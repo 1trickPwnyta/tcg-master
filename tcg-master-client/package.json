@@ -1,0 +1,22 @@
+{
+  "name": "tcg-master-client",
+  "private": true,
+  "version": "0.0.1",
+  "author": "1trickPwnyta",
+  "license": "ISC",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "@types/jquery": "^4.0.1",
+    "typescript": "~6.0.2",
+    "vite": "^8.3.0"
+  },
+  "dependencies": {
+    "jquery": "^4.0.0",
+    "socket.io-client": "^4.8.4"
+  }
+}

@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+        <link rel="stylesheet" href="/src/style.css" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>tcg-master-client</title>
+    </head>
+    <body>
+        <div id="app">
+            <textarea disabled="true" cols="80" rows="50"></textarea>
+            <div id="prompt"></div>
+            <div id="choices"></div>
+            <form onsubmit="form_submit(event)">
+                <input type="text" />
+                <input type="submit" value="Submit" />
+            </form>
+        </div>
+        <script type="module" src="/src/main.ts"></script>
+    </body>
+</html>
