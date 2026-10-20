@@ -1,5 +1,5 @@
 import { Player } from "./game/Player.js";
-import { Prompt } from "./game/Prompt.js";
+import { Prompt } from "./game/interaction/prompts/Prompt.js";
 
 export abstract class Client {
     protected readonly player: Player;

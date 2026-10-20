@@ -1,3 +1,4 @@
+import { InvalidSelectionError } from "../game/interaction/prompts/Prompt.js";
 import { Command } from "./Command.js";
 import { CommandContext } from "./CommandContext.js";
 
@@ -6,12 +7,14 @@ export class Command_select extends Command {
 
     public execute(context: CommandContext): string | void {
         const selection: number = parseInt(context.text);
-        if (selection > 0) {
-            if (context.player.prompt?.respond(selection - 1)) {
-                return;
+        try {
+            context.player.prompt?.respond(selection - 1);
+        } catch (e) {
+            if (e instanceof InvalidSelectionError) {
+                context.player.send(e.message);
+            } else {
+                throw e;
             }
         }
-        
-        context.player.error("Enter a valid selection.");
     }
 }

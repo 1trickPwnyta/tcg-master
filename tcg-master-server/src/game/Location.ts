@@ -1,21 +1,26 @@
-import { Card } from "./Card.js";
+import { Card } from "./cards/Card.js";
 
-export class Cards {
-    protected _cards: Card[] = [];
+export class Location<T extends Card> {
+    private _cards: T[] = [];
 
     public get count(): number {
         return this._cards.length;
     }
 
-    public get cards(): Card[] {
+    public get cards(): T[] {
         return [...this._cards];
     }
 
-    public add(card: Card, position: number = this._cards.length) {
-        this._cards.splice(position, 0, card);
+    public get empty(): boolean {
+        return this.cards.length === 0;
     }
 
-    public take(card: Card | number): Card | null {
+    public add(card: T, position: number = this._cards.length) {
+        this._cards.splice(position, 0, card.take() as T);
+        card.location = this;
+    }
+
+    public take(card: T | number): T | null {
         if (typeof card === "number") {
             if (card < 0 || card >= this._cards.length) {
                 return null;
@@ -30,6 +35,12 @@ export class Cards {
                 return this._cards.splice(index, 1)[0];
             }
         }
+    }
+
+    protected swap(pos1: number, pos2: number) {
+        const temp = this._cards[pos1];
+        this._cards[pos1] = this._cards[pos2];
+        this._cards[pos2] = temp;
     }
 
     public toString(): string {

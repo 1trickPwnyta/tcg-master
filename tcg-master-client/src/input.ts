@@ -14,6 +14,7 @@ globalThis.form_submit = (e: Event) => {
     textarea.append("> ");
     textarea.append(input as string);
     textarea.append("\n");
+    textarea.scrollTop(textarea[0].scrollHeight);
     Input.send(input as string);
 };
 

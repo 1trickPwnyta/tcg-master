@@ -7,8 +7,9 @@ import { Command_select } from "./commands/Command_select.js";
 
 export class Input {
     static {
+        Command.default = new Command_select();
+        Command.register(Command.default);
         Command.register(new Command_check());
-        Command.register(new Command_select());
     }
 
     public static init(server: HttpServer, cors: { origin: string; methods: string[]; credentials: boolean }) {

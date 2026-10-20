@@ -1,8 +1,8 @@
-import { Card } from "./card.js";
-import { Cards } from "./Cards.js";
+import { Card } from "./cards/Card.js";
+import { Location } from "./Location.js";
 import { Player } from "./Player.js";
 
-export class Deck extends Cards {
+export class Deck extends Location<Card> {
     private player: Player;
 
     public constructor(player: Player) {
@@ -10,29 +10,25 @@ export class Deck extends Cards {
         this.player = player;
     }
 
-    public add(card: Card) {
-        this._cards.push(card);
-    }
-
-    public fill<T extends Card>(cards: { card: new () => T; qty: number }[]) {
+    public fill<T extends Card>(cards: { card: new (owner: Player) => T; qty: number }[]) {
         cards.forEach(c => {
-            this._cards = [ ...this._cards as Card[], ...Array(c.qty).fill(new c.card()) ];
+            for (let i = 0; i < c.qty; i++) {
+                this.add(new c.card(this.player));
+            }
         });
     }
 
     public draw(): Card {
-        if (!this._cards.length) {
+        if (this.empty) {
             throw new DeckDrawError();
         }
-        return this._cards.pop() as Card;
+        return this.take(this.count - 1)!;
     }
 
     public shuffle() {
-        for (let i = this._cards.length - 1; i > 0; i--) {
+        for (let i = this.count - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
-            const temp = this._cards[i];
-            this._cards[i] = this._cards[j];
-            this._cards[j] = temp;
+            this.swap(i, j);
         }
         this.player.game.send(`${this.player.name} shuffled ${this.player.pronoun.possessive} deck.`);
     }

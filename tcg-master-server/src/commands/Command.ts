@@ -1,18 +1,23 @@
 import { CommandContext } from "./CommandContext.js";
 
 export abstract class Command {
-    public abstract readonly name: string;
-
     private static readonly commands: Map<string, Command> = new Map<string, Command>();
+    public static default: Command | undefined;
 
     public static register(command: Command) {
         Command.commands.set(command.name, command);
     }
 
     public static execute(context: CommandContext): string | void {
-        const command = Command.commands.get(context.name);
+        let command = Command.commands.get(context.name);
         if (!command) {
-            throw new CommandNotFoundError(context.name);
+            if (Command.default) {
+                context.args = [ context.name, ...context.args ];
+                context.name = Command.default.name;
+                command = Command.default;
+            } else {
+                throw new CommandNotFoundError(context.name);
+            }
         }
         try {
             return command.execute(context);
@@ -25,6 +30,8 @@ export abstract class Command {
             }
         }
     }
+
+    public abstract readonly name: string;
 
     public abstract execute(context: CommandContext): string | void;
 };

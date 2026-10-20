@@ -1,14 +1,19 @@
 import { Socket } from "socket.io";
 import { Client_Human } from "../Client_Human.js";
-import { Card_Pokemon } from "./Card_Pokemon.js";
+import { Card_Pokemon } from "./cards/Card_Pokemon.js";
 import { Player } from "./Player.js";
-import { Prompt } from "./Prompt.js";
+import { Prompt } from "./interaction/prompts/Prompt.js";
 import { Client_AI } from "../ai/Client_AI.js";
+import Choice_PlayCard from "./interaction/choices/Choice_PlayCard.js";
+import Choice_Attack from "./interaction/choices/Choice_Attack.js";
+import Choice_EndTurn from "./interaction/choices/Choice_EndTurn.js";
+import { Prompt_SelectCard } from "./interaction/prompts/Prompt_SelectCard.js";
 
 export enum GameState {
     Setup,
     Main,
-    Between
+    Between,
+    Ended
 };
 
 export class Game {
@@ -23,16 +28,21 @@ export class Game {
     public player2: Player;
     public prizes: number = 6;
 
-    private state: GameState = GameState.Setup;
+    private _state: GameState = GameState.Setup;
     private current!: Player;
+    public energyPlayed: boolean = false;
+
+    private constructor() {
+        this.player1 = Player.new(this, "Pikachu");
+        this.player2 = Player.new(this, "COM");
+    }
 
     public get players(): Player[] {
         return [ this.player1, this.player2 ];
     }
 
-    private constructor() {
-        this.player1 = Player.new(this, "Pikachu");
-        this.player2 = Player.new(this, "COM");
+    public get state(): GameState {
+        return this._state;
     }
 
     public getPlayer(client: string): Player | undefined {
@@ -47,63 +57,75 @@ export class Game {
                 p.prizes.add(p.deck.draw());
             }
             p.draw(7);
-            const basicPokemon = p.hand.cards.filter(c => c instanceof Card_Pokemon);
-            p.prompt = new Prompt(
+            p.setPrompt(new Prompt_SelectCard<Card_Pokemon>(
                 "Select a basic Pokémon as your active Pokémon.",
-                basicPokemon.map(c => ({
-                    text: c.toString(),
-                    action: () => {
-                        p.active = p.hand.take(c) as Card_Pokemon;
-                        return true;
-                    }
-                }))
-            );
+                p.hand.basicPokemon,
+                (card: Card_Pokemon) => {
+                    p.active.single = card.take() as Card_Pokemon;
+                    const selectBenchPokemon = () => {
+                        if (p.hand.basicPokemon.length) {
+                            p.setPrompt(new Prompt_SelectCard<Card_Pokemon>(
+                                "Choose other basic Pokémon to put on the bench.",
+                                p.hand.basicPokemon,
+                                (card: Card_Pokemon) => {
+                                    p.bench.add(card.take() as Card_Pokemon);
+                                    selectBenchPokemon();
+                                    return true;
+                                }
+                            ));
+                        }
+                    };
+                    selectBenchPokemon();
+                    return true;
+                }
+            ));
         });
     }
 
+    public setState(state: GameState) {
+        if (this._state != GameState.Ended) {
+            this._state = state;
+        }
+    }
+
     public update() {
-        switch (this.state) {
+        switch (this._state) {
             case GameState.Setup: this.updateSetup(); break;
+            case GameState.Main: this.updateMain(); break;
             case GameState.Between: this.beginTurn(this.current.opponent); break;
         }
     }
 
     private updateSetup() {
-        if (!this.players.some(p => !p.active)) {
+        if (!this.players.some(p => p.active.empty)) {
             this.beginTurn(this.player1);
         }
     }
 
-    private beginTurn(player: Player) {
-        this.state = GameState.Main;
-        this.current = player;
-        this.send(`Begin ${this.current.name}'s turn.`);
-        this.current.draw();
-        this.current.prompt = new Prompt(
+    private updateMain() {
+        this.current.setPrompt(new Prompt(
             "Your turn.",
             [
-                {
-                    text: "play a card",
-                    action: () => {
-                        return false;
-                    }
-                },
-                {
-                    text: "attack",
-                    action: () => {
-                        return false;
-                    }
-                },
-                {
-                    text: "end turn",
-                    action: () => {
-                        player.opponent.send(`${player.name} ended ${player.pronoun.possessive} turn.`);
-                        this.state = GameState.Between;
-                        return true;
-                    }
-                }
+                Choice_PlayCard(this.current),
+                Choice_Attack(this, this.current),
+                Choice_EndTurn(this, this.current)
             ]
-        );
+        ));
+    }
+
+    private beginTurn(player: Player) {
+        this.energyPlayed = false;
+        this._state = GameState.Main;
+        this.current = player;
+        this.send(`Begin ${player}'s turn.`);
+        player.draw();
+        this.update();
+    }
+
+    public end(winner: Player, reason: string) {
+        this._state = GameState.Ended;
+        this.send(`${reason} ${winner} wins!`);
+        this.players.forEach(p => p.notify_gameOver());
     }
 
     public send(message: string) {

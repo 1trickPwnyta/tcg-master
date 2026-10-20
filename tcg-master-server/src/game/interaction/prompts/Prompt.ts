@@ -1,4 +1,4 @@
-import { Player } from "./Player.js";
+import { Player } from "../../Player.js";
 
 export class Prompt {
     private _player!: Player;
@@ -21,12 +21,13 @@ export class Prompt {
     public respond(n: number): boolean {
         if (Number.isInteger(n) && n >= 0 && n < this.choices.length) {
             if (this.choices[n].action()) {
-                this._player.prompt = null;
-                this._player.game.update();
-                return true;
+                this._player.clearPrompt();
+            } else {
+                this._player.lastPrompt();
             }
+            return true;
         }
-        return false;
+        throw new InvalidSelectionError();
     }
 };
 
@@ -34,3 +35,9 @@ export type Choice = {
     text: string;
     action: () => boolean;
 };
+
+export class InvalidSelectionError extends Error {
+    public constructor() {
+        super("Invalid selection.");
+    }
+}

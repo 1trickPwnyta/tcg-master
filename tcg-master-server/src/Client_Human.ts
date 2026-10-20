@@ -3,7 +3,7 @@ import { Client } from "./Client.js";
 import { Player } from "./game/Player.js";
 import { CommandContext } from "./commands/CommandContext.js";
 import { Command, CommandNotFoundError } from "./commands/Command.js";
-import { Prompt } from "./game/Prompt.js";
+import { Prompt } from "./game/interaction/prompts/Prompt.js";
 
 export class Client_Human extends Client {
     public readonly socket: Socket;
