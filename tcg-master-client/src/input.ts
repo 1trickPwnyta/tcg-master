@@ -7,16 +7,18 @@ declare global {
 
 globalThis.form_submit = (e: Event) => {
     e.preventDefault();
-    const textarea = $("textarea");
+    const log = $("#console");
     const form = $("form");
     const input = form.find("input[type=\"text\"]").val();
     form.trigger("reset");
-    textarea.append("> ");
-    textarea.append(input as string);
-    textarea.append("\n");
-    textarea.scrollTop(textarea[0].scrollHeight);
+    log.append("> ");
+    log.append(input as string);
+    log.append("<br />");
+    log.scrollTop(log[0].scrollHeight);
     Input.send(input as string);
 };
+
+$("#input")[0].focus();
 
 class Input {
     private static socket = io("http://localhost:3000");
@@ -31,11 +33,17 @@ class Input {
         Input.socket.emit("CMD", input);
     }
 
-    public static receive(message: string) {
-        const textarea = $("textarea");
-        textarea.append(message);
-        textarea.append("\n");
-        textarea.scrollTop(textarea[0].scrollHeight)
+    public static receive(tokens: { text: string, type?: string }[]) {
+        const log = $("#console");
+        log.append(tokens.map(t => {
+            if (t.type) {
+                return `<span class="token_${t.type}">${t.text}</span>`;
+            } else {
+                return t.text;
+            }
+        }).join(" ").replaceAll(/\s([\.!\?,;:'])/g, "$1"));
+        log.append("<br />");
+        log.scrollTop(log[0].scrollHeight)
     }
 
     public static prompt(prompt: { text: string, choices: string[] }) {

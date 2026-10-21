@@ -1,10 +1,17 @@
 import { Card } from "./Card.js";
 import { Prompt } from "../interaction/prompts/Prompt.js";
 import { Location } from "../Location.js";
+import { Attack } from "./Attack.js";
+import { Token } from "../../Client.js";
 
 export abstract class Card_Pokemon extends Card {
+    public get tokenType(): string {
+        return "pokemon";
+    }
+
     public abstract readonly stage: EvolutionStage;
     public abstract readonly hp: number;
+    public abstract readonly attacks: Attack[];
 
     private _damageCounters: number = 0;
     public readonly energy: Location<Card> = new Location<Card>();
@@ -14,6 +21,7 @@ export abstract class Card_Pokemon extends Card {
     }
 
     public set damageCounters(n: number) {
+        this.game.send(this.owner, "'s", this, "took", { toString: () => n * 10, tokenType: "damage" }, "damage!");
         this._damageCounters = n;
         if (this._damageCounters * 10 >= this.hp) {
             this.knockOut();
@@ -26,7 +34,7 @@ export abstract class Card_Pokemon extends Card {
 
     public override play() {
         if (this.owner.bench.count < 5) {
-            this.game.send(`${this.owner} put ${this} on ${this.owner.pronoun.possessive} bench.`);
+            this.game.send(this.owner, "put", this, "on", this.owner.pronoun.possessive, "bench.");
             this.owner.bench.add(this.take() as Card_Pokemon);
         } else {
             this.owner.send("The bench is full.");
@@ -34,7 +42,7 @@ export abstract class Card_Pokemon extends Card {
     }
 
     public knockOut() {
-        this.game.send(`${this.owner}'s ${this} was knocked out!`);
+        this.game.send(this.owner, "'s", this, "was knocked out!");
         this.owner.opponent.takePrize();
         if (this.isActive) {
             if (this.owner.bench.empty) {
@@ -46,7 +54,7 @@ export abstract class Card_Pokemon extends Card {
                         text: c.toString(),
                         action: () => {
                             this.owner.active.single = c.take() as Card_Pokemon;
-                            this.owner.opponent.send(`${this.owner} sent out ${c}.`);
+                            this.owner.opponent.send(this.owner, "sent out", c, ".");
                             return true;
                         }
                     }))
@@ -60,6 +68,19 @@ export abstract class Card_Pokemon extends Card {
     public reset() {
         this._damageCounters = 0;
         this.energy.cards.forEach(c => this.owner.discard.add(c.take()));
+    }
+
+    public override getDetails(): any[] {
+        return [ this, { toString: () => `[${this.hp} HP]`, tokenType: "hp" }, "<br />", ...this.attacks.map(a => a.getDetails()) ];
+    }
+
+    public getStatus(): any[] {
+        return [
+            this,
+            { toString: () => `[${this.hp - this.damageCounters * 10} / ${this.hp} HP]`, tokenType: "hp" },
+            "<br />..Energy:",
+            ...Card.cardTokens(this.energy.cards)
+        ];
     }
 };
 

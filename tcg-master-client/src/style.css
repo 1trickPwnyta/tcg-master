@@ -1,10 +1,54 @@
-textarea {
-    resize: none;
+div#console {
     color: #dedede;
     background-color: #212121;
     font-family: monospace;
+    font-size: 20px;
+    width: 1000px;
+    height: 600px;
+    padding: 10px;
+    overflow: scroll;
 }
 
 #choices {
     padding-left: 8px;
+}
+
+.token_player {
+    color: #c981c3;
+}
+
+.token_player::before {
+    content: "👤"
+}
+
+.token_pokemon {
+    color: #e4d12c;
+}
+
+.token_trainer {
+    color: #87a8a8;
+}
+
+.token_energy {
+    color: #33cc33;
+}
+
+.token_hp {
+    color: #f04e4e;
+}
+
+.token_damage {
+    color: #f04e4e;
+}
+
+.token_damage::before {
+    content: "💥"
+}
+
+.token_error {
+    color: #f04e4e;
+}
+
+.token_error::before {
+    content: "🚨"
 }

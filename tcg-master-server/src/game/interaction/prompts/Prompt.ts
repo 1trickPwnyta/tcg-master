@@ -5,9 +5,15 @@ export class Prompt {
     public text: string;
     public choices: Choice[];
 
-    public constructor(text: string, choices: Choice[]) {
+    public constructor(text: string, choices: Choice[], options: PromptOptions = {}) {
         this.text = text;
         this.choices = choices;
+        if (options.cancelAction) {
+            this.choices.push({
+                text: "(cancel)",
+                action: options.cancelAction
+            });
+        }
     }
 
     public set player(player: Player) {
@@ -36,7 +42,13 @@ export type Choice = {
     action: () => boolean;
 };
 
+export type PromptOptions = {
+    cancelAction?: () => boolean;
+};
+
 export class InvalidSelectionError extends Error {
+    public readonly tokenType: string = "error";
+
     public constructor() {
         super("Invalid selection.");
     }

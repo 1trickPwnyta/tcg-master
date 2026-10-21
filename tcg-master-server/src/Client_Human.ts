@@ -18,8 +18,8 @@ export class Client_Human extends Client {
                 const context = new CommandContext(socket.id, player.game, command);
                 const response = Command.execute(context);
                 if (response !== undefined) {
-                    console.log(`Command ${context.name} responded: ${response}`);
-                    socket.emit("MSG", response);
+                    console.log(`Command ${context.name} responded: ${response.join(" ")}`);
+                    socket.emit("MSG", Client.tokenize(...response));
                 }
             } catch (e) {
                 if (e instanceof CommandNotFoundError) {
@@ -37,8 +37,8 @@ export class Client_Human extends Client {
         });
     }
 
-    public send(message: string) {
-        this.socket.emit("MSG", message);
+    public send(...parts: any[]) {
+        this.socket.emit("MSG", Client.tokenize(...parts));
     }
 
     public error(message: string) {

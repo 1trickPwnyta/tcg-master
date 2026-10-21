@@ -1,23 +1,13 @@
 import { Card } from "../../cards/Card.js";
 import { Card_Pokemon } from "../../cards/Card_Pokemon.js";
-import { Prompt } from "./Prompt.js";
+import { Prompt, PromptOptions } from "./Prompt.js";
 
 export class Prompt_SelectCard<T extends Card> extends Prompt {
-    public constructor(text: string, cards: T[], action: (card: T) => boolean, options: PromptOptions_SelectCard = {}) {
+    public constructor(text: string, cards: T[], action: (card: T) => boolean, options: PromptOptions = {}) {
         const choices = cards.map(c => ({
             text: `${c}${c instanceof Card_Pokemon && c.isActive ? " (active)" : ""}`,
             action: () => action(c)
         }));
-        if (options.cancelAction) {
-            choices.push({
-                text: "(cancel)",
-                action: options.cancelAction
-            });
-        }
-        super(text, choices);
+        super(text, choices, options);
     }
-};
-
-export type PromptOptions_SelectCard = {
-    cancelAction?: () => boolean;
 };

@@ -8,7 +8,7 @@ export abstract class Command {
         Command.commands.set(command.name, command);
     }
 
-    public static execute(context: CommandContext): string | void {
+    public static execute(context: CommandContext): any[] | void {
         let command = Command.commands.get(context.name);
         if (!command) {
             if (Command.default) {
@@ -33,7 +33,7 @@ export abstract class Command {
 
     public abstract readonly name: string;
 
-    public abstract execute(context: CommandContext): string | void;
+    public abstract execute(context: CommandContext): any[] | void;
 };
 
 export class InvalidCommandArgumentsError extends Error {

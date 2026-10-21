@@ -2,12 +2,14 @@ import { Client } from "../Client.js";
 import { InvalidSelectionError, Prompt } from "../game/interaction/prompts/Prompt.js";
 
 export class Client_AI extends Client {
-    public send(message: string): void {
-        console.log(`${this.player} received a message: ${message}`);
+    public send(...parts: any[]): void {
+        console.log(`${this.player} received a message: ${parts.join(" ")}`);
     }
+
     public error(message: string): void {
         console.error(`${this.player} received an error: ${message}`);
     }
+
     public prompt(prompt: Prompt | null): void {
         if (prompt) {
             console.log(`${this.player} received a prompt with ${prompt.choices.length} choice(s): ${prompt.text}`);

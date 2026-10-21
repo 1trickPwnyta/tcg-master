@@ -9,11 +9,11 @@
     </head>
     <body>
         <div id="app">
-            <textarea disabled="true" cols="80" rows="50"></textarea>
+            <div id="console"></div>
             <div id="prompt"></div>
             <div id="choices"></div>
             <form onsubmit="form_submit(event)">
-                <input type="text" />
+                <input id="input" type="text" />
                 <input type="submit" value="Submit" />
             </form>
         </div>

@@ -1,3 +1,4 @@
+import { Token } from "../Client.js";
 import { Card } from "./cards/Card.js";
 
 export class Location<T extends Card> {
@@ -20,6 +21,10 @@ export class Location<T extends Card> {
         card.location = this;
     }
 
+    public addMany(cards: T[], position: number = this._cards.length) {
+        cards.forEach(c => this.add(c, position++));
+    }
+
     public take(card: T | number): T | null {
         if (typeof card === "number") {
             if (card < 0 || card >= this._cards.length) {
@@ -37,6 +42,10 @@ export class Location<T extends Card> {
         }
     }
 
+    public takeAll(): T[] {
+        return this.cards.map(c => this.take(c)!);
+    }
+
     protected swap(pos1: number, pos2: number) {
         const temp = this._cards[pos1];
         this._cards[pos1] = this._cards[pos2];
@@ -45,5 +54,9 @@ export class Location<T extends Card> {
 
     public toString(): string {
         return Card.cardString(this.cards);
+    }
+
+    public get tokens(): Token[] {
+        return Card.cardTokens(this.cards);
     }
 };

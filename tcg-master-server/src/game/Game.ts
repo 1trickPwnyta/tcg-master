@@ -1,13 +1,13 @@
 import { Socket } from "socket.io";
 import { Client_Human } from "../Client_Human.js";
-import { Card_Pokemon } from "./cards/Card_Pokemon.js";
 import { Player } from "./Player.js";
 import { Prompt } from "./interaction/prompts/Prompt.js";
 import { Client_AI } from "../ai/Client_AI.js";
 import Choice_PlayCard from "./interaction/choices/Choice_PlayCard.js";
 import Choice_Attack from "./interaction/choices/Choice_Attack.js";
 import Choice_EndTurn from "./interaction/choices/Choice_EndTurn.js";
-import { Prompt_SelectCard } from "./interaction/prompts/Prompt_SelectCard.js";
+import { GameStarter } from "./GameStarter.js";
+import { Token } from "../Client.js";
 
 export enum GameState {
     Setup,
@@ -50,36 +50,7 @@ export class Game {
     }
 
     public start() {
-        this.players.forEach(p => {
-            p.send("Welcome!");
-            p.deck.shuffle();
-            for (let i = 0; i < this.prizes; i++) {
-                p.prizes.add(p.deck.draw());
-            }
-            p.draw(7);
-            p.setPrompt(new Prompt_SelectCard<Card_Pokemon>(
-                "Select a basic Pokémon as your active Pokémon.",
-                p.hand.basicPokemon,
-                (card: Card_Pokemon) => {
-                    p.active.single = card.take() as Card_Pokemon;
-                    const selectBenchPokemon = () => {
-                        if (p.hand.basicPokemon.length) {
-                            p.setPrompt(new Prompt_SelectCard<Card_Pokemon>(
-                                "Choose other basic Pokémon to put on the bench.",
-                                p.hand.basicPokemon,
-                                (card: Card_Pokemon) => {
-                                    p.bench.add(card.take() as Card_Pokemon);
-                                    selectBenchPokemon();
-                                    return true;
-                                }
-                            ));
-                        }
-                    };
-                    selectBenchPokemon();
-                    return true;
-                }
-            ));
-        });
+        GameStarter.startGame(this);
     }
 
     public setState(state: GameState) {
@@ -117,20 +88,20 @@ export class Game {
         this.energyPlayed = false;
         this._state = GameState.Main;
         this.current = player;
-        this.send(`Begin ${player}'s turn.`);
+        this.send("Begin", player, "'s turn.");
         player.draw();
         this.update();
     }
 
-    public end(winner: Player, reason: string) {
+    public end(winner: Player, ...reason: any[]) {
         this._state = GameState.Ended;
-        this.send(`${reason} ${winner} wins!`);
+        this.send(...reason, winner, "wins!");
         this.players.forEach(p => p.notify_gameOver());
     }
 
-    public send(message: string) {
+    public send(...parts: any[]) {
         this.players.forEach(p => {
-            p.send(message);
+            p.send(...parts);
         });
     }
 };

@@ -1,7 +1,8 @@
 import express from "express";
 import { createServer } from "http";
 import cors from "cors";
-import { Input } from "./input.js";
+import "./extensions.js";
+import { Input } from "./Input.js";
 
 const corsConfig = {
     origin: "http://localhost:5173",

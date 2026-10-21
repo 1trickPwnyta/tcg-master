@@ -1,3 +1,4 @@
+import { Client } from "../Client.js";
 import { Card } from "./cards/Card.js";
 import { Location } from "./Location.js";
 import { Player } from "./Player.js";
@@ -30,7 +31,7 @@ export class Deck extends Location<Card> {
             const j = Math.floor(Math.random() * (i + 1));
             this.swap(i, j);
         }
-        this.player.game.send(`${this.player.name} shuffled ${this.player.pronoun.possessive} deck.`);
+        this.player.game.send(this.player, "shuffled", this.player.pronoun.possessive, "deck.");
     }
 };
 

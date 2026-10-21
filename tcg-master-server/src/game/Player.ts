@@ -2,7 +2,7 @@ import { Card } from "./cards/Card.js";
 import { Deck } from "./Deck.js";
 import { Card_Pokemon_Pokemon } from "./cards/dev/Card_Pokemon_Pokemon.js";
 import { Card_Energy_Energy } from "./cards/dev/Card_Energy_Energy.js";
-import { Client } from "../Client.js";
+import { Client, Token } from "../Client.js";
 import { Game } from "./Game.js";
 import { Pronoun } from "../users/Pronoun.js";
 import { Prompt } from "./interaction/prompts/Prompt.js";
@@ -10,20 +10,27 @@ import { Location } from "./Location.js";
 import { Card_Pokemon } from "./cards/Card_Pokemon.js";
 import { Location_Single } from "./Location_Single.js";
 import { Hand } from "./Hand.js";
+import { Card_Trainer_Trainer } from "./cards/dev/Card_Trainer_Trainer.js";
+import { Bench } from "./Bench.js";
 
 export class Player {
     public static new(game: Game, name: string): Player {
         const player: Player = new Player(game, name);
         player.deck = new Deck(player);
         player.deck.fill<Card>([
-            { card: Card_Pokemon_Pokemon, qty: 30 },
+            { card: Card_Pokemon_Pokemon, qty: 20 },
+            { card: Card_Trainer_Trainer, qty: 10 },
             { card: Card_Energy_Energy, qty: 30 }
         ]);
         return player;
     }
 
     public name: string;
-    public pronoun: Pronoun = { possessive: "their" };
+    public readonly tokenType: string = "player";
+    public pronoun: Pronoun = {
+        objective: "they",
+        possessive: "their"
+    };
     public game: Game;
     public client: Client | undefined;
 
@@ -31,10 +38,10 @@ export class Player {
     public hand: Hand = new Hand();
     public discard: Location<Card> = new Location<Card>();
     public prizes: Location<Card> = new Location<Card>();
-    public bench: Location<Card_Pokemon> = new Location<Card_Pokemon>();
+    public bench: Bench = new Bench();
     public active: Location_Single<Card_Pokemon> = new Location_Single<Card_Pokemon>();
     private _prompt: Prompt | null = null;
-    private nextPrompt: Prompt | null = null;
+    private promptStack: Prompt[] = [];
     private _lastPrompt: Prompt | null = null;
 
     private constructor(game: Game, name: string) {
@@ -46,8 +53,8 @@ export class Player {
         return this.game.player1 == this ? this.game.player2 : this.game.player1;
     }
 
-    public send(message: string) {
-        this.client?.send(message);
+    public send(...parts: any[]) {
+        this.client?.send(...parts);
     }
 
     public error(message: string) {
@@ -60,7 +67,7 @@ export class Player {
 
     public setPrompt(prompt: Prompt) {
         if (this._prompt) {
-            this.nextPrompt = prompt;
+            this.promptStack.push(prompt);
         } else {
             this._prompt = prompt;
             this._prompt.player = this;
@@ -78,9 +85,8 @@ export class Player {
     public clearPrompt() {
         this._lastPrompt = this._prompt;
         this._prompt = null;
-        if (this.nextPrompt) {
-            const nextPrompt = this.nextPrompt;
-            this.nextPrompt = null;
+        if (this.promptStack.length) {
+            const nextPrompt = this.promptStack.pop()!;
             this.setPrompt(nextPrompt);
         } else {
             this.client?.prompt(null);
@@ -98,20 +104,20 @@ export class Player {
             const drawn = this.deck.draw();
             this.hand.add(drawn);
             if (qty <= 3) {
-                this.send(`You drew ${drawn}.`);
+                this.send("You drew", drawn, ".");
             }
         }
-        const drawMessage = `${this} drew ${qty} card(s).`;
+        const drawMessage = [ this, `drew ${qty} card(s).` ];
         if (qty <= 3) {
-            this.opponent.send(drawMessage);
+            this.opponent.send(...drawMessage);
         } else {
-            this.game.send(drawMessage);
+            this.game.send(...drawMessage);
         }
     }
 
     public takePrize() {
         this.hand.add(this.prizes.take(0)!);
-        this.game.send(`${this} took a prize.`);
+        this.game.send(this, "took a prize.");
         if (this.prizes.empty) {
             this.game.end(this, `${this} took ${this.pronoun.possessive} last prize.`);
         }
