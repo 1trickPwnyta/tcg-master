@@ -11,12 +11,12 @@ export class Client_AI extends Client {
     }
 
     public prompt(prompt: Prompt | null): void {
-        if (prompt) {
+        if (prompt?.choices?.length) {
             console.log(`${this.player} received a prompt with ${prompt.choices.length} choice(s): ${prompt.text}`);
             const option = Math.floor(Math.random() * (prompt.choices.length ?? 0));
             console.log(`${this.player} responds: ${option + 1}`);
             try {
-                prompt.respond(option);
+                prompt.respond(prompt.choices[option].key!);
             } catch (e) {
                 if (e instanceof InvalidSelectionError) {
                     console.error(`${this.player} selected an invalid option: ${prompt.choices[option]?.text ?? option}`);

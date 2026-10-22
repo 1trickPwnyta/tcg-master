@@ -11,6 +11,7 @@ export class Client_Human extends Client {
     public constructor(socket: Socket, player: Player) {
         super(player);
         this.socket = socket;
+        this.socket.emit("NEW");
 
         socket.on("CMD", (command: string) => {
             console.log(`Received command from ${player.name ?? "(unknown)"}: ${command}`);
@@ -48,7 +49,7 @@ export class Client_Human extends Client {
     public prompt(prompt: Prompt | null) {
         this.socket.emit("ASK", {
             text: prompt?.text ?? "Please stand by...",
-            choices: prompt?.choices.map((c: any, i: number) => `[${i + 1}] ${c.text}`) ?? []
+            choices: prompt?.choices.map(c => `[${c.key!}] ${c.text}`) ?? []
         });
     }
 };

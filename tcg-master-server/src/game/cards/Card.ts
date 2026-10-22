@@ -32,7 +32,17 @@ export abstract class Card {
     }
 
     public take(): Card {
-        return this.location?.take(this) ?? this;
+        this.location?.take(this);
+        this.location = null;
+        return this;
+    }
+
+    public discard() {
+        this.owner.discard.add(this.take());
+    }
+
+    public get unplayableReason(): string | null {
+        return null;
     }
 
     public abstract play(): void;

@@ -6,9 +6,8 @@ export class Command_select extends Command {
     public name: string = "select";
 
     public execute(context: CommandContext): any[] | void {
-        const selection: number = parseInt(context.text);
         try {
-            context.player.prompt?.respond(selection - 1);
+            context.player.prompt?.respond(context.text);
         } catch (e) {
             if (e instanceof InvalidSelectionError) {
                 context.player.send(e);

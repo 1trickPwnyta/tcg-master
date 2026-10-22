@@ -8,6 +8,6 @@ export class Bench extends Location<Card_Pokemon> {
     }
 
     public get tokens(): Token[] {
-        return Client.tokenize(...this.cards.flatMap(c => [ ...c.getStatus(), "<br />" ]));
+        return !this.empty ? Client.tokenize(...this.cards.flatMap(c => [ ...c.getStatus(), "<br />" ])) : super.tokens;
     }
 };

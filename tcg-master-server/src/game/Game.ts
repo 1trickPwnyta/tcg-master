@@ -7,7 +7,7 @@ import Choice_PlayCard from "./interaction/choices/Choice_PlayCard.js";
 import Choice_Attack from "./interaction/choices/Choice_Attack.js";
 import Choice_EndTurn from "./interaction/choices/Choice_EndTurn.js";
 import { GameStarter } from "./GameStarter.js";
-import { Token } from "../Client.js";
+import Choice_Retreat from "./interaction/choices/Choice_Retreat.js";
 
 export enum GameState {
     Setup,
@@ -63,7 +63,7 @@ export class Game {
         switch (this._state) {
             case GameState.Setup: this.updateSetup(); break;
             case GameState.Main: this.updateMain(); break;
-            case GameState.Between: this.beginTurn(this.current.opponent); break;
+            case GameState.Between: this.updateBetween(); break;
         }
     }
 
@@ -78,16 +78,28 @@ export class Game {
             "Your turn.",
             [
                 Choice_PlayCard(this.current),
-                Choice_Attack(this, this.current),
-                Choice_EndTurn(this, this.current)
+                Choice_Attack(this.current),
+                Choice_Retreat(this.current),
+                Choice_EndTurn(this.current)
             ]
         ));
+    }
+
+    private updateBetween() {
+        this.players.forEach(p => {
+            p.active.single?.notify_betweenTurns();
+            p.bench.cards.forEach(c => {
+                c.notify_betweenTurns();
+            });
+        });
+        this.beginTurn(this.current.opponent);
     }
 
     private beginTurn(player: Player) {
         this.energyPlayed = false;
         this._state = GameState.Main;
         this.current = player;
+        this.send();
         this.send("Begin", player, "'s turn.");
         player.draw();
         this.update();

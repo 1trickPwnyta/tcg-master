@@ -3,19 +3,26 @@
     <head>
         <meta charset="UTF-8" />
         <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-        <link rel="stylesheet" href="/src/style.css" />
+        <link rel="stylesheet" href="/src/style/main.css" />
+        <link rel="stylesheet" href="/src/style/tokens.css" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>tcg-master-client</title>
+        <title>TCG Master</title>
     </head>
     <body>
         <div id="app">
             <div id="console"></div>
-            <div id="prompt"></div>
-            <div id="choices"></div>
-            <form onsubmit="form_submit(event)">
-                <input id="input" type="text" />
-                <input type="submit" value="Submit" />
-            </form>
+            <div id="controls">
+                <div id="commands">
+                    <div id="commands-you" class="commands-panel">You<div></div></div>
+                    <div id="commands-opponent" class="commands-panel">Opponent<div></div></div>
+                </div>
+                <div id="prompt"></div>
+                <div id="choices"></div>
+                <form onsubmit="formSubmit(event)">
+                    <input id="input" type="text" autocomplete="off" />
+                    <input type="submit" value="Submit" />
+                </form>
+            </div>
         </div>
         <script type="module" src="/src/main.ts"></script>
     </body>

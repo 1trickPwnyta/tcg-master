@@ -2,34 +2,33 @@ import { io } from "socket.io-client";
 import $ from "jquery";
 
 declare global {
-    var form_submit: (e: Event) => void;
+    var formSubmit: (e: Event) => void;
 }
 
-globalThis.form_submit = (e: Event) => {
+globalThis.formSubmit = (e: Event) => {
     e.preventDefault();
-    const log = $("#console");
     const form = $("form");
-    const input = form.find("input[type=\"text\"]").val();
+    const input = form.find("input[type=\"text\"]").val() as string;
     form.trigger("reset");
-    log.append("> ");
-    log.append(input as string);
-    log.append("<br />");
-    log.scrollTop(log[0].scrollHeight);
-    Input.send(input as string);
+    Input.send(input.trim());
 };
 
 $("#input")[0].focus();
 
-class Input {
+export class Input {
     private static socket = io("http://localhost:3000");
 
     static {
         Input.socket.on("MSG", Input.receive);
         Input.socket.on("ERR", Input.receive);
         Input.socket.on("ASK", Input.prompt);
+        Input.socket.on("NEW", () => $("#console").empty());
     }
 
     public static send(input: string) {
+        const log = $("#console");
+        log.append(`<span class="user-input">&gt; ${input}</span><br />`);
+        log.scrollTop(log[0].scrollHeight);
         Input.socket.emit("CMD", input);
     }
 
@@ -50,4 +49,4 @@ class Input {
         $("#prompt").text(prompt.text);
         $("#choices").html(prompt.choices.join("<br />"));
     }
-}
+};

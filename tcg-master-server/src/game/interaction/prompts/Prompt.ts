@@ -8,8 +8,17 @@ export class Prompt {
     public constructor(text: string, choices: Choice[], options: PromptOptions = {}) {
         this.text = text;
         this.choices = choices;
+
+        let i = 1;
+        for (const choice of this.choices) {
+            if (!choice.key) {
+                choice.key = (i++).toString();
+            }
+        }
+
         if (options.cancelAction) {
             this.choices.push({
+                key: "c",
                 text: "(cancel)",
                 action: options.cancelAction
             });
@@ -24,9 +33,10 @@ export class Prompt {
         this._player.client?.prompt(this);
     }
 
-    public respond(n: number): boolean {
-        if (Number.isInteger(n) && n >= 0 && n < this.choices.length) {
-            if (this.choices[n].action()) {
+    public respond(response: string): boolean {
+        const choice = this.choices.find(c => c.key === response);
+        if (choice) {
+            if (choice.action()) {
                 this._player.clearPrompt();
             } else {
                 this._player.lastPrompt();
@@ -38,6 +48,7 @@ export class Prompt {
 };
 
 export type Choice = {
+    key?: string;
     text: string;
     action: () => boolean;
 };

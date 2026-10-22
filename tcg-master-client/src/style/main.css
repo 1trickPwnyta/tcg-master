@@ -1,0 +1,57 @@
+body {
+    background-color: #999999;
+}
+
+#app {
+    width: 1000px;
+    font-family: "Georgia", "Times New Roman", "Times", serif;
+}
+
+#console {
+    color: #dedede;
+    background-color: #212121;
+    font-family: monospace;
+    font-size: 20px;
+    height: 600px;
+    padding: 10px;
+    overflow: scroll;
+    margin-bottom: 10px;
+}
+
+#console .user-input {
+    color: #828282;
+}
+
+#controls {
+    color: #dedede;
+    background-color: #444444;
+    padding: 10px;
+}
+
+#controls #commands {
+    margin-bottom: 10px;
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    width: 100%;
+}
+
+#controls #commands .commands-panel {
+    background-color: #333333;
+    padding: 10px;
+    width: 100%;
+    font-size: 0.8em;
+}
+
+#controls #commands button {
+    margin-top: 5px;
+    margin-right: 10px;
+}
+
+#controls #choices {
+    padding-left: 8px;
+}
+
+#controls form {
+    margin-top: 10px;
+}

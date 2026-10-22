@@ -1,8 +1,6 @@
 import { Card } from "./cards/Card.js";
 import { Deck } from "./Deck.js";
-import { Card_Pokemon_Pokemon } from "./cards/dev/Card_Pokemon_Pokemon.js";
-import { Card_Energy_Energy } from "./cards/dev/Card_Energy_Energy.js";
-import { Client, Token } from "../Client.js";
+import { Client } from "../Client.js";
 import { Game } from "./Game.js";
 import { Pronoun } from "../users/Pronoun.js";
 import { Prompt } from "./interaction/prompts/Prompt.js";
@@ -10,17 +8,21 @@ import { Location } from "./Location.js";
 import { Card_Pokemon } from "./cards/Card_Pokemon.js";
 import { Location_Single } from "./Location_Single.js";
 import { Hand } from "./Hand.js";
-import { Card_Trainer_Trainer } from "./cards/dev/Card_Trainer_Trainer.js";
 import { Bench } from "./Bench.js";
+import { Card_Pokemon_BaseSet_Vulpix } from "./cards/BaseSet/Card_Pokemon_BaseSet_Vulpix.js";
+import { Card_Trainer_BaseSet_Switch } from "./cards/BaseSet/Card_Trainer_BaseSet_Switch.js";
+import { Card_Pokemon_BaseSet_Ninetales } from "./cards/BaseSet/Card_Pokemon_BaseSet_Ninetales.js";
+import { Card_Energy_BaseSet_FireEnergy } from "./cards/BaseSet/Card_Energy_BaseSet_FireEnergy.js";
 
 export class Player {
     public static new(game: Game, name: string): Player {
         const player: Player = new Player(game, name);
         player.deck = new Deck(player);
         player.deck.fill<Card>([
-            { card: Card_Pokemon_Pokemon, qty: 20 },
-            { card: Card_Trainer_Trainer, qty: 10 },
-            { card: Card_Energy_Energy, qty: 30 }
+            { card: Card_Pokemon_BaseSet_Ninetales, qty: 10 },
+            { card: Card_Pokemon_BaseSet_Vulpix, qty: 20 },
+            { card: Card_Energy_BaseSet_FireEnergy, qty: 24 },
+            { card: Card_Trainer_BaseSet_Switch, qty: 6 }
         ]);
         return player;
     }
@@ -51,6 +53,20 @@ export class Player {
 
     public get opponent(): Player {
         return this.game.player1 == this ? this.game.player2 : this.game.player1;
+    }
+
+    public get allPokemonInPlay(): Card_Pokemon[] {
+        return [ ...(this.active.single ? [ this.active.single ] : []), ...this.bench.cards ];
+    }
+
+    public flipCoin(): boolean {
+        if (Math.random() < 0.5) {
+            this.game.send(this, "flipped a coin. It was", "heads", "!");
+            return true;
+        } else {
+            this.game.send(this, "flipped a coin. It was", "tails", "!");
+            return false;
+        }
     }
 
     public send(...parts: any[]) {
