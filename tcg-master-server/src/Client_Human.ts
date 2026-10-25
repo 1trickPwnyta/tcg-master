@@ -3,7 +3,8 @@ import { Client } from "./Client.js";
 import { Player } from "./game/Player.js";
 import { CommandContext } from "./commands/CommandContext.js";
 import { Command, CommandNotFoundError } from "./commands/Command.js";
-import { Prompt } from "./game/interaction/prompts/Prompt.js";
+import { Client_HumanSimulator } from "./ai/Client_HumanSimulator.js";
+import { MoveRequest } from "./game/interaction/moves/MoveRequest.js";
 
 export class Client_Human extends Client {
     public readonly socket: Socket;
@@ -46,10 +47,14 @@ export class Client_Human extends Client {
         this.socket.emit("ERR", message);
     }
 
-    public prompt(prompt: Prompt | null) {
+    public requestMove(request: MoveRequest) {
         this.socket.emit("ASK", {
-            text: prompt?.text ?? "Please stand by...",
-            choices: prompt?.choices.map(c => `[${c.key!}] ${c.text}`) ?? []
+            text: request.prompt,
+            choices: request.choices.map(c => `[${c.key!}] ${c.target.label}`)
         });
+    }
+
+    public override copy(player: Player): Client {
+        return new Client_HumanSimulator(player);
     }
 };

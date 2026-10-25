@@ -6,14 +6,17 @@ export class Command_select extends Command {
     public name: string = "select";
 
     public execute(context: CommandContext): any[] | void {
-        try {
-            context.player.prompt?.respond(context.text);
-        } catch (e) {
-            if (e instanceof InvalidSelectionError) {
-                context.player.send(e);
+        const request = context.game.moves.getRequestedMove();
+        if (request) {
+            const target = request.choices.find(c => c.key == context.text)?.target;
+            if (target) {
+                const move = new request.type(context.player, target);
+                context.game.moves.makeMove(move);
             } else {
-                throw e;
+                context.player.send(new InvalidSelectionError());
             }
+        } else {
+            context.player.send("Please wait.");
         }
     }
 }

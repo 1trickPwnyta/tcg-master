@@ -1,5 +1,5 @@
 import { Card } from "../game/cards/Card.js";
-import { GameState } from "../game/Game.js";
+import { GamePhase } from "../game/Game.js";
 import { Command, InvalidCommandArgumentsError } from "./Command.js";
 import { CommandContext } from "./CommandContext.js";
 
@@ -19,8 +19,8 @@ export class Command_check extends Command {
             case "xhand": return [ context.player.opponent.hand.count, "card(s)" ];
             case "xdiscard": return [ context.player.opponent.discard ];
             case "xprizes": return [ context.player.opponent.prizes.count, "card(s)" ];
-            case "xactive": return context.game.state != GameState.Setup ? (context.player.opponent.active.single?.getStatus() ?? [ "(none)" ]) : [ "(hidden)" ];
-            case "xbench": return context.game.state != GameState.Setup ? [ context.player.opponent.bench ] : [ "(hidden)" ];
+            case "xactive": return context.game.phase != GamePhase.Setup ? (context.player.opponent.active.single?.getStatus() ?? [ "(none)" ]) : [ "(hidden)" ];
+            case "xbench": return context.game.phase != GamePhase.Setup ? [ context.player.opponent.bench ] : [ "(hidden)" ];
         }
 
         const cardName = context.text;

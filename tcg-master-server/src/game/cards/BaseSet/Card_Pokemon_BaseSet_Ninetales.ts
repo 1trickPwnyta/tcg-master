@@ -51,7 +51,7 @@ class Attack_FireBlast extends Attack implements ITargeter<Card_Energy> {
     }
 
     public get choices(): Card_Energy[] {
-        return this.parent.energy.cards;
+        return this.parent.energy.cards.filter(c => c.type == EnergyType.Fire);
     }
 
     protected override preEffect(energy: Card_Energy): number {

@@ -1,4 +1,4 @@
-import { GameState } from "../../Game.js";
+import { GamePhase } from "../../Game.js";
 import { Player } from "../../Player.js";
 
 export default (player: Player) => ({
@@ -6,7 +6,7 @@ export default (player: Player) => ({
     text: "end turn",
     action: () => {
         player.opponent.send(player, "ended", player.pronoun.possessive, "turn.");
-        player.game.setState(GameState.Between);
+        player.game.setPhase(GamePhase.Between);
         return true;
     }
 });

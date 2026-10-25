@@ -1,18 +1,32 @@
+import { Game } from "./game/Game.js";
 import { Player } from "./game/Player.js";
+import { MoveRequest } from "./game/interaction/moves/MoveRequest.js";
 import { Prompt } from "./game/interaction/prompts/Prompt.js";
 
 export abstract class Client {
     protected readonly player: Player;
+    private gameOver: boolean = false;
 
     public constructor(player: Player) {
         this.player = player;
+    }
+
+    public get game(): Game {
+        return this.player.game;
     }
 
     public abstract send(...parts: any[]): void;
 
     public abstract error(message: string): void;
 
-    public abstract prompt(prompt: Prompt | null): void;
+    public abstract requestMove(request: MoveRequest): void;
+
+    public notify_gameOver() {
+        this.send("Game over!");
+        this.gameOver = true;
+    }
+
+    public abstract copy(player: Player): Client;
 
     public static tokenize(...parts: any[]): Token[] {
         const tokens: Token[] = [];

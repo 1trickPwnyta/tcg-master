@@ -1,5 +1,5 @@
 import { EnergyType } from "../EnergyType.js";
-import { Game, GameState } from "../Game.js";
+import { Game, GamePhase } from "../Game.js";
 import { Player } from "../Player.js";
 import { Card } from "./Card.js";
 import { Card_Energy } from "./Card_Energy.js";
@@ -63,7 +63,7 @@ export abstract class Attack {
         const damageOffset = this.preEffect(...targets);
         this.owner.opponent.active.single?.takeDamage(this.damage + damageOffset, this.parent.type);
         this.postEffect(...targets);
-        this.game.setState(GameState.Between);
+        this.game.setPhase(GamePhase.Between);
         this.game.update();
     }
 

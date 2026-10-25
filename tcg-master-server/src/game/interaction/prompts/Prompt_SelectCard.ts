@@ -5,7 +5,7 @@ import { Prompt, PromptOptions } from "./Prompt.js";
 export class Prompt_SelectCard<T extends Card> extends Prompt {
     public constructor(text: string, cards: T[], action: (card: T) => boolean, options: PromptOptions = {}) {
         const choices = cards.map(c => ({
-            text: `${c}${c instanceof Card_Pokemon && c.isActive ? " (active)" : ""}`,
+            text: `${c}${c instanceof Card_Pokemon && c.active ? " (active)" : ""}`,
             action: () => action(c)
         }));
         super(text, choices, options);

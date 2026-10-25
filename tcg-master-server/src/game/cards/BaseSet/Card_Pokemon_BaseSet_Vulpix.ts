@@ -22,7 +22,7 @@ class Attack_ConfuseRay extends Attack {
     public override readonly text: string = "Flip a coin. If heads, the Defending Pokémon is now Confused.";
 
     protected override postEffect(_attacker: Card_Pokemon, defender: Card_Pokemon) {
-        if (this.owner.flipCoin()) {
+        if (defender.inPlay && this.owner.flipCoin()) {
             defender.orientation = CardOrientation.Confused;
         }
     }

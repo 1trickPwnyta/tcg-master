@@ -28,6 +28,7 @@ export abstract class Card_Pokemon extends Card {
     private poisoned: boolean = false;
     public readonly energy: Location<Card_Energy> = new Location<Card_Energy>();
     public readonly evolutions: Location<Card_Pokemon> = new Location<Card_Pokemon>();
+    private damagePreventionThreshold: number | null = null;
 
     public evolvesInto(evolution: Card_Pokemon): boolean {
         return this.evolutionTree.evolvesDirect(this.name, evolution.name);
@@ -47,9 +48,19 @@ export abstract class Card_Pokemon extends Card {
         return this._damageCounters;
     }
 
+    public get damage(): number {
+        return this._damageCounters * 10;
+    }
+
     public takeDamage(amount: number, type: EnergyType, source: string | undefined = undefined) {
         if (this.weakness === type) {
             amount *= 2;
+        }
+        if (this.damagePreventionThreshold !== null && (amount <= this.damagePreventionThreshold || this.damagePreventionThreshold === 0)) {
+            if (amount > 0) {
+                this.game.send("The damage was prevented!");
+            }
+            amount = 0;
         }
         if (amount) {
             this.game.send(this.owner, "'s", this, "took", { toString: () => amount, tokenType: "damage" }, "damage", ...(source ? [ "due to", source ] : []), "!");
@@ -70,13 +81,19 @@ export abstract class Card_Pokemon extends Card {
         }
     }
 
+    public preventDamage(threshold: number = 0) {
+        this.damagePreventionThreshold = threshold;
+    }
+
     public get orientation(): CardOrientation {
         return this._orientation;
     }
 
     public set orientation(orientation: CardOrientation) {
+        if (this._orientation != orientation) {
+            this.game.send(...orientation.message(this));
+        }
         this._orientation = orientation;
-        this.game.send(...orientation.message(this));
     }
 
     public poison() {
@@ -84,8 +101,12 @@ export abstract class Card_Pokemon extends Card {
         this.game.send(this, " was poisoned!");
     }
 
-    public get isActive(): boolean {
+    public get active(): boolean {
         return this.location == this.owner.active;
+    }
+
+    public get inPlay(): boolean {
+        return this.active || this.location == this.owner.bench;
     }
 
     public override play() {
@@ -118,10 +139,14 @@ export abstract class Card_Pokemon extends Card {
         return null;
     }
 
+    public get nonattackingReason(): string | null {
+        return this.orientation.nonattackingReason;
+    }
+
     public knockOut() {
         this.game.send(this.owner, "'s", this, "was knocked out!");
         this.reset();
-        const wasActive = this.isActive;
+        const wasActive = this.active;
         this.owner.discard.add(this.take());
         this.owner.opponent.takePrize();
         if (wasActive) {
@@ -176,8 +201,12 @@ export abstract class Card_Pokemon extends Card {
     }
 
     public notify_betweenTurns() {
+        this.orientation = this.orientation.notify_betweenTurns(this);
         if (this.poisoned) {
             this.takeDamage(10, EnergyType.Colorless, "poison");
+        }
+        if (this.game.currentTurn == this.owner.opponent) {
+            this.damagePreventionThreshold = null;
         }
     }
 

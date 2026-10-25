@@ -47,12 +47,6 @@ export class Prompt {
     }
 };
 
-export type Choice = {
-    key?: string;
-    text: string;
-    action: () => boolean;
-};
-
 export type PromptOptions = {
     cancelAction?: () => boolean;
 };

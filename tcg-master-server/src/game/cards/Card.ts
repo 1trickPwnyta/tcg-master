@@ -1,9 +1,10 @@
 import { Client, Token } from "../../Client.js";
 import { Game } from "../Game.js";
+import { IMoveTarget } from "../interaction/moves/IMoveTarget.js";
 import { Location } from "../Location.js";
 import { Player } from "../Player.js";
 
-export abstract class Card {
+export abstract class Card implements IMoveTarget {
     public static readonly all: Card[] = [];
 
     public static cardString(cards: Card[]): string {
@@ -25,6 +26,10 @@ export abstract class Card {
     public constructor(owner: Player) {
         Card.all.push(this);
         this.owner = owner;
+    }
+
+    public get label(): string {
+        return this.toString();
     }
 
     public get game(): Game {
@@ -52,4 +57,11 @@ export abstract class Card {
     }
 
     public abstract getDetails(): any[];
+
+    public copy(owner: Player, location: Location<Card>): this {
+        const card = Object.create(Object.getPrototypeOf(this));
+        card.owner = owner;
+        card.location = location;
+        return card;
+    }
 };

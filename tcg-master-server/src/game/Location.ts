@@ -1,5 +1,6 @@
 import { Token } from "../Client.js";
 import { Card } from "./cards/Card.js";
+import { Player } from "./Player.js";
 
 export class Location<T extends Card> {
     private _cards: T[] = [];
@@ -58,5 +59,11 @@ export class Location<T extends Card> {
 
     public get tokens(): Token[] {
         return Card.cardTokens(this.cards);
+    }
+
+    public copy(owner: Player): this {
+        const location = Object.create(Object.getPrototypeOf(this));
+        location._cards = this.cards.map(c => c.copy(owner, location));
+        return location;
     }
 };

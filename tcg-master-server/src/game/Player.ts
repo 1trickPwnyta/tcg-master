@@ -9,19 +9,20 @@ import { Card_Pokemon } from "./cards/Card_Pokemon.js";
 import { Location_Single } from "./Location_Single.js";
 import { Hand } from "./Hand.js";
 import { Bench } from "./Bench.js";
-import { Card_Pokemon_BaseSet_Vulpix } from "./cards/BaseSet/Card_Pokemon_BaseSet_Vulpix.js";
 import { Card_Trainer_BaseSet_Switch } from "./cards/BaseSet/Card_Trainer_BaseSet_Switch.js";
-import { Card_Pokemon_BaseSet_Ninetales } from "./cards/BaseSet/Card_Pokemon_BaseSet_Ninetales.js";
-import { Card_Energy_BaseSet_FireEnergy } from "./cards/BaseSet/Card_Energy_BaseSet_FireEnergy.js";
+import { Card_Pokemon_BaseSet_Starmie } from "./cards/BaseSet/Card_Pokemon_BaseSet_Starmie.js";
+import { Card_Pokemon_BaseSet_Staryu } from "./cards/BaseSet/Card_Pokemon_BaseSet_Staryu.js";
+import { Card_Energy_BaseSet_WaterEnergy } from "./cards/BaseSet/Card_Energy_BaseSet_WaterEnergy.js";
+import { MoveRequest } from "./interaction/moves/MoveRequest.js";
 
 export class Player {
     public static new(game: Game, name: string): Player {
         const player: Player = new Player(game, name);
         player.deck = new Deck(player);
         player.deck.fill<Card>([
-            { card: Card_Pokemon_BaseSet_Ninetales, qty: 10 },
-            { card: Card_Pokemon_BaseSet_Vulpix, qty: 20 },
-            { card: Card_Energy_BaseSet_FireEnergy, qty: 24 },
+            { card: Card_Pokemon_BaseSet_Staryu, qty: 15 },
+            { card: Card_Pokemon_BaseSet_Starmie, qty: 15 },
+            { card: Card_Energy_BaseSet_WaterEnergy, qty: 24 },
             { card: Card_Trainer_BaseSet_Switch, qty: 6 }
         ]);
         return player;
@@ -49,6 +50,10 @@ export class Player {
     private constructor(game: Game, name: string) {
         this.game = game;
         this.name = name;
+    }
+
+    public get id(): number {
+        return this == this.game.player1 ? 0 : 1;
     }
 
     public get opponent(): Player {
@@ -81,6 +86,10 @@ export class Player {
         return this._prompt;
     }
 
+    public requestMove(request: MoveRequest) {
+        this.client?.requestMove(request);
+    }
+
     public setPrompt(prompt: Prompt) {
         if (this._prompt) {
             this.promptStack.push(prompt);
@@ -110,11 +119,6 @@ export class Player {
         }
     }
 
-    public notify_gameOver() {
-        this._prompt = null;
-        this.client?.prompt(new Prompt("Game over!", []));
-    }
-
     public draw(qty: number = 1) {
         for (let i = 0; i < qty; i++) {
             const drawn = this.deck.draw();
@@ -141,5 +145,18 @@ export class Player {
 
     public toString(): string {
         return this.name;
+    }
+
+    public copy(game: Game): Player {
+        const player = new Player(game, this.name);
+        player.pronoun = this.pronoun;
+        player.client = this.client?.copy(player);
+        player.deck = this.deck.copy(player);
+        player.hand = this.hand.copy(player);
+        player.discard = this.discard.copy(player);
+        player.prizes = this.prizes.copy(player);
+        player.bench = this.bench.copy(player);
+        player.active = this.active.copy(player);
+        return player;
     }
 };
