@@ -1,5 +1,5 @@
 import { EnergyType } from "../EnergyType.js";
-import { Game, GamePhase } from "../Game.js";
+import { Game } from "../Game.js";
 import { Player } from "../Player.js";
 import { Card } from "./Card.js";
 import { Card_Energy } from "./Card_Energy.js";

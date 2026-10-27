@@ -11,6 +11,8 @@ globalThis.formSubmit = (e: Event) => {
     const input = form.find("input[type=\"text\"]").val() as string;
     form.trigger("reset");
     Input.send(input.trim());
+    $("#prompt").text("Please stand by...");
+    $("#choices").html("");
 };
 
 $("#input")[0].focus();
@@ -32,13 +34,13 @@ export class Input {
         Input.socket.emit("CMD", input);
     }
 
-    public static receive(tokens: { text: string, type?: string }[]) {
+    public static receive(tokens: { name: string, tokenType?: string }[]) {
         const log = $("#console");
         log.append(tokens.map(t => {
-            if (t.type) {
-                return `<span class="token_${t.type}">${t.text}</span>`;
+            if (t.tokenType) {
+                return `<span class="token_${t.tokenType}">${t.name}</span>`;
             } else {
-                return t.text;
+                return t.name;
             }
         }).join(" ").replaceAll(/\s([\.!\?,;:'])/g, "$1"));
         log.append("<br />");

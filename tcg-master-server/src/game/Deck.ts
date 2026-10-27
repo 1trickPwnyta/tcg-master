@@ -1,20 +1,13 @@
-import { Client } from "../Client.js";
 import { Card } from "./cards/Card.js";
+import { Game } from "./Game.js";
 import { Location } from "./Location.js";
 import { Player } from "./Player.js";
 
 export class Deck extends Location<Card> {
-    private player: Player;
-
-    public constructor(player: Player) {
-        super();
-        this.player = player;
-    }
-
-    public fill<T extends Card>(cards: { card: new (owner: Player) => T; qty: number }[]) {
+    public fill<T extends Card>(cards: { card: new (game: Game, owner: Player) => T; qty: number }[]) {
         cards.forEach(c => {
             for (let i = 0; i < c.qty; i++) {
-                this.add(new c.card(this.player));
+                this.add(new c.card(this.game, this.owner));
             }
         });
     }
@@ -31,7 +24,7 @@ export class Deck extends Location<Card> {
             const j = Math.floor(Math.random() * (i + 1));
             this.swap(i, j);
         }
-        this.player.game.send(this.player, "shuffled", this.player.pronoun.possessive, "deck.");
+        this.game.send(this.owner, "shuffled", this.owner.pronoun.possessive, "deck.");
     }
 };
 

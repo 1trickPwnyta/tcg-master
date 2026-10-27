@@ -1,10 +1,11 @@
+import { Client_AI } from "../../ai/Client_AI.js";
 import { Client, Token } from "../../Client.js";
 import { Game } from "../Game.js";
-import { IMoveTarget } from "../interaction/moves/IMoveTarget.js";
+import { GameObject } from "../GameObject.js";
 import { Location } from "../Location.js";
 import { Player } from "../Player.js";
 
-export abstract class Card implements IMoveTarget {
+export abstract class Card extends GameObject {
     public static readonly all: Card[] = [];
 
     public static cardString(cards: Card[]): string {
@@ -23,17 +24,14 @@ export abstract class Card implements IMoveTarget {
     public readonly owner: Player;
     public location: Location<Card> | null = null;
 
-    public constructor(owner: Player) {
+    public constructor(game: Game, owner: Player) {
+        super(game);
         Card.all.push(this);
         this.owner = owner;
     }
 
     public get label(): string {
         return this.toString();
-    }
-
-    public get game(): Game {
-        return this.owner.game;
     }
 
     public take(): Card {
@@ -58,10 +56,11 @@ export abstract class Card implements IMoveTarget {
 
     public abstract getDetails(): any[];
 
-    public copy(owner: Player, location: Location<Card>): this {
-        const card = Object.create(Object.getPrototypeOf(this));
-        card.owner = owner;
-        card.location = location;
+    public override copy(_requester: Client_AI, game: Game): this {
+        const card = new (this.constructor as new (game: Game, owner: Player) => this)(game, game.players[this.owner.id]);
+        if (this.location) {
+            card.location = game.getObject(this.location.id) as Location<Card>;
+        }
         return card;
     }
 };

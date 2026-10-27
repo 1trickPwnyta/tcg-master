@@ -1,6 +1,6 @@
-import { IMoveTarget } from "./IMoveTarget.js";
+import { GameObject } from "../../GameObject.js";
 
-export class MoveTarget_Cancel implements IMoveTarget {
+export class MoveTarget_Cancel implements GameObject {
     get label(): string {
         return "cancel";
     }

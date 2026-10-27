@@ -1,23 +1,22 @@
 import { Socket } from "socket.io";
 import { Client } from "./Client.js";
-import { Player } from "./game/Player.js";
 import { CommandContext } from "./commands/CommandContext.js";
 import { Command, CommandNotFoundError } from "./commands/Command.js";
-import { Client_HumanSimulator } from "./ai/Client_HumanSimulator.js";
-import { MoveRequest } from "./game/interaction/moves/MoveRequest.js";
+import { IToken, Token } from "./Token.js";
 
 export class Client_Human extends Client {
+    public override name: string = "Pikachu";
     public readonly socket: Socket;
 
-    public constructor(socket: Socket, player: Player) {
-        super(player);
+    public constructor(socket: Socket) {
+        super();
         this.socket = socket;
         this.socket.emit("NEW");
 
         socket.on("CMD", (command: string) => {
-            console.log(`Received command from ${player.name ?? "(unknown)"}: ${command}`);
+            console.log(`> [${this.name}] ${command}`);
             try {
-                const context = new CommandContext(socket.id, player.game, command);
+                const context = new CommandContext(this, this.player_id!, this.game!, command);
                 const response = Command.execute(context);
                 if (response !== undefined) {
                     console.log(`Command ${context.name} responded: ${response.join(" ")}`);
@@ -31,7 +30,6 @@ export class Client_Human extends Client {
                     throw e;
                 }
             }
-            player.prompt?.send();
         });
 
         socket.on("disconnect", () => {
@@ -39,7 +37,7 @@ export class Client_Human extends Client {
         });
     }
 
-    public send(...parts: any[]) {
+    public send(...parts: (IToken | string)[]) {
         this.socket.emit("MSG", Client.tokenize(...parts));
     }
 
@@ -47,14 +45,14 @@ export class Client_Human extends Client {
         this.socket.emit("ERR", message);
     }
 
-    public requestMove(request: MoveRequest) {
+    public override prompt(text: string, choices: string[], force: boolean = false) {
+        const userChoices = choices.map((c, i) => `[${i + 1}] ${c}`);
+        if (!force) {
+            userChoices.push("[`] (cancel)");
+        }
         this.socket.emit("ASK", {
-            text: request.prompt,
-            choices: request.choices.map(c => `[${c.key!}] ${c.target.label}`)
+            text: text,
+            choices: userChoices
         });
-    }
-
-    public override copy(player: Player): Client {
-        return new Client_HumanSimulator(player);
     }
 };

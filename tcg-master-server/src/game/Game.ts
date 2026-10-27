@@ -1,129 +1,263 @@
-import { Socket } from "socket.io";
-import { Client_Human } from "../Client_Human.js";
-import { Player } from "./Player.js";
-import { Prompt } from "./interaction/prompts/Prompt.js";
 import { Client_AI } from "../ai/Client_AI.js";
-import Choice_PlayCard from "./interaction/choices/Choice_PlayCard.js";
-import Choice_Attack from "./interaction/choices/Choice_Attack.js";
-import Choice_EndTurn from "./interaction/choices/Choice_EndTurn.js";
-import Choice_Retreat from "./interaction/choices/Choice_Retreat.js";
-import { MoveHandler } from "./interaction/moves/MoveHandler.js";
-import { GamePhase } from "./phases/GamePhase.js";
-import { GamePhase_Setup } from "./phases/GamePhase_Setup.js";
-import { Move } from "./interaction/moves/Move.js";
-import { IMoveTarget } from "./interaction/moves/IMoveTarget.js";
+import { GameState } from "./state/GameState.js";
+import { Interrupt, InterruptSync } from "./state/Interrupt.js";
+import { PlayerState } from "./state/PlayerState.js";
+import { CardState } from "./state/CardState.js";
+import { CardDatabase } from "./cards/CardDatabase.js";
+import { Card_Pokemon_BaseSet_Voltorb } from "./cards/BaseSet/Card_Pokemon_BaseSet_Voltorb.js";
+import { CardWorker_Pokemon } from "./cards/CardWorker_Pokemon.js";
+import { Client } from "../Client.js";
+import { IToken } from "../Token.js";
+import { InterruptResolution } from "./InterruptResolution.js";
+import { InterruptResolver } from "./InterruptResolver.js";
 
 export class Game {
-    public static new(socket1: Socket | null = null, socket2: Socket | null = null): Game {
-        const game = new Game();
-        game.player1.client = socket1 ? new Client_Human(socket1, game.player1) : new Client_AI(game.player1);
-        game.player2.client = socket2 ? new Client_Human(socket2, game.player2) : new Client_AI(game.player2);
-        return game;
-    }
+    private clients: Client[];
+    private state: GameState;
 
-    public player1: Player;
-    public player2: Player;
-    public readonly moves: MoveHandler = new MoveHandler(this);
-    public prizes: number = 6;
-    public planningMode: boolean = false;
-
-    private phase: GamePhase = new GamePhase_Setup();
-    private _currentTurn!: Player;
-    public mulligansTaken: number[] = [ 0, 0 ];
-    public energyPlayed: boolean = false;
-
-    private constructor() {
-        this.player1 = Player.new(this, "Pikachu");
-        this.player2 = Player.new(this, "COM");
-    }
-
-    public get players(): Player[] {
-        return [ this.player1, this.player2 ];
-    }
-
-    public get currentTurn(): Player {
-        return this._currentTurn;
-    }
-
-    public getPlayer(client: string): Player | undefined {
-        return [ this.player1, this.player2 ].find(p => p.client instanceof Client_Human && (p.client as Client_Human)?.socket.id === client);
-    }
-
-    public start() {
+    public constructor(client1?: Client, client2?: Client, options: { prizes?: number } = {}) {
+        if (client1) {
+            client1.game = this;
+        } else {
+            client1 = new Client_AI(this);
+        }
+        if (client2) {
+            client2.game = this;
+        } else {
+            client2 = new Client_AI(this);
+        }
+        this.clients = [ client1, client2 ];
+        client1.player_id = crypto.randomUUID();
+        client2.player_id = crypto.randomUUID();
+        this.state = {
+            players: [
+                {
+                    id: client1.player_id,
+                    tokenType: "player",
+                    name: "Pikachu",
+                    pronouns: { objective: "they", possessive: "their" },
+                    active: { id: crypto.randomUUID(), cards: [] },
+                    bench: { id: crypto.randomUUID(), cards: [] },
+                    hand: { id: crypto.randomUUID(), cards: [] },
+                    discard: { id: crypto.randomUUID(), cards: [] },
+                    prizes: { id: crypto.randomUUID(), cards: [] },
+                    deck: { id: crypto.randomUUID(), cards: [] },
+                    mulligans: 0
+                },
+                {
+                    id: client2.player_id,
+                    tokenType: "player",
+                    name: "COM",
+                    pronouns: { objective: "they", possessive: "their" },
+                    active: { id: crypto.randomUUID(), cards: [] },
+                    bench: { id: crypto.randomUUID(), cards: [] },
+                    hand: { id: crypto.randomUUID(), cards: [] },
+                    discard: { id: crypto.randomUUID(), cards: [] },
+                    prizes: { id: crypto.randomUUID(), cards: [] },
+                    deck: { id: crypto.randomUUID(), cards: [] },
+                    mulligans: 0
+                }
+            ],
+            turn: null,
+            interrupt: null,
+            rules: {
+                prizes: options.prizes ?? 6
+            }
+        };
         this.update();
     }
 
-    public notify_moveExecuted(move: Move<IMoveTarget>) {
-        this.phase.notify_moveExecuted(move);
+    public getState(): GameState {
+        return this.state;
     }
 
-    public notify_moveCancelled(move: Move<IMoveTarget>) {
-        this.phase.notify_moveCancelled(move);
+    public getPlayer(player_id: string): PlayerState {
+        return this.state.players.find(p => p.id == player_id)!;
     }
 
-    public update() {
-        this.moves.update();
-        this.phase = this.phase.evaluate(this);
+    private update() {
+        if (this.state.interrupt) {
+            this.interrupt(this.state.interrupt);
+        } else if (!this.state.turn) {
+            this.start();
+        } else {
+            this.updateMain();
+        }
     }
 
-    private updateSetup() {
-        if (!this.players.some(p => p.active.empty)) {
-            this.beginTurn(this.player1);
+    private start() {
+        this.send("Starting game between", this.state.players[0].name, "and", this.state.players[1].name, ".");
+        for (const player of this.state.players) {
+            for (let i = 0; i < 60; i++) {
+                const card: CardState = this.makeCard(CardDatabase.find(Card_Pokemon_BaseSet_Voltorb).dbid);
+                player.deck.cards.push(card);
+            }
+            this.shuffleDeck(player.id);
+            player.mulligans = this.setupDraw(player);
+        }
+        this.interrupt({
+            interrupts: this.state.players.map(p => ({
+                player: p.id,
+                prompt: "Select a basic Pokémon as your active Pokémon.",
+                choices: this.basicPokemonInHand(p.id).map(c => ({ text: c.name, target_id: c.id })),
+                resolution: InterruptResolution.MoveCard,
+                args: [ p.hand.id, p.active.id ]
+            }))
+        });
+    }
+
+    private setupDraw(player: PlayerState, mulligans: number = 0): number {
+        this.draw(player.id, 7);
+        if (this.basicPokemonInHand(player.id).length) {
+            return mulligans;
+        } else {
+            this.send(player, "has no basic Pokémon in", player.pronouns.possessive, "hand.", player.pronouns.objective.capitalizeFirst(), "must take a mulligan.");
+            this.shuffleHandIntoDeck(player.id);
+            return this.setupDraw(player, mulligans + 1);
         }
     }
 
     private updateMain() {
-        this._currentTurn.setPrompt(new Prompt(
-            "Your turn.",
-            [
-                Choice_PlayCard(this._currentTurn),
-                Choice_Attack(this._currentTurn),
-                Choice_Retreat(this._currentTurn),
-                Choice_EndTurn(this._currentTurn)
-            ]
-        ));
+        
     }
 
-    private updateBetween() {
-        this.players.forEach(p => {
-            p.active.single?.notify_betweenTurns();
-            p.bench.cards.forEach(c => {
-                c.notify_betweenTurns();
-            });
-        });
-        this.beginTurn(this._currentTurn.opponent);
+    private interrupt(interrupt: Interrupt) {
+        interrupt.id = crypto.randomUUID();
+        this.state.interrupt = interrupt;
+        this.sendInterrupt(interrupt);
     }
 
-    private beginTurn(player: Player) {
-        this.energyPlayed = false;
-        this._phase = GamePhase.Main;
-        this._currentTurn = player;
-        this.send();
-        this.send("Begin", player, "'s turn.");
-        player.draw();
-        this.update();
+    private sendInterrupt(interrupt: Interrupt) {
+        if (interrupt.interrupts?.length) {
+            for (const sub of interrupt.interrupts) {
+                this.sendInterrupt(sub);
+            }
+        } else {
+            this.clients.find(c => c.player_id === interrupt.player)!
+                .prompt(interrupt.prompt!, interrupt.choices!.map(c => c.text), interrupt.force);
+        }
     }
 
-    public end(winner: Player, ...reason: any[]) {
-        this._phase = GamePhase.Ended;
-        this.send(...reason, winner, "wins!");
-        this.players.forEach(p => p.client?.notify_gameOver());
-    }
-
-    public send(...parts: any[]) {
-        this.players.forEach(p => {
-            p.send(...parts);
+    public send(...parts: (IToken | string)[]) {
+        this.clients.forEach(c => {
+            c.send(...parts);
         });
     }
 
-    public copy(): Game {
-        const game = new Game();
-        game.planningMode = true;
-        game.player1 = this.player1.copy(game);
-        game.player2 = this.player2.copy(game);
-        game._phase = this._phase;
-        game._currentTurn = this._currentTurn == this.player1 ? game.player1 : game.player2;
-        game.energyPlayed = this.energyPlayed;
-        return game;
+    private makeCard(dbid: string): CardState {
+        return {
+            id: crypto.randomUUID(),
+            dbid: dbid,
+            name: CardDatabase.find(dbid).name,
+            damage: 0,
+            poison: false,
+            orientation: "normal",
+            attachments: { id: crypto.randomUUID(), cards: [] }
+        };
+    }
+
+    public getInterrupt(player_id: string, root?: Interrupt): InterruptSync | null {
+        if (this.state.interrupt?.player === player_id) {
+            return this.state.interrupt as InterruptSync;
+        } else if (root?.player === player_id) {
+            return root as InterruptSync;
+        } else {
+            const interrupts = (root ?? this.state.interrupt)?.interrupts;
+            if (interrupts) {
+                for (const interrupt of interrupts) {
+                    if (this.getInterrupt(player_id, interrupt)) {
+                        return interrupt as InterruptSync;
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    private closeInterrupt(interrupt_id: string) {
+        if (this.state.interrupt?.id === interrupt_id) {
+            this.state.interrupt = null;
+            return;
+        }
+
+        this.closeInterruptRecursive(interrupt_id, this.state.interrupt);
+        this.cleanInterrupts(this.state.interrupt);
+    }
+
+    private closeInterruptRecursive(interrupt_id: string, root: Interrupt | null) {
+        if (root?.interrupts) {
+            for (let i = 0; i < root.interrupts.length; i++) {
+                if (root.interrupts[i].id === interrupt_id) {
+                    root.interrupts.splice(i, 1);
+                    return;
+                }
+                this.closeInterruptRecursive(interrupt_id, root.interrupts[i]);
+            }
+        }
+    }
+
+    private cleanInterrupts(root: Interrupt | null) {
+        if (this.state.interrupt?.interrupts && !this.state.interrupt.interrupts.length) {
+            this.state.interrupt = null;
+            return;
+        }
+        if (root?.interrupts) {
+            for (let i = 0; i < root.interrupts.length; i++) {
+                if (root.interrupts[i].interrupts && !root.interrupts[i].interrupts?.length) {
+                    root.interrupts.splice(i, 1);
+                }
+                this.cleanInterrupts(root.interrupts[i]);
+            }
+        }
+    }
+
+    public resolveInterrupt(player_id: string, choice: number | null) {
+        const interrupt = this.getInterrupt(player_id);
+        if (interrupt) {
+            if (choice !== null) {
+                InterruptResolver.resolve(this, interrupt, choice);
+            }
+            this.closeInterrupt(interrupt.id!);
+            this.update();
+        } else {
+            throw new Error(`No interrupt found for player ${player_id}.`)
+        }
+    }
+
+    public shuffleDeck(player_id: string) {
+        const player = this.getPlayer(player_id);
+        for (let i = player.deck.cards.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            const temp = player.deck.cards[i];
+            player.deck.cards[i] = player.deck.cards[j];
+            player.deck.cards[j] = temp;
+        }
+        this.send(player, "shuffled", player.pronouns.possessive, "deck.");
+    }
+
+    public shuffleHandIntoDeck(player_id: string) {
+        const player = this.getPlayer(player_id);
+        while (player.hand.cards.length) {
+            player.deck.cards.push(player.hand.cards.pop()!);
+        }
+        this.shuffleDeck(player_id);
+    }
+
+    public draw(player_id: string, amount: number = 1) {
+        const player = this.getPlayer(player_id);
+        for (let i = 0; i < amount && player.deck.cards.length; i++) {
+            player.hand.cards.push(player.deck.cards.pop()!);
+        }
+    }
+
+    public basicPokemonInHand(player_id: string): CardState[] {
+        const player = this.getPlayer(player_id);
+        return player.hand.cards.filter(c => {
+            const worker = CardDatabase.find(c.dbid)
+            if (worker instanceof CardWorker_Pokemon) {
+                return worker.evo === "basic";
+            }
+            return false;
+        });
     }
 };

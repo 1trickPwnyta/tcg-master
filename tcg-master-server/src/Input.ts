@@ -4,6 +4,8 @@ import { Game } from "./game/Game.js";
 import { Command } from "./commands/Command.js";
 import { Command_check } from "./commands/Command_check.js";
 import { Command_select } from "./commands/Command_select.js";
+import { Client_Human } from "./Client_Human.js";
+import { Client_AI } from "./ai/Client_AI.js";
 
 export class Input {
     static {
@@ -17,7 +19,7 @@ export class Input {
 
         io.on("connection", (socket: Socket) => {
             console.log(`Client connected: ${socket.id}`);
-            Game.new(socket).start();
+            new Game(new Client_Human(socket));
         });
     }
 };

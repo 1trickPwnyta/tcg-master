@@ -1,9 +1,18 @@
+import { Client_AI } from "../ai/Client_AI.js";
 import { Token } from "../Client.js";
 import { Card } from "./cards/Card.js";
+import { Game } from "./Game.js";
+import { GameObject } from "./GameObject.js";
 import { Player } from "./Player.js";
 
-export class Location<T extends Card> {
+export class Location<T extends Card> extends GameObject {
+    public readonly owner: Player;
     private _cards: T[] = [];
+
+    public constructor(game: Game, owner: Player) {
+        super(game);
+        this.owner = owner;
+    }
 
     public get count(): number {
         return this._cards.length;
@@ -15,6 +24,10 @@ export class Location<T extends Card> {
 
     public get empty(): boolean {
         return this.cards.length === 0;
+    }
+
+    public get label(): string {
+        return "location";
     }
 
     public add(card: T, position: number = this._cards.length) {
@@ -61,9 +74,9 @@ export class Location<T extends Card> {
         return Card.cardTokens(this.cards);
     }
 
-    public copy(owner: Player): this {
-        const location = Object.create(Object.getPrototypeOf(this));
-        location._cards = this.cards.map(c => c.copy(owner, location));
+    public copy(requester: Client_AI, game: Game): this {
+        const location = new (this.constructor as new (game: Game, owner: Player) => this)(game, game.players[this.owner.id]);
+        location._cards = this.cards.map(c => c.copy(requester, game));
         return location;
     }
 };

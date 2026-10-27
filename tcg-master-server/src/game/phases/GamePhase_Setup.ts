@@ -3,15 +3,19 @@ import { Player } from "../Player.js";
 import { GamePhase } from "./GamePhase.js";
 import { GamePhase_MulliganBonusDraw } from "./GamePhase_MulliganBonusDraw.js";
 
-export class GamePhase_Setup extends GamePhase {
-    public override evaluate(game: Game): GamePhase {
+export class GamePhase_Setup extends GamePhase<never> {
+    protected override getMoveRequests(_game: Game): never[] {
+        return [];
+    }
+
+    public override evaluate(game: Game): GamePhase<any> {
         for (const player of game.players) {
             player.send("Welcome!");
             player.deck.shuffle();
             const mulligans = this.drawHand(player);
             game.mulligansTaken[player.id] = mulligans;
         };
-        return new GamePhase_MulliganBonusDraw(game.player1);
+        return new GamePhase_MulliganBonusDraw(game);
     }
 
     private drawHand(player: Player, mulligans: number = 0): number {

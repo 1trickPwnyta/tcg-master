@@ -1,18 +1,18 @@
 import { Game } from "../../Game.js";
 import { Player } from "../../Player.js";
 import { Choice } from "../choices/Choice.js";
-import { IMoveTarget } from "./IMoveTarget.js";
+import { GameObject } from "../../GameObject.js";
 import { Move } from "./Move.js";
-import { MoveTarget_Cancel } from "./MoveTarget_Cancel.js";
 
-export class MoveRequest<T extends IMoveTarget> {
-    public static choices(targets: IMoveTarget[], canCancel: boolean = true): Choice[] {
-        const choices = targets.map((t, i) => ({
+export class MoveRequest<T extends GameObject | string | null> {
+    public static choices<T extends GameObject | string>(targets: T[], canCancel: boolean = true): Choice[] {
+        const choices: Choice[] = targets.map((t, i) => ({
             key: (i + 1).toString(),
-            target: t
+            label: t instanceof GameObject ? t.label : t.toString(),
+            id: t instanceof GameObject ? t.id : t.toString()
         }));
         if (canCancel) {
-            choices.push({ key: "c", target: new MoveTarget_Cancel() });
+            choices.push({ key: "c", label: "(cancel)", id: "cancel" });
         }
         return choices;
     }
@@ -29,11 +29,13 @@ export class MoveRequest<T extends IMoveTarget> {
         this.choices = choices;
     }
 
-    protected get game(): Game {
-        return this.player.game;
+    public send() {
+        if (this.choices.length) {
+            this.player.requestMove(this);
+        }
     }
 
-    public send() {
-        this.player.requestMove(this);
+    public copy(game: Game): MoveRequest<T> {
+        return new MoveRequest(this.type, game.players[this.player.id], this.prompt, this.choices);
     }
 };

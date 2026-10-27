@@ -1,77 +1,65 @@
 import { Client } from "../Client.js";
-import { InvalidSelectionError, Prompt } from "../game/interaction/prompts/Prompt.js";
+import { Card_Pokemon_BaseSet_Staryu } from "../game/cards/BaseSet/Card_Pokemon_BaseSet_Staryu.js";
+import { Card } from "../game/cards/Card.js";
+import { Game } from "../game/Game.js";
 import { Player } from "../game/Player.js";
-import { AIEvaluator } from "./AIEvaluator.js";
+import { IToken, Token } from "../Token.js";
 import { AIPlanner } from "./AIPlanner.js";
 
 export class Client_AI extends Client {
-    private evaluator: AIEvaluator = new AIEvaluator(this.player);
-    private planner: AIPlanner | null = null;
-    private choiceQueue: string[] = [];
+    public override name: string = "COM";
+    public planner: AIPlanner | null = null;
+    private witnessedCards: Map<(new (game: Game, owner: Player) => Card), number> = new Map<(new (game: Game, owner: Player) => Card), number>();
+    public readonly depth: number;
 
-    public send(...parts: any[]): void {
-        console.log(`${this.player} received a message: ${parts.join(" ")}`);
+    public constructor(game: Game, depth: number = 0) {
+        super();
+        this.game = game;
+        this.depth = depth;
     }
 
-    public error(message: string): void {
+    public override send(...parts: (IToken | string)[]): void {
+        console.log(Client.tokenize(...parts).map(t => t.name).join(" "));
+    }
+
+    public override error(message: string): void {
         console.error(`${this.player} received an error: ${message}`);
     }
 
-    public sendPrompt(prompt: Prompt | null): void {
-        if (prompt?.choices?.length) {
-            console.log(`${this.player} received a prompt with ${prompt.choices.length} choice(s): ${prompt.text}`);
-            
-            if (this.planner?.nextChoice) {
-                const choice = this.planner.nextChoice;
-                this.planner.nextChoice = null;
-                this.planner.choice = choice;
-                prompt.respond(choice);
-                if (!this.planner.nullified) {
-                    const score = this.evaluator.evaluate();
-                    this.planner.recordScore(score);
-                }
-            } else if (this.choiceQueue.length) {
-                const choice = this.choiceQueue.splice(0, 1)[0];
-                prompt.respond(choice);
-            } else {
-                if (!this.game.planningMode) {
-                    AIPlanner.reset();
-                }
-                
-                for (const c of prompt.choices) {
-                    console.log("Being choice " + c.key);
-                    const game = this.player.game.copy();
-                    const client = game.players.find(p => p.client instanceof Client_AI && p.name == this.player.name)!.client as Client_AI;
-                    let previousChoices: string[] = [];
-                    if (this.planner?.choice) {
-                        previousChoices = [ ...this.planner.previousChoices, this.planner.choice ];
-                        this.planner.nullified = true;
-                    }
-                    client.planner = new AIPlanner(c.key!, previousChoices);
-                    game.update();
-                    console.log("End choice " + c.key);
-                };
+    public override prompt(text: string, choices: string[], force: boolean = false) {
+        console.log(`${text} [ ${choices.join(", ")}${!force ? ", (cancel)" : ""} ]`);
+    }
 
-                if (!this.game.planningMode) {
-                    this.choiceQueue = AIPlanner.getBestChoices();
-                }
-            }
-            
-            /*const option = Math.floor(Math.random() * (prompt.choices.length ?? 0));
-            console.log(`${this.player} responds: ${option + 1}`);
-            try {
-                prompt.respond(prompt.choices[option].key!);
-            } catch (e) {
-                if (e instanceof InvalidSelectionError) {
-                    console.error(`${this.player} selected an invalid option: ${prompt.choices[option]?.text ?? option}`);
-                } else {
-                    throw e;
-                }
-            }*/
+    public witness(player: Player, card: Card) {
+        if (player !== this.player) {
+            this.witnessedCards.set(Object.getPrototypeOf(card), this.witnessedCards.get(Object.getPrototypeOf(card)) ?? 0 + 1);
         }
     }
 
-    public override copy(player: Player): Client {
-        return new Client_AI(player);
+    public getBeliefDistribution(game: Game, amount: number): Card[] {
+        const totalWitnessed = this.witnessedCards.values().reduce((sum, value) => sum + value, 0);
+        const cards: Card[] = [];
+
+        for (const witnessed of this.witnessedCards.keys()) {
+            const distAmount = Math.ceil(this.witnessedCards.get(witnessed)! / totalWitnessed * amount);
+            for (let i = 0; i < distAmount; i++) {
+                const card = new witnessed(game, game.players[this.player.opponent.id]);
+                cards.push(card);
+            }
+        }
+
+        while (cards.length > amount) {
+            cards.splice(Math.floor(Math.random() * cards.length), 1);
+        }
+
+        // If we didn't produce enough (never witnessed any cards), just stuff with Basic Pokemon
+        while (cards.length < amount) {
+            cards.push(new Card_Pokemon_BaseSet_Staryu(game, game.players[this.player.opponent.id]));
+        }
+        return cards;
+    }
+
+    public override copy(player: Player, depth: number = 0): Client {
+        return new Client_AI(player, depth);
     }
 };

@@ -14,11 +14,12 @@ import { Card_Pokemon_BaseSet_Starmie } from "./cards/BaseSet/Card_Pokemon_BaseS
 import { Card_Pokemon_BaseSet_Staryu } from "./cards/BaseSet/Card_Pokemon_BaseSet_Staryu.js";
 import { Card_Energy_BaseSet_WaterEnergy } from "./cards/BaseSet/Card_Energy_BaseSet_WaterEnergy.js";
 import { MoveRequest } from "./interaction/moves/MoveRequest.js";
+import { Client_AI } from "../ai/Client_AI.js";
 
 export class Player {
     public static new(game: Game, name: string): Player {
         const player: Player = new Player(game, name);
-        player.deck = new Deck(player);
+        player.deck = new Deck(game, player);
         player.deck.fill<Card>([
             { card: Card_Pokemon_BaseSet_Staryu, qty: 15 },
             { card: Card_Pokemon_BaseSet_Starmie, qty: 15 },
@@ -38,11 +39,11 @@ export class Player {
     public client: Client | undefined;
 
     public deck!: Deck;
-    public hand: Hand = new Hand();
-    public discard: Location<Card> = new Location<Card>();
-    public prizes: Location<Card> = new Location<Card>();
-    public bench: Bench = new Bench();
-    public active: Location_Single<Card_Pokemon> = new Location_Single<Card_Pokemon>();
+    public hand: Hand;
+    public discard: Location<Card>;
+    public prizes: Location<Card>;
+    public bench: Bench;
+    public active: Location_Single<Card_Pokemon>;
     private _prompt: Prompt | null = null;
     private promptStack: Prompt[] = [];
     private _lastPrompt: Prompt | null = null;
@@ -50,6 +51,11 @@ export class Player {
     private constructor(game: Game, name: string) {
         this.game = game;
         this.name = name;
+        this.hand = new Hand(this.game, this);
+        this.discard = new Location<Card>(this.game, this);
+        this.prizes = new Location<Card>(this.game, this);
+        this.bench = new Bench(this.game, this);
+        this.active = new Location_Single<Card_Pokemon>(this.game, this);
     }
 
     public get id(): number {
@@ -86,7 +92,7 @@ export class Player {
         return this._prompt;
     }
 
-    public requestMove(request: MoveRequest) {
+    public requestMove(request: MoveRequest<any>) {
         this.client?.requestMove(request);
     }
 
@@ -114,7 +120,7 @@ export class Player {
             const nextPrompt = this.promptStack.pop()!;
             this.setPrompt(nextPrompt);
         } else {
-            this.client?.prompt(null);
+            //this.client?.prompt(null);
             this.game.update();
         }
     }
@@ -147,16 +153,25 @@ export class Player {
         return this.name;
     }
 
-    public copy(game: Game): Player {
+    public copy(requester: Client_AI, game: Game): Player {
         const player = new Player(game, this.name);
         player.pronoun = this.pronoun;
-        player.client = this.client?.copy(player);
-        player.deck = this.deck.copy(player);
-        player.hand = this.hand.copy(player);
-        player.discard = this.discard.copy(player);
-        player.prizes = this.prizes.copy(player);
-        player.bench = this.bench.copy(player);
-        player.active = this.active.copy(player);
+        player.client = this.client?.copy(player, requester.depth + 1);
+        player.discard = this.discard.copy(requester, game);
+        player.bench = this.bench.copy(requester, game);
+        player.active = this.active.copy(requester, game);
+        if (requester.player.id === this.id) {
+            player.deck = this.deck.copy(requester, game);
+            player.hand = this.hand.copy(requester, game);
+            player.prizes = this.prizes.copy(requester, game);
+        } else {
+            player.deck = new Deck(game, player);
+            player.deck.addMany(requester.getBeliefDistribution(game, this.deck.count));
+            player.hand = new Hand(game, player);
+            player.hand.addMany(requester.getBeliefDistribution(game, this.hand.count));
+            player.prizes = new Location<Card>(game, player);
+            player.prizes.addMany(requester.getBeliefDistribution(game, this.prizes.count));
+        }
         return player;
     }
 };

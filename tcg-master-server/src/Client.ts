@@ -1,34 +1,18 @@
 import { Game } from "./game/Game.js";
-import { Player } from "./game/Player.js";
-import { MoveRequest } from "./game/interaction/moves/MoveRequest.js";
-import { Prompt } from "./game/interaction/prompts/Prompt.js";
+import { IToken, Token } from "./Token.js";
 
 export abstract class Client {
-    protected readonly player: Player;
-    private gameOver: boolean = false;
+    public game: Game | undefined;
+    public player_id: string | undefined;
+    public abstract name: string;
 
-    public constructor(player: Player) {
-        this.player = player;
-    }
-
-    public get game(): Game {
-        return this.player.game;
-    }
-
-    public abstract send(...parts: any[]): void;
+    public abstract send(...parts: (IToken | string)[]): void;
 
     public abstract error(message: string): void;
 
-    public abstract requestMove(request: MoveRequest): void;
+    public abstract prompt(text: string, choices: string[], force?: boolean): void;
 
-    public notify_gameOver() {
-        this.send("Game over!");
-        this.gameOver = true;
-    }
-
-    public abstract copy(player: Player): Client;
-
-    public static tokenize(...parts: any[]): Token[] {
+    public static tokenize(...parts: (IToken | string)[]): Token[] {
         const tokens: Token[] = [];
         for (const part of parts) {
             if (part instanceof Token) {
@@ -40,30 +24,10 @@ export abstract class Client {
                         tokens.push(partToken);
                     }
                 } else {
-                    tokens.push(new Token(part.toString(), part.tokenType));
+                    tokens.push(new Token(part.name ?? part.toString(), part.tokenType));
                 }
             }
         }
         return tokens;
-    }
-};
-
-export class Token {
-    public text: string;
-    public type: string | undefined;
-
-    public constructor(text: string, type: string | undefined) {
-        this.text = text;
-        this.type = type;
-    }
-
-    public setText(text: string): Token {
-        this.text = text;
-        return this;
-    }
-
-    public setType(type: string | undefined): Token {
-        this.type = type;
-        return this;
     }
 };

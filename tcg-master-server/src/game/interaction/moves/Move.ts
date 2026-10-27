@@ -1,7 +1,7 @@
 import { Player } from "../../Player.js";
-import { IMoveTarget } from "./IMoveTarget.js";
+import { GameObject } from "../../GameObject.js";
 
-export abstract class Move<T extends IMoveTarget> {
+export abstract class Move<T extends GameObject | string | null> {
     public readonly player: Player;
     public readonly target: T;
 

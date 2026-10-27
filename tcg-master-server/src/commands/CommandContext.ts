@@ -1,22 +1,20 @@
+import { Client } from "../Client.js";
 import { Game } from "../game/Game.js";
-import { Player } from "../game/Player.js";
 
 export class CommandContext {
     public name: string;
-    public readonly client: string;
+    public client: Client;
+    public readonly player_id: string;
     public readonly game: Game;
     public args: string[];
 
-    public constructor(client: string, game: Game, caller: string) {
+    public constructor(client: Client, player_id: string, game: Game, caller: string) {
         const tokens = caller.split(" ");
         this.name = tokens[0];
         this.args = tokens.slice(1);
         this.client = client;
+        this.player_id = player_id;
         this.game = game;
-    }
-
-    public get player(): Player {
-        return this.game.getPlayer(this.client)!;
     }
 
     public get text(): string {

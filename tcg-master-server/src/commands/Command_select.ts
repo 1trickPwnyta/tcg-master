@@ -6,17 +6,18 @@ export class Command_select extends Command {
     public name: string = "select";
 
     public execute(context: CommandContext): any[] | void {
-        const request = context.game.moves.getRequestedMove();
-        if (request) {
-            const target = request.choices.find(c => c.key == context.text)?.target;
-            if (target) {
-                const move = new request.type(context.player, target);
-                context.game.moves.makeMove(move);
-            } else {
-                context.player.send(new InvalidSelectionError());
+        const interrupt = context.game.getInterrupt(context.player_id);
+        if (interrupt) {
+            const num = parseInt(context.text);
+            if (!isNaN(num) && num > 0 && num <= interrupt.choices.length) {
+                context.game.resolveInterrupt(context.player_id, num - 1);
+                return;
+            } else if (context.text === "`") {
+                context.game.resolveInterrupt(context.player_id, null);
+                return;
             }
-        } else {
-            context.player.send("Please wait.");
+
+            context.client.send(new InvalidSelectionError().message);
         }
     }
 }

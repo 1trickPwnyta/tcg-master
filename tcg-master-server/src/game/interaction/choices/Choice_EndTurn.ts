@@ -1,4 +1,3 @@
-import { GamePhase } from "../../Game.js";
 import { Player } from "../../Player.js";
 
 export default (player: Player) => ({
