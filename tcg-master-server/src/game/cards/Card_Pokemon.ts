@@ -7,7 +7,7 @@ import { Card_Energy } from "./Card_Energy.js";
 import { Location } from "../Location.js";
 import { EvolutionTree } from "./EvolutionTree.js";
 import { Prompt_SelectCard } from "../interaction/prompts/Prompt_SelectCard.js";
-import { Game } from "../Game.js";
+import { GameEngine } from "../engine/GameEngine.js";
 import { Player } from "../Player.js";
 
 export abstract class Card_Pokemon extends Card {
@@ -32,7 +32,7 @@ export abstract class Card_Pokemon extends Card {
     public readonly evolutions: Location<Card_Pokemon>;
     private damagePreventionThreshold: number | null = null;
 
-    public constructor(game: Game, owner: Player) {
+    public constructor(game: GameEngine, owner: Player) {
         super(game, owner);
         this.energy = new Location<Card_Energy>(this.game, this.owner);
         this.evolutions = new Location<Card_Pokemon>(this.game, this.owner);

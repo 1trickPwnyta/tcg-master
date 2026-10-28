@@ -1,4 +1,4 @@
-import { Game } from "../../Game.js";
+import { GameEngine } from "../../engine/GameEngine.js";
 import { Player } from "../../Player.js";
 import { Choice } from "../choices/Choice.js";
 import { GameObject } from "../../GameObject.js";
@@ -35,7 +35,7 @@ export class MoveRequest<T extends GameObject | string | null> {
         }
     }
 
-    public copy(game: Game): MoveRequest<T> {
+    public copy(game: GameEngine): MoveRequest<T> {
         return new MoveRequest(this.type, game.players[this.player.id], this.prompt, this.choices);
     }
 };

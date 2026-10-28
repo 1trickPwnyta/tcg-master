@@ -1,5 +1,5 @@
 import { EnergyType } from "../EnergyType.js";
-import { Game } from "../Game.js";
+import { GameEngine } from "../engine/GameEngine.js";
 import { Player } from "../Player.js";
 import { Card } from "./Card.js";
 import { Card_Energy } from "./Card_Energy.js";
@@ -18,7 +18,7 @@ export abstract class Attack {
         this.parent = parent;
     }
 
-    public get game(): Game {
+    public get game(): GameEngine {
         return this.parent.game;
     }
 

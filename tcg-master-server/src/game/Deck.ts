@@ -1,10 +1,10 @@
 import { Card } from "./cards/Card.js";
-import { Game } from "./Game.js";
+import { GameEngine } from "./engine/GameEngine.js";
 import { Location } from "./Location.js";
 import { Player } from "./Player.js";
 
 export class Deck extends Location<Card> {
-    public fill<T extends Card>(cards: { card: new (game: Game, owner: Player) => T; qty: number }[]) {
+    public fill<T extends Card>(cards: { card: new (game: GameEngine, owner: Player) => T; qty: number }[]) {
         cards.forEach(c => {
             for (let i = 0; i < c.qty; i++) {
                 this.add(new c.card(this.game, this.owner));

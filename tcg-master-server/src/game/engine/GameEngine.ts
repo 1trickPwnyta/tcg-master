@@ -1,21 +1,28 @@
-import { Client_AI } from "../ai/Client_AI.js";
-import { GameState } from "./state/GameState.js";
-import { Interrupt, InterruptSync } from "./state/Interrupt.js";
-import { PlayerState } from "./state/PlayerState.js";
-import { CardState } from "./state/CardState.js";
-import { CardDatabase } from "./cards/CardDatabase.js";
-import { Card_Pokemon_BaseSet_Voltorb } from "./cards/BaseSet/Card_Pokemon_BaseSet_Voltorb.js";
-import { CardWorker_Pokemon } from "./cards/CardWorker_Pokemon.js";
-import { Client } from "../Client.js";
-import { IToken } from "../Token.js";
-import { InterruptResolution } from "./InterruptResolution.js";
-import { InterruptResolver } from "./InterruptResolver.js";
+import { Client_AI } from "../../ai/Client_AI.js";
+import { GameState } from "../state/GameState.js";
+import { Interrupt, InterruptSync } from "../state/Interrupt.js";
+import { PlayerState } from "../state/PlayerState.js";
+import { CardState } from "../state/CardState.js";
+import { CardDatabase } from "../cards/CardDatabase.js";
+import { CardWorker_Pokemon } from "../cards/CardWorker_Pokemon.js";
+import { Client } from "../../Client.js";
+import { IToken } from "../../IToken.js";
+import { InterruptResolver } from "../InterruptResolver.js";
+import { GameWorker_Setup } from "./GameWorker_Setup.js";
+import { GameWorker_Turn } from "./GameWorker_Turn.js";
+import { LocationState } from "../state/LocationState.js";
 
-export class Game {
-    private clients: Client[];
+export class GameEngine {
+    private readonly clients: Client[];
     private state: GameState;
 
+    private readonly setup: GameWorker_Setup;
+    private readonly turns: GameWorker_Turn;
+
     public constructor(client1?: Client, client2?: Client, options: { prizes?: number } = {}) {
+        this.setup = new GameWorker_Setup(this);
+        this.turns = new GameWorker_Turn(this);
+
         if (client1) {
             client1.game = this;
         } else {
@@ -33,29 +40,33 @@ export class Game {
             players: [
                 {
                     id: client1.player_id,
-                    tokenType: "player",
+                    token: { name: "Pikachu", type: "player" },
                     name: "Pikachu",
-                    pronouns: { objective: "they", possessive: "their" },
+                    pronouns: { subjective: "they", possessive: "their" },
                     active: { id: crypto.randomUUID(), cards: [] },
                     bench: { id: crypto.randomUUID(), cards: [] },
                     hand: { id: crypto.randomUUID(), cards: [] },
                     discard: { id: crypto.randomUUID(), cards: [] },
                     prizes: { id: crypto.randomUUID(), cards: [] },
                     deck: { id: crypto.randomUUID(), cards: [] },
-                    mulligans: 0
+                    mulligans: 0,
+                    mulliganBonusUsed: false,
+                    setupComplete: false
                 },
                 {
                     id: client2.player_id,
-                    tokenType: "player",
+                    token: { name: "COM", type: "player" },
                     name: "COM",
-                    pronouns: { objective: "they", possessive: "their" },
+                    pronouns: { subjective: "they", possessive: "their" },
                     active: { id: crypto.randomUUID(), cards: [] },
                     bench: { id: crypto.randomUUID(), cards: [] },
                     hand: { id: crypto.randomUUID(), cards: [] },
                     discard: { id: crypto.randomUUID(), cards: [] },
                     prizes: { id: crypto.randomUUID(), cards: [] },
                     deck: { id: crypto.randomUUID(), cards: [] },
-                    mulligans: 0
+                    mulligans: 0,
+                    mulliganBonusUsed: false,
+                    setupComplete: false
                 }
             ],
             turn: null,
@@ -75,56 +86,41 @@ export class Game {
         return this.state.players.find(p => p.id == player_id)!;
     }
 
-    private update() {
+    public flipCoin(player_id?: string): boolean {
+        const heads = Math.random() < 0.5;
+        if (player_id) {
+            this.send(this.getPlayer(player_id), "flipped a coin... It was", heads ? "heads" : "tails", "!");
+        } else {
+            this.send("A coin was flipped... It was", heads ? "heads" : "tails", "!");
+        }
+        return heads;
+    }
+
+    public update() {
         if (this.state.interrupt) {
             this.interrupt(this.state.interrupt);
         } else if (!this.state.turn) {
-            this.start();
+            this.setup.update();
         } else {
-            this.updateMain();
+            this.turns.update();
         }
     }
 
-    private start() {
-        this.send("Starting game between", this.state.players[0].name, "and", this.state.players[1].name, ".");
-        for (const player of this.state.players) {
-            for (let i = 0; i < 60; i++) {
-                const card: CardState = this.makeCard(CardDatabase.find(Card_Pokemon_BaseSet_Voltorb).dbid);
-                player.deck.cards.push(card);
-            }
-            this.shuffleDeck(player.id);
-            player.mulligans = this.setupDraw(player);
-        }
-        this.interrupt({
-            interrupts: this.state.players.map(p => ({
-                player: p.id,
-                prompt: "Select a basic Pokémon as your active Pokémon.",
-                choices: this.basicPokemonInHand(p.id).map(c => ({ text: c.name, target_id: c.id })),
-                resolution: InterruptResolution.MoveCard,
-                args: [ p.hand.id, p.active.id ]
-            }))
-        });
-    }
-
-    private setupDraw(player: PlayerState, mulligans: number = 0): number {
-        this.draw(player.id, 7);
-        if (this.basicPokemonInHand(player.id).length) {
-            return mulligans;
-        } else {
-            this.send(player, "has no basic Pokémon in", player.pronouns.possessive, "hand.", player.pronouns.objective.capitalizeFirst(), "must take a mulligan.");
-            this.shuffleHandIntoDeck(player.id);
-            return this.setupDraw(player, mulligans + 1);
-        }
-    }
-
-    private updateMain() {
-        
-    }
-
-    private interrupt(interrupt: Interrupt) {
-        interrupt.id = crypto.randomUUID();
+    public interrupt(interrupt: Interrupt) {
+        this.assignInterruptId(interrupt);
         this.state.interrupt = interrupt;
         this.sendInterrupt(interrupt);
+    }
+
+    private assignInterruptId(interrupt: Interrupt) {
+        if (!interrupt.id) {
+            interrupt.id = crypto.randomUUID();
+        }
+        if (interrupt.interrupts) {
+            for (const sub of interrupt.interrupts) {
+                this.assignInterruptId(sub);
+            }
+        }
     }
 
     private sendInterrupt(interrupt: Interrupt) {
@@ -138,22 +134,14 @@ export class Game {
         }
     }
 
-    public send(...parts: (IToken | string)[]) {
+    public send(...parts: any[]) {
         this.clients.forEach(c => {
             c.send(...parts);
         });
     }
 
-    private makeCard(dbid: string): CardState {
-        return {
-            id: crypto.randomUUID(),
-            dbid: dbid,
-            name: CardDatabase.find(dbid).name,
-            damage: 0,
-            poison: false,
-            orientation: "normal",
-            attachments: { id: crypto.randomUUID(), cards: [] }
-        };
+    public sendTo(player: PlayerState, ...parts: (IToken | string)[]) {
+        this.clients.find(c => c.player_id === player.id)?.send(...parts);
     }
 
     public getInterrupt(player_id: string, root?: Interrupt): InterruptSync | null {
@@ -179,7 +167,6 @@ export class Game {
             this.state.interrupt = null;
             return;
         }
-
         this.closeInterruptRecursive(interrupt_id, this.state.interrupt);
         this.cleanInterrupts(this.state.interrupt);
     }
@@ -216,6 +203,8 @@ export class Game {
         if (interrupt) {
             if (choice !== null) {
                 InterruptResolver.resolve(this, interrupt, choice);
+            } else if (interrupt.cancelResolution) {
+                InterruptResolver.cancel(this, interrupt, player_id);
             }
             this.closeInterrupt(interrupt.id!);
             this.update();
@@ -245,9 +234,11 @@ export class Game {
 
     public draw(player_id: string, amount: number = 1) {
         const player = this.getPlayer(player_id);
-        for (let i = 0; i < amount && player.deck.cards.length; i++) {
+        amount = Math.min(amount, player.deck.cards.length);
+        for (let i = 0; i < amount; i++) {
             player.hand.cards.push(player.deck.cards.pop()!);
         }
+        this.send(player, "drew", amount, `card${amount > 1 ? "s" : ""}.`)
     }
 
     public basicPokemonInHand(player_id: string): CardState[] {
@@ -259,5 +250,81 @@ export class Game {
             }
             return false;
         });
+    }
+
+    public get activePlayer(): PlayerState {
+        return this.state.players.find(p => p.id === this.state.turn!.player)!;
+    }
+
+    public get inactivePlayer(): PlayerState {
+        return this.state.players.find(p => p.id !== this.state.turn!.player)!;
+    }
+
+    public findCard(card_id: string, root?: LocationState): CardState | null {
+        if (!root) {
+            for (const player of this.state.players) {
+                for (const location of [ player.deck, player.hand, player.active, player.bench, player.discard, player.prizes ]) {
+                    const card = this.findCard(card_id, location);
+                    if (card) {
+                        return card;
+                    }
+                }
+            }
+        } else {
+            for (const card of root.cards) {
+                if (card.id === card_id) {
+                    return card;
+                } else {
+                    const sub = this.findCard(card_id, card.attachments);
+                    if (sub) {
+                        return sub;
+                    }
+                }
+            }
+        }
+
+        return null;
+    }
+
+    public getLocation(location_id: string): LocationState | null {
+        for (const player of this.state.players) {
+            for (const location of [ player.active, player.bench, player.deck, player.discard, player.hand, player.prizes ]) {
+                if (location.id === location_id) {
+                    return location;
+                }
+            }
+            for (const card of [ ...player.active.cards, ...player.bench.cards ]) {
+                if (card.attachments.id === location_id) {
+                    return card.attachments;
+                }
+            }
+        }
+        return null;
+    }
+
+    public moveCard(card_id: string, from_id: string, to_id: string) {
+        const card = this.findCard(card_id)!;
+        const from = this.getLocation(from_id)!;
+        const to = this.getLocation(to_id)!;
+        from.cards.splice(from.cards.indexOf(card), 1);
+        to.cards.push(card);
+    }
+
+    public beginTurn(player_id: string) {
+        if (this.state.turn) {
+            this.send("End of", this.activePlayer, "'s turn.");
+            this.send();
+        }
+        this.state.turn = {
+            number: (this.state.turn?.number ?? 0) + 1,
+            player: player_id,
+            energyPlayed: false
+        };
+        this.send("Beginning of", this.activePlayer, "'s turn.");
+        this.draw(player_id);
+    }
+
+    public endTurn() {
+        this.beginTurn(this.inactivePlayer.id);
     }
 };

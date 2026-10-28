@@ -1,6 +1,6 @@
 import { Client_AI } from "../../ai/Client_AI.js";
 import { Client, Token } from "../../Client.js";
-import { Game } from "../Game.js";
+import { GameEngine } from "../engine/GameEngine.js";
 import { GameObject } from "../GameObject.js";
 import { Location } from "../Location.js";
 import { Player } from "../Player.js";
@@ -24,7 +24,7 @@ export abstract class Card extends GameObject {
     public readonly owner: Player;
     public location: Location<Card> | null = null;
 
-    public constructor(game: Game, owner: Player) {
+    public constructor(game: GameEngine, owner: Player) {
         super(game);
         Card.all.push(this);
         this.owner = owner;
@@ -56,8 +56,8 @@ export abstract class Card extends GameObject {
 
     public abstract getDetails(): any[];
 
-    public override copy(_requester: Client_AI, game: Game): this {
-        const card = new (this.constructor as new (game: Game, owner: Player) => this)(game, game.players[this.owner.id]);
+    public override copy(_requester: Client_AI, game: GameEngine): this {
+        const card = new (this.constructor as new (game: GameEngine, owner: Player) => this)(game, game.players[this.owner.id]);
         if (this.location) {
             card.location = game.getObject(this.location.id) as Location<Card>;
         }

@@ -24,7 +24,7 @@ export abstract class Command {
         } catch (e) {
             if (e instanceof InvalidCommandArgumentsError) {
                 console.log(e.message);
-                context.player.error(e.message);
+                context.client.error(e.message);
             } else {
                 throw e;
             }

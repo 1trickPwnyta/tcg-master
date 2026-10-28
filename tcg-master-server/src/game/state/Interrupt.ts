@@ -5,9 +5,10 @@ export interface InterruptSync {
     interrupts?: Interrupt[];
     player: string;
     prompt: string;
-    choices: { text: string, target_id: string }[];
+    choices: Choice[];
     force?: boolean;
     resolution?: InterruptResolution;
+    cancelResolution?: InterruptResolution;
     args?: string[];
 };
 
@@ -16,8 +17,9 @@ export interface InterruptAsync {
     interrupts: Interrupt[];
     player?: string;
     prompt?: string;
-    choices?: { text: string, target_id: string }[];
+    choices?: Choice[];
     force?: boolean;
 };
 
+export type Choice = { text: string, target_id?: string, resolution?: InterruptResolution, args?: string[] };
 export type Interrupt = InterruptSync | InterruptAsync;

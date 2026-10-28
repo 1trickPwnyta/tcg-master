@@ -1,5 +1,5 @@
 export interface Turn {
     number: number;
-    player: number;
+    player: string;
     energyPlayed: boolean;
 };

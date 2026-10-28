@@ -1,11 +1,11 @@
 import { Client_AI } from "../ai/Client_AI.js";
-import { Game } from "./Game.js";
+import { GameEngine } from "./engine/GameEngine.js";
 
 export abstract class GameObject {
     public id: string = "";
-    public readonly game: Game;
+    public readonly game: GameEngine;
 
-    public constructor(game: Game) {
+    public constructor(game: GameEngine) {
         this.game = game;
         game.registerObject(this);
     }
@@ -14,11 +14,11 @@ export abstract class GameObject {
         return this.toString();
     }
 
-    public branch(requester: Client_AI, game: Game): this {
+    public branch(requester: Client_AI, game: GameEngine): this {
         const copy = this.copy(requester, game);
         game.registerObject(copy, this.id);
         return copy;
     }
 
-    protected abstract copy(requester: Client_AI, game: Game): this;
+    protected abstract copy(requester: Client_AI, game: GameEngine): this;
 };

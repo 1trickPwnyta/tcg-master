@@ -34,11 +34,11 @@ export class Input {
         Input.socket.emit("CMD", input);
     }
 
-    public static receive(tokens: { name: string, tokenType?: string }[]) {
+    public static receive(tokens: { name: string, type?: string }[]) {
         const log = $("#console");
         log.append(tokens.map(t => {
-            if (t.tokenType) {
-                return `<span class="token_${t.tokenType}">${t.name}</span>`;
+            if (t.type) {
+                return `<span class="token_${t.type}">${t.name}</span>`;
             } else {
                 return t.name;
             }

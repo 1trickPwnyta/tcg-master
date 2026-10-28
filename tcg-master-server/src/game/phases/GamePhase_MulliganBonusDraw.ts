@@ -1,11 +1,11 @@
-import { Game } from "../Game.js";
+import { GameEngine } from "../engine/GameEngine.js";
 import { Move_DrawCards } from "../interaction/moves/Move_DrawCards.js";
 import { MoveRequest } from "../interaction/moves/MoveRequest.js";
 import { GamePhase } from "./GamePhase.js";
 import { GamePhase_ActivePokemonSelection } from "./GamePhase_ActivePokemonSelection.js";
 
 export class GamePhase_MulliganBonusDraw extends GamePhase<MoveRequest<string | null>> {
-    protected override getMoveRequests(game: Game): MoveRequest<string | null>[] {
+    protected override getMoveRequests(game: GameEngine): MoveRequest<string | null>[] {
         return game.players.filter(p => game.mulligansTaken[p.opponent.id]).map(p => new MoveRequest(
             Move_DrawCards,
             p,
@@ -14,7 +14,7 @@ export class GamePhase_MulliganBonusDraw extends GamePhase<MoveRequest<string | 
         ));
     }
 
-    public override evaluate(game: Game): GamePhase<any> {
+    public override evaluate(game: GameEngine): GamePhase<any> {
         if (this.playersPending.length) {
             return this;
         } else {

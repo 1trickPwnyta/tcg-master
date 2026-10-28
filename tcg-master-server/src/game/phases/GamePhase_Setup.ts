@@ -1,14 +1,14 @@
-import { Game } from "../Game.js";
+import { GameEngine } from "../engine/GameEngine.js";
 import { Player } from "../Player.js";
 import { GamePhase } from "./GamePhase.js";
 import { GamePhase_MulliganBonusDraw } from "./GamePhase_MulliganBonusDraw.js";
 
 export class GamePhase_Setup extends GamePhase<never> {
-    protected override getMoveRequests(_game: Game): never[] {
+    protected override getMoveRequests(_game: GameEngine): never[] {
         return [];
     }
 
-    public override evaluate(game: Game): GamePhase<any> {
+    public override evaluate(game: GameEngine): GamePhase<any> {
         for (const player of game.players) {
             player.send("Welcome!");
             player.deck.shuffle();

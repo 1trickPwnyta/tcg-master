@@ -1,3 +1,8 @@
 export enum InterruptResolution {
-    MoveCard
+     PlayCard
+    ,MoveCard
+    ,AttachEnergy
+    ,Attack
+    ,EndTurn
+    ,CompleteSetup
 };

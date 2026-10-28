@@ -1,13 +1,13 @@
-import { Game } from "../Game.js";
+import { GameEngine } from "../engine/GameEngine.js";
 import { GameObject } from "../GameObject.js";
 import { Move } from "../interaction/moves/Move.js";
 import { MoveRequest } from "../interaction/moves/MoveRequest.js";
 import { Player } from "../Player.js";
 
 export abstract class GamePhase<T extends MoveRequest<any>> {
-    private game: Game;
+    private game: GameEngine;
 
-    public constructor(game: Game) {
+    public constructor(game: GameEngine) {
         this.game = game;
     }
 
@@ -33,11 +33,11 @@ export abstract class GamePhase<T extends MoveRequest<any>> {
         }
     }
 
-    protected abstract getMoveRequests(game: Game): T[];
+    protected abstract getMoveRequests(game: GameEngine): T[];
 
-    public abstract evaluate(game: Game): GamePhase<any>;
+    public abstract evaluate(game: GameEngine): GamePhase<any>;
 
-    public copy(game: Game): GamePhase<T> {
-        return new (this.constructor as new (game: Game) => this)(game);
+    public copy(game: GameEngine): GamePhase<T> {
+        return new (this.constructor as new (game: GameEngine) => this)(game);
     }
 };

@@ -1,12 +1,12 @@
-import { CardState } from "./CardState.js";
+import { IToken } from "../../IToken.js";
 import { LocationState } from "./LocationState.js";
 
 export interface PlayerState {
     id: string;
-    tokenType: string;
+    token: IToken;
     name: string;
     pronouns: {
-        objective: string;
+        subjective: string;
         possessive: string;
     };
     active: LocationState;
@@ -16,4 +16,6 @@ export interface PlayerState {
     prizes: LocationState;
     deck: LocationState;
     mulligans: number;
+    mulliganBonusUsed: boolean;
+    setupComplete: boolean;
 };

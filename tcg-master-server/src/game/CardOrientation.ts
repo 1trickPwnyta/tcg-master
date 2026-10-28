@@ -1,5 +1,5 @@
 import { Card_Pokemon } from "./cards/Card_Pokemon.js";
-import { Game } from "./Game.js";
+import { GameEngine } from "./engine/GameEngine.js";
 
 export abstract class CardOrientation {
     public static readonly Normal: CardOrientation = new class extends CardOrientation {

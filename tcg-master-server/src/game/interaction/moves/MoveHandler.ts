@@ -1,4 +1,4 @@
-import { Game } from "../../Game.js";
+import { GameEngine } from "../../engine/GameEngine.js";
 import { Player } from "../../Player.js";
 import { GameObject } from "../../GameObject.js";
 import { Move } from "./Move.js";
@@ -6,10 +6,10 @@ import { MoveRequest } from "./MoveRequest.js";
 import { MoveTarget_Cancel } from "./MoveTarget_Cancel.js";
 
 export class MoveHandler {
-    private readonly game: Game;
+    private readonly game: GameEngine;
     public readonly requestedMove: Map<Player, MoveRequest<any>> = new Map<Player, MoveRequest<any>>();
 
-    public constructor(game: Game) {
+    public constructor(game: GameEngine) {
         this.game = game;
     }
 
@@ -65,7 +65,7 @@ export class MoveHandler {
         }
     }
 
-    public copy(game: Game): MoveHandler {
+    public copy(game: GameEngine): MoveHandler {
         const moves = new MoveHandler(game);
         for (const player of this.requestedMove.keys()) {
             moves.requestedMove.set(game.players[player.id], this.requestedMove.get(player)!.copy(game));

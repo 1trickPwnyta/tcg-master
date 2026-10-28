@@ -1,24 +1,23 @@
 import { Client } from "../Client.js";
 import { Card_Pokemon_BaseSet_Staryu } from "../game/cards/BaseSet/Card_Pokemon_BaseSet_Staryu.js";
 import { Card } from "../game/cards/Card.js";
-import { Game } from "../game/Game.js";
+import { GameEngine } from "../game/engine/GameEngine.js";
 import { Player } from "../game/Player.js";
-import { IToken, Token } from "../Token.js";
 import { AIPlanner } from "./AIPlanner.js";
 
 export class Client_AI extends Client {
     public override name: string = "COM";
     public planner: AIPlanner | null = null;
-    private witnessedCards: Map<(new (game: Game, owner: Player) => Card), number> = new Map<(new (game: Game, owner: Player) => Card), number>();
+    private witnessedCards: Map<(new (game: GameEngine, owner: Player) => Card), number> = new Map<(new (game: GameEngine, owner: Player) => Card), number>();
     public readonly depth: number;
 
-    public constructor(game: Game, depth: number = 0) {
+    public constructor(game: GameEngine, depth: number = 0) {
         super();
         this.game = game;
         this.depth = depth;
     }
 
-    public override send(...parts: (IToken | string)[]): void {
+    public override send(...parts: any[]): void {
         console.log(Client.tokenize(...parts).map(t => t.name).join(" "));
     }
 
@@ -28,6 +27,10 @@ export class Client_AI extends Client {
 
     public override prompt(text: string, choices: string[], force: boolean = false) {
         console.log(`${text} [ ${choices.join(", ")}${!force ? ", (cancel)" : ""} ]`);
+        const choice = Math.floor(Math.random() * choices.length);
+        const finalChoice = !force && Math.random() < 0.1 ? null : choice;
+        console.log(`> ${finalChoice ?? "(cancel)"}`);
+        this.game!.resolveInterrupt(this.player_id!, finalChoice);
     }
 
     public witness(player: Player, card: Card) {
@@ -36,7 +39,7 @@ export class Client_AI extends Client {
         }
     }
 
-    public getBeliefDistribution(game: Game, amount: number): Card[] {
+    public getBeliefDistribution(game: GameEngine, amount: number): Card[] {
         const totalWitnessed = this.witnessedCards.values().reduce((sum, value) => sum + value, 0);
         const cards: Card[] = [];
 

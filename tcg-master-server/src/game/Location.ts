@@ -1,7 +1,7 @@
 import { Client_AI } from "../ai/Client_AI.js";
 import { Token } from "../Client.js";
 import { Card } from "./cards/Card.js";
-import { Game } from "./Game.js";
+import { GameEngine } from "./engine/GameEngine.js";
 import { GameObject } from "./GameObject.js";
 import { Player } from "./Player.js";
 
@@ -9,7 +9,7 @@ export class Location<T extends Card> extends GameObject {
     public readonly owner: Player;
     private _cards: T[] = [];
 
-    public constructor(game: Game, owner: Player) {
+    public constructor(game: GameEngine, owner: Player) {
         super(game);
         this.owner = owner;
     }
@@ -74,8 +74,8 @@ export class Location<T extends Card> extends GameObject {
         return Card.cardTokens(this.cards);
     }
 
-    public copy(requester: Client_AI, game: Game): this {
-        const location = new (this.constructor as new (game: Game, owner: Player) => this)(game, game.players[this.owner.id]);
+    public copy(requester: Client_AI, game: GameEngine): this {
+        const location = new (this.constructor as new (game: GameEngine, owner: Player) => this)(game, game.players[this.owner.id]);
         location._cards = this.cards.map(c => c.copy(requester, game));
         return location;
     }

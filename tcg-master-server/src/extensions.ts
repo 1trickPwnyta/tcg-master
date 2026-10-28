@@ -1,10 +1,8 @@
-import { Token } from "./Token.js";
+import { IToken } from "./IToken.js";
 
 declare global {
     interface Object {
-        readonly name: string;
-        readonly tokenType: string;
-        readonly tokens: Token[];
+        readonly token: IToken;
     }
 
     interface String {

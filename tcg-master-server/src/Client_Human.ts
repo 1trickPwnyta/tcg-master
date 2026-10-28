@@ -2,7 +2,7 @@ import { Socket } from "socket.io";
 import { Client } from "./Client.js";
 import { CommandContext } from "./commands/CommandContext.js";
 import { Command, CommandNotFoundError } from "./commands/Command.js";
-import { IToken, Token } from "./Token.js";
+import { IToken } from "./IToken.js";
 
 export class Client_Human extends Client {
     public override name: string = "Pikachu";
@@ -19,7 +19,7 @@ export class Client_Human extends Client {
                 const context = new CommandContext(this, this.player_id!, this.game!, command);
                 const response = Command.execute(context);
                 if (response !== undefined) {
-                    console.log(`Command ${context.name} responded: ${response.join(" ")}`);
+                    console.log(`Command ${context.name} responded: ${Client.tokenize(...response).map(t => t.name).join(" ")}`);
                     socket.emit("MSG", Client.tokenize(...response));
                 }
             } catch (e) {
@@ -37,7 +37,7 @@ export class Client_Human extends Client {
         });
     }
 
-    public send(...parts: (IToken | string)[]) {
+    public send(...parts: any[]) {
         this.socket.emit("MSG", Client.tokenize(...parts));
     }
 

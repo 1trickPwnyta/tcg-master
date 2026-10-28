@@ -2,6 +2,7 @@ import express from "express";
 import { createServer } from "http";
 import cors from "cors";
 import "./extensions.js";
+import "./loader.js"
 import { Input } from "./Input.js";
 
 const corsConfig = {

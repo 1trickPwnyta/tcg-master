@@ -1,6 +1,6 @@
 import { Server as HttpServer } from "http";
 import { Server, Socket } from "socket.io";
-import { Game } from "./game/Game.js";
+import { GameEngine } from "./game/engine/GameEngine.js";
 import { Command } from "./commands/Command.js";
 import { Command_check } from "./commands/Command_check.js";
 import { Command_select } from "./commands/Command_select.js";
@@ -19,7 +19,7 @@ export class Input {
 
         io.on("connection", (socket: Socket) => {
             console.log(`Client connected: ${socket.id}`);
-            new Game(new Client_Human(socket));
+            new GameEngine(new Client_Human(socket));
         });
     }
 };

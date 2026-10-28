@@ -1,7 +1,7 @@
 import { Card } from "./cards/Card.js";
 import { Deck } from "./Deck.js";
 import { Client } from "../Client.js";
-import { Game } from "./Game.js";
+import { GameEngine } from "./engine/GameEngine.js";
 import { Pronoun } from "../users/Pronoun.js";
 import { Prompt } from "./interaction/prompts/Prompt.js";
 import { Location } from "./Location.js";
@@ -17,7 +17,7 @@ import { MoveRequest } from "./interaction/moves/MoveRequest.js";
 import { Client_AI } from "../ai/Client_AI.js";
 
 export class Player {
-    public static new(game: Game, name: string): Player {
+    public static new(game: GameEngine, name: string): Player {
         const player: Player = new Player(game, name);
         player.deck = new Deck(game, player);
         player.deck.fill<Card>([
@@ -35,7 +35,7 @@ export class Player {
         objective: "they",
         possessive: "their"
     };
-    public game: Game;
+    public game: GameEngine;
     public client: Client | undefined;
 
     public deck!: Deck;
@@ -48,7 +48,7 @@ export class Player {
     private promptStack: Prompt[] = [];
     private _lastPrompt: Prompt | null = null;
 
-    private constructor(game: Game, name: string) {
+    private constructor(game: GameEngine, name: string) {
         this.game = game;
         this.name = name;
         this.hand = new Hand(this.game, this);
@@ -153,7 +153,7 @@ export class Player {
         return this.name;
     }
 
-    public copy(requester: Client_AI, game: Game): Player {
+    public copy(requester: Client_AI, game: GameEngine): Player {
         const player = new Player(game, this.name);
         player.pronoun = this.pronoun;
         player.client = this.client?.copy(player, requester.depth + 1);
