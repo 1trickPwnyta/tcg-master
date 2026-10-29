@@ -6,5 +6,7 @@ export interface GameState {
     players: PlayerState[];
     turn: Turn | null;
     interrupt: Interrupt | null;
+    interruptStack: Interrupt[];
     rules: { prizes: number };
+    winner_id?: string;
 };

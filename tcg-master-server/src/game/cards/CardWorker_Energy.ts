@@ -16,9 +16,10 @@ export abstract class CardWorker_Energy extends CardWorker {
         return { name: `${symbol}${this.basic ? "Energy" : this.name}`, type: "energy" };
     }
 
-    public override play(context: PlayContext) {
+    public override play(context: PlayContext): boolean {
         if (context.state.turn?.energyPlayed) {
-            context.game.send("You already played an Energy card this turn.");
+            context.game.sendError(context.game.activePlayer, "You already played an Energy card this turn.");
+            return false;
         } else {
             context.game.interrupt({
                 player: context.game.activePlayer.id,
@@ -30,6 +31,7 @@ export abstract class CardWorker_Energy extends CardWorker {
                 resolution: InterruptResolution.AttachEnergy,
                 args: [ context.card.id ]
             });
+            return true;
         }
     }
 };

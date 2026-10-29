@@ -11,8 +11,6 @@ globalThis.formSubmit = (e: Event) => {
     const input = form.find("input[type=\"text\"]").val() as string;
     form.trigger("reset");
     Input.send(input.trim());
-    $("#prompt").text("Please stand by...");
-    $("#choices").html("");
 };
 
 $("#input")[0].focus();
@@ -24,6 +22,7 @@ export class Input {
         Input.socket.on("MSG", Input.receive);
         Input.socket.on("ERR", Input.receive);
         Input.socket.on("ASK", Input.prompt);
+        Input.socket.on("WAIT", Input.wait)
         Input.socket.on("NEW", () => $("#console").empty());
     }
 
@@ -50,5 +49,10 @@ export class Input {
     public static prompt(prompt: { text: string, choices: string[] }) {
         $("#prompt").text(prompt.text);
         $("#choices").html(prompt.choices.join("<br />"));
+    }
+
+    public static wait() {
+        $("#prompt").text("Please stand by...");
+        $("#choices").html("");
     }
 };

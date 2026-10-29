@@ -9,10 +9,10 @@ import { Card_Pokemon } from "./cards/Card_Pokemon.js";
 import { Location_Single } from "./Location_Single.js";
 import { Hand } from "./Hand.js";
 import { Bench } from "./Bench.js";
-import { Card_Trainer_BaseSet_Switch } from "./cards/BaseSet/Card_Trainer_BaseSet_Switch.js";
-import { Card_Pokemon_BaseSet_Starmie } from "./cards/BaseSet/Card_Pokemon_BaseSet_Starmie.js";
-import { Card_Pokemon_BaseSet_Staryu } from "./cards/BaseSet/Card_Pokemon_BaseSet_Staryu.js";
-import { Card_Energy_BaseSet_WaterEnergy } from "./cards/BaseSet/Card_Energy_BaseSet_WaterEnergy.js";
+import { Card_Trainer_BaseSet_Switch } from "./cards/workers/BaseSet/Card_Trainer_BaseSet_Switch.js";
+import { Card_Pokemon_BaseSet_Starmie } from "./cards/workers/BaseSet/Card_Pokemon_BaseSet_Starmie.js";
+import { Card_Pokemon_BaseSet_Staryu } from "./cards/workers/BaseSet/Card_Pokemon_BaseSet_Staryu.js";
+import { Card_Energy_BaseSet_WaterEnergy } from "./cards/workers/BaseSet/Card_Energy_BaseSet_WaterEnergy.js";
 import { MoveRequest } from "./interaction/moves/MoveRequest.js";
 import { Client_AI } from "../ai/Client_AI.js";
 

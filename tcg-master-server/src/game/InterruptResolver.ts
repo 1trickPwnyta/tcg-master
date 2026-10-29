@@ -11,12 +11,12 @@ export function ResolvesInterrupt(resolution: InterruptResolution) {
 };
 
 export class InterruptResolver {
-    public static resolve(game: GameEngine, interrupt: InterruptSync, choice: number) {
+    public static resolve(game: GameEngine, interrupt: InterruptSync, choice: number): boolean {
         const key = interrupt.choices[choice].resolution ?? interrupt.resolution!;
         const worker = workers.get(key);
         if (worker) {
             const target = interrupt.choices[choice].target_id;
-            worker.execute({ game: game, state: game.getState() }, target ?? null, ...(interrupt.choices[choice].args ?? interrupt.args ?? []));
+            return worker.execute({ game: game, state: game.getState() }, target ?? null, ...(interrupt.choices[choice].args ?? interrupt.args ?? []));
         } else {
             throw new Error(`No worker for ${key}.`);
         }

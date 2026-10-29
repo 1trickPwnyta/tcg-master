@@ -3,6 +3,10 @@ export enum InterruptResolution {
     ,MoveCard
     ,AttachEnergy
     ,Attack
+    ,Retreat
     ,EndTurn
-    ,CompleteSetup
+    ,Promote
+    ,UseMulliganBonus
+    ,SkipMulliganBonus
+    ,SkipBench
 };

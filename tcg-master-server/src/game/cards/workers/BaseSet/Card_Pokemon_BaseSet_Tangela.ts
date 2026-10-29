@@ -1,8 +1,8 @@
-import { CardOrientation } from "../../CardOrientation.js";
-import { EnergyType } from "../../EnergyType.js";
-import { Attack } from "../Attack.js";
-import { Card_Pokemon, EvolutionStage } from "../Card_Pokemon.js";
-import { EvolutionTree } from "../EvolutionTree.js";
+import { CardOrientation } from "../../../CardOrientation.js";
+import { EnergyType } from "../../../EnergyType.js";
+import { Attack } from "../../Attack.js";
+import { Card_Pokemon, EvolutionStage } from "../../Card_Pokemon.js";
+import { EvolutionTree } from "../../EvolutionTree.js";
 
 export class Card_Pokemon_BaseSet_Tangela extends Card_Pokemon {
     public override readonly name: string = "Tangela";

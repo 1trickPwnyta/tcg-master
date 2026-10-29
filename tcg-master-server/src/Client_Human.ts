@@ -3,6 +3,7 @@ import { Client } from "./Client.js";
 import { CommandContext } from "./commands/CommandContext.js";
 import { Command, CommandNotFoundError } from "./commands/Command.js";
 import { IToken } from "./IToken.js";
+import { Choice } from "./game/state/Interrupt.js";
 
 export class Client_Human extends Client {
     public override name: string = "Pikachu";
@@ -41,12 +42,12 @@ export class Client_Human extends Client {
         this.socket.emit("MSG", Client.tokenize(...parts));
     }
 
-    public error(message: string) {
-        this.socket.emit("ERR", message);
+    public error(...parts: any[]) {
+        this.socket.emit("ERR", Client.tokenize(...parts));
     }
 
-    public override prompt(text: string, choices: string[], force: boolean = false) {
-        const userChoices = choices.map((c, i) => `[${i + 1}] ${c}`);
+    public override prompt(text: string, choices: Choice[], force: boolean = false) {
+        const userChoices = choices.map((c, i) => `[${i + 1}] ${c.text}`);
         if (!force) {
             userChoices.push("[`] (cancel)");
         }
@@ -54,5 +55,9 @@ export class Client_Human extends Client {
             text: text,
             choices: userChoices
         });
+    }
+
+    public override wait() {
+        this.socket.emit("WAIT");
     }
 };

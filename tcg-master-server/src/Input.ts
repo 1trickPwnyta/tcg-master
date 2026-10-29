@@ -5,7 +5,6 @@ import { Command } from "./commands/Command.js";
 import { Command_check } from "./commands/Command_check.js";
 import { Command_select } from "./commands/Command_select.js";
 import { Client_Human } from "./Client_Human.js";
-import { Client_AI } from "./ai/Client_AI.js";
 
 export class Input {
     static {

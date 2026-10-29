@@ -1,5 +1,5 @@
-import { EnergyType } from "../../EnergyType.js";
-import { Card_Energy } from "../Card_Energy.js";
+import { EnergyType } from "../../../EnergyType.js";
+import { Card_Energy } from "../../Card_Energy.js";
 
 export class Card_Energy_BaseSet_GrassEnergy extends Card_Energy {
     public override readonly name: string = "Grass Energy";

@@ -1,18 +1,16 @@
 import { CardWorker } from "./CardWorker.js";
 
-export class CardDatabase {
-    private static readonly workers: Map<string, CardWorker> = new Map<string, CardWorker>();
+const workers = new Map<string, CardWorker>();
+export function Card(dbid: string) {
+    return (worker: new () => CardWorker) => {
+        const instance = new worker();
+        instance.dbid = dbid;
+        workers.set(dbid, instance);
+    };
+};
 
-    public static find<T extends CardWorker>(card: (new (...args: any[]) => T) | string): T {
-        if (typeof card === "string") {
-            return CardDatabase.workers.values().find(w => w.dbid === card) as T;
-        } else {
-            const type = card as new (...args: any[]) => T;
-            const key = type.name;
-            if (!CardDatabase.workers.has(key)) {
-                CardDatabase.workers.set(key, new type());
-            }
-            return CardDatabase.workers.get(key) as T;
-        }
+export class CardDatabase {
+    public static find<T extends CardWorker>(dbid: string): T {
+        return workers.values().find(w => w.dbid === dbid) as T;
     }
 };

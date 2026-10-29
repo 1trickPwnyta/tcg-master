@@ -1,12 +1,12 @@
-import { CardOrientation } from "../../CardOrientation.js";
-import { EnergyType } from "../../EnergyType.js";
-import { Attack } from "../Attack.js";
-import { Card } from "../Card.js";
-import { Card_Energy } from "../Card_Energy.js";
-import { Card_Pokemon, EvolutionStage } from "../Card_Pokemon.js";
-import { EvolutionTree } from "../EvolutionTree.js";
-import { ITargeter } from "../ITargeter.js";
-import { TargetSelector } from "../TargetSelector.js";
+import { CardOrientation } from "../../../CardOrientation.js";
+import { EnergyType } from "../../../EnergyType.js";
+import { Attack } from "../../Attack.js";
+import { Card } from "../../Card.js";
+import { Card_Energy } from "../../Card_Energy.js";
+import { Card_Pokemon, EvolutionStage } from "../../Card_Pokemon.js";
+import { EvolutionTree } from "../../EvolutionTree.js";
+import { ITargeter } from "../../ITargeter.js";
+import { TargetSelector } from "../../TargetSelector.js";
 
 export class Card_Pokemon_BaseSet_Starmie extends Card_Pokemon {
     public override readonly name: string = "Starmie";

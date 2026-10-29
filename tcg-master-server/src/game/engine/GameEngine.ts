@@ -11,6 +11,7 @@ import { InterruptResolver } from "../InterruptResolver.js";
 import { GameWorker_Setup } from "./GameWorker_Setup.js";
 import { GameWorker_Turn } from "./GameWorker_Turn.js";
 import { LocationState } from "../state/LocationState.js";
+import { Client_HumanSimulator } from "../../ai/Client_HumanSimulator.js";
 
 export class GameEngine {
     private readonly clients: Client[];
@@ -19,36 +20,38 @@ export class GameEngine {
     private readonly setup: GameWorker_Setup;
     private readonly turns: GameWorker_Turn;
 
-    public constructor(client1?: Client, client2?: Client, options: { prizes?: number } = {}) {
+    public constructor(client1?: Client, client2?: Client, options: { prizes?: number } = {}, clonedState?: GameState) {
         this.setup = new GameWorker_Setup(this);
         this.turns = new GameWorker_Turn(this);
 
         if (client1) {
             client1.game = this;
         } else {
-            client1 = new Client_AI(this);
+            client1 = new Client_AI();
+            client1.game = this;
         }
         if (client2) {
             client2.game = this;
         } else {
-            client2 = new Client_AI(this);
+            client2 = new Client_AI();
+            client2.game = this;
         }
         this.clients = [ client1, client2 ];
-        client1.player_id = crypto.randomUUID();
-        client2.player_id = crypto.randomUUID();
-        this.state = {
+        client1.player_id = client1.player_id ?? crypto.randomUUID();
+        client2.player_id = client2.player_id ?? clonedState?.players.find(p => p.id !== client1.player_id)?.id ?? crypto.randomUUID();
+        this.state = clonedState ?? {
             players: [
                 {
                     id: client1.player_id,
                     token: { name: "Pikachu", type: "player" },
                     name: "Pikachu",
                     pronouns: { subjective: "they", possessive: "their" },
-                    active: { id: crypto.randomUUID(), cards: [] },
-                    bench: { id: crypto.randomUUID(), cards: [] },
-                    hand: { id: crypto.randomUUID(), cards: [] },
-                    discard: { id: crypto.randomUUID(), cards: [] },
-                    prizes: { id: crypto.randomUUID(), cards: [] },
-                    deck: { id: crypto.randomUUID(), cards: [] },
+                    active: { id: crypto.randomUUID(), name: "Pikachu's active", cards: [] },
+                    bench: { id: crypto.randomUUID(), name: "Pikachu's bench", cards: [] },
+                    hand: { id: crypto.randomUUID(), name: "Pikachu's hand", cards: [] },
+                    discard: { id: crypto.randomUUID(), name: "Pikachu's discard", cards: [] },
+                    prizes: { id: crypto.randomUUID(), name: "Pikachu's prizes", cards: [] },
+                    deck: { id: crypto.randomUUID(), name: "Pikachu's deck", cards: [] },
                     mulligans: 0,
                     mulliganBonusUsed: false,
                     setupComplete: false
@@ -58,12 +61,12 @@ export class GameEngine {
                     token: { name: "COM", type: "player" },
                     name: "COM",
                     pronouns: { subjective: "they", possessive: "their" },
-                    active: { id: crypto.randomUUID(), cards: [] },
-                    bench: { id: crypto.randomUUID(), cards: [] },
-                    hand: { id: crypto.randomUUID(), cards: [] },
-                    discard: { id: crypto.randomUUID(), cards: [] },
-                    prizes: { id: crypto.randomUUID(), cards: [] },
-                    deck: { id: crypto.randomUUID(), cards: [] },
+                    active: { id: crypto.randomUUID(), name: "COM's active", cards: [] },
+                    bench: { id: crypto.randomUUID(), name: "COM's bench", cards: [] },
+                    hand: { id: crypto.randomUUID(), name: "COM's hand", cards: [] },
+                    discard: { id: crypto.randomUUID(), name: "COM's discard", cards: [] },
+                    prizes: { id: crypto.randomUUID(), name: "COM's prizes", cards: [] },
+                    deck: { id: crypto.randomUUID(), name: "COM's deck", cards: [] },
                     mulligans: 0,
                     mulliganBonusUsed: false,
                     setupComplete: false
@@ -71,15 +74,22 @@ export class GameEngine {
             ],
             turn: null,
             interrupt: null,
+            interruptStack: [],
             rules: {
                 prizes: options.prizes ?? 6
             }
         };
-        this.update();
+        if (!clonedState) {
+            this.update();
+        }
     }
 
     public getState(): GameState {
         return this.state;
+    }
+
+    public getClient(player_id: string): Client {
+        return this.clients.find(c => c.player_id === player_id)!;
     }
 
     public getPlayer(player_id: string): PlayerState {
@@ -96,20 +106,31 @@ export class GameEngine {
         return heads;
     }
 
-    public update() {
-        if (this.state.interrupt) {
-            this.interrupt(this.state.interrupt);
-        } else if (!this.state.turn) {
-            this.setup.update();
-        } else {
-            this.turns.update();
+    public update(callback?: () => void) {
+        if (!this.state.winner_id) {
+            if (this.state.interrupt) {
+                this.interrupt(this.state.interrupt, callback);
+            } else if (this.state.interruptStack.length) {
+                this.interrupt(this.state.interruptStack.pop()!, callback);
+            } else if (!this.state.turn) {
+                this.setup.update(callback);
+            } else {
+                this.turns.update(callback);
+            }
         }
     }
 
-    public interrupt(interrupt: Interrupt) {
+    public interrupt(interrupt: Interrupt, callback?: () => void) {
         this.assignInterruptId(interrupt);
         this.state.interrupt = interrupt;
-        this.sendInterrupt(interrupt);
+        this.sendInterrupt(interrupt, callback);
+    }
+
+    public stackInterrupt(interrupt: Interrupt) {
+        if (this.state.interrupt) {
+            this.state.interruptStack.push(this.state.interrupt);
+        }
+        this.interrupt(interrupt);
     }
 
     private assignInterruptId(interrupt: Interrupt) {
@@ -123,25 +144,29 @@ export class GameEngine {
         }
     }
 
-    private sendInterrupt(interrupt: Interrupt) {
+    private sendInterrupt(interrupt: Interrupt, callback?: () => void) {
         if (interrupt.interrupts?.length) {
             for (const sub of interrupt.interrupts) {
-                this.sendInterrupt(sub);
+                this.sendInterrupt(sub, callback);
             }
         } else {
             this.clients.find(c => c.player_id === interrupt.player)!
-                .prompt(interrupt.prompt!, interrupt.choices!.map(c => c.text), interrupt.force);
+                .prompt(interrupt.prompt!, interrupt.choices!, interrupt.force, callback);
         }
     }
 
     public send(...parts: any[]) {
-        this.clients.forEach(c => {
-            c.send(...parts);
-        });
+        if (!this.state.winner_id) {
+            for (const client of this.clients) {
+                client.send(...parts);
+            }
+        }
     }
 
-    public sendTo(player: PlayerState, ...parts: (IToken | string)[]) {
-        this.clients.find(c => c.player_id === player.id)?.send(...parts);
+    public sendError(player: PlayerState, ...parts: (IToken | string)[]) {
+        if (!this.state.winner_id) {
+            this.clients.find(c => c.player_id === player.id)?.error(...parts);
+        }
     }
 
     public getInterrupt(player_id: string, root?: Interrupt): InterruptSync | null {
@@ -198,16 +223,20 @@ export class GameEngine {
         }
     }
 
-    public resolveInterrupt(player_id: string, choice: number | null) {
+    public resolveInterrupt(player_id: string, choice: number | null, callback?: () => void) {
         const interrupt = this.getInterrupt(player_id);
         if (interrupt) {
+            let resolved = true;
             if (choice !== null) {
-                InterruptResolver.resolve(this, interrupt, choice);
+                resolved = InterruptResolver.resolve(this, interrupt, choice);
             } else if (interrupt.cancelResolution) {
                 InterruptResolver.cancel(this, interrupt, player_id);
             }
-            this.closeInterrupt(interrupt.id!);
-            this.update();
+            if (resolved) {
+                this.closeInterrupt(interrupt.id!);
+            }
+            this.getClient(player_id).wait();
+            this.update(callback);
         } else {
             throw new Error(`No interrupt found for player ${player_id}.`)
         }
@@ -241,6 +270,15 @@ export class GameEngine {
         this.send(player, "drew", amount, `card${amount > 1 ? "s" : ""}.`)
     }
 
+    public takePrize(player_id: string) {
+        const player = this.getPlayer(player_id);
+        player.hand.cards.push(player.prizes.cards.pop()!);
+        this.send(player, "took a prize.");
+        if (player.prizes.cards.length <= 0) {
+            this.endGame(player_id);
+        }
+    }
+
     public basicPokemonInHand(player_id: string): CardState[] {
         const player = this.getPlayer(player_id);
         return player.hand.cards.filter(c => {
@@ -263,7 +301,7 @@ export class GameEngine {
     public findCard(card_id: string, root?: LocationState): CardState | null {
         if (!root) {
             for (const player of this.state.players) {
-                for (const location of [ player.deck, player.hand, player.active, player.bench, player.discard, player.prizes ]) {
+                for (const location of [ player.active, player.bench, player.hand, player.discard, player.prizes, player.deck ]) {
                     const card = this.findCard(card_id, location);
                     if (card) {
                         return card;
@@ -272,6 +310,9 @@ export class GameEngine {
             }
         } else {
             for (const card of root.cards) {
+                if (!card) {
+                    console.log(root.name);
+                }
                 if (card.id === card_id) {
                     return card;
                 } else {
@@ -318,13 +359,23 @@ export class GameEngine {
         this.state.turn = {
             number: (this.state.turn?.number ?? 0) + 1,
             player: player_id,
-            energyPlayed: false
+            energyPlayed: false,
+            attacked: false
         };
         this.send("Beginning of", this.activePlayer, "'s turn.");
         this.draw(player_id);
     }
 
     public endTurn() {
+        for (const client of this.clients) {
+            client.notify_endOfTurn();
+        }
         this.beginTurn(this.inactivePlayer.id);
+    }
+
+    public endGame(winner_id: string) {
+        const winner = this.getPlayer(winner_id);
+        this.send(winner, "has no more prizes left.", winner, "wins!");
+        this.state.winner_id = winner_id;
     }
 };

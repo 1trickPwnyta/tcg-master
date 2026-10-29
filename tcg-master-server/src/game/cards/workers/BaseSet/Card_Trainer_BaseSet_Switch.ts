@@ -1,8 +1,8 @@
-import { Card } from "../Card.js";
-import { Card_Pokemon } from "../Card_Pokemon.js";
-import { Card_Trainer } from "../Card_Trainer.js";
-import { ITargeter } from "../ITargeter.js";
-import { TargetSelector } from "../TargetSelector.js";
+import { Card } from "../../Card.js";
+import { Card_Pokemon } from "../../Card_Pokemon.js";
+import { Card_Trainer } from "../../Card_Trainer.js";
+import { ITargeter } from "../../ITargeter.js";
+import { TargetSelector } from "../../TargetSelector.js";
 
 export class Card_Trainer_BaseSet_Switch extends Card_Trainer implements ITargeter<Card_Pokemon> {
     public override readonly name: string = "Switch";

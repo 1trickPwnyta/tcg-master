@@ -5,7 +5,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "nodemon --watch src -e ts --exec tsx src/index.ts"
+    "dev": "nodemon --watch src -e ts --exec \"tsx --inspect src/index.ts\""
   },
   "author": "1trickPwnyta",
   "license": "ISC",
