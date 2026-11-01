@@ -7,7 +7,7 @@ import { PlayerState } from "../state/PlayerState.js";
 import { GameWorker } from "./GameWorker.js";
 
 export class GameWorker_Setup extends GameWorker {
-    public update(callback?: () => void) {
+    public update() {
         if (this.state.players.find(p => p.deck.cards.length === 0)) {
             this.game.send("Starting game between", this.state.players[0], "and", this.state.players[1], ".");
             for (const player of this.state.players) {
@@ -24,7 +24,7 @@ export class GameWorker_Setup extends GameWorker {
                 this.game.shuffleDeck(player.id);
                 player.mulligans = this.setupDraw(player);
             }
-            this.game.update(callback);
+            this.game.update();
         } else if (this.state.players.find(p => p.mulligans && !this.state.players.find(o => o.id !== p.id)!.mulliganBonusUsed)) {
             this.game.interrupt({
                 interrupts: this.state.players.map((p): Interrupt | undefined => {
@@ -42,7 +42,7 @@ export class GameWorker_Setup extends GameWorker {
                         return undefined;
                     }
                 }).filter(i => i !== undefined)
-            }, callback);
+            });
         } else if (this.state.players.find(p => !p.active.cards.length)) {
             this.game.interrupt({
                 interrupts: this.state.players.map(p => ({
@@ -53,7 +53,7 @@ export class GameWorker_Setup extends GameWorker {
                     args: [ p.hand.id, p.active.id ],
                     force: true
                 }))
-            }, callback);
+            });
         } else {
             const playersNotReady = this.state.players.filter(p => !p.setupComplete && this.game.basicPokemonInHand(p.id).length && p.bench.cards.length < 5);
             if (playersNotReady.length) {
@@ -66,7 +66,7 @@ export class GameWorker_Setup extends GameWorker {
                         cancelResolution: InterruptResolution.SkipBench,
                         args: [ p.hand.id, p.bench.id ]
                     }))
-                }, callback);
+                });
             } else {
                 for (const player of this.state.players) {
                     for (let i = 0; i < this.state.rules.prizes; i++) {
@@ -77,7 +77,7 @@ export class GameWorker_Setup extends GameWorker {
                 this.game.send(firstPlayer, "will go first.");
                 this.game.send();
                 this.game.beginTurn(firstPlayer.id);
-                this.game.update(callback);
+                this.game.update();
             }
         }
     }

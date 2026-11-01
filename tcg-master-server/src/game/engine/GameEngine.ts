@@ -106,24 +106,24 @@ export class GameEngine {
         return heads;
     }
 
-    public update(callback?: () => void) {
+    public update() {
         if (!this.state.winner_id) {
             if (this.state.interrupt) {
-                this.interrupt(this.state.interrupt, callback);
+                this.interrupt(this.state.interrupt);
             } else if (this.state.interruptStack.length) {
-                this.interrupt(this.state.interruptStack.pop()!, callback);
+                this.interrupt(this.state.interruptStack.pop()!);
             } else if (!this.state.turn) {
-                this.setup.update(callback);
+                this.setup.update();
             } else {
-                this.turns.update(callback);
+                this.turns.update();
             }
         }
     }
 
-    public interrupt(interrupt: Interrupt, callback?: () => void) {
+    public interrupt(interrupt: Interrupt) {
         this.assignInterruptId(interrupt);
         this.state.interrupt = interrupt;
-        this.sendInterrupt(interrupt, callback);
+        this.sendInterrupt(interrupt);
     }
 
     public stackInterrupt(interrupt: Interrupt) {
@@ -144,14 +144,14 @@ export class GameEngine {
         }
     }
 
-    private sendInterrupt(interrupt: Interrupt, callback?: () => void) {
+    private sendInterrupt(interrupt: Interrupt) {
         if (interrupt.interrupts?.length) {
             for (const sub of interrupt.interrupts) {
-                this.sendInterrupt(sub, callback);
+                this.sendInterrupt(sub);
             }
         } else {
             this.clients.find(c => c.player_id === interrupt.player)!
-                .prompt(interrupt.prompt!, interrupt.choices!, interrupt.force, callback);
+                .prompt(interrupt.prompt!, interrupt.choices!, interrupt.force);
         }
     }
 
@@ -223,7 +223,7 @@ export class GameEngine {
         }
     }
 
-    public resolveInterrupt(player_id: string, choice: number | null, callback?: () => void) {
+    public resolveInterrupt(player_id: string, choice: number | null) {
         const interrupt = this.getInterrupt(player_id);
         if (interrupt) {
             let resolved = true;
@@ -236,7 +236,7 @@ export class GameEngine {
                 this.closeInterrupt(interrupt.id!);
             }
             this.getClient(player_id).wait();
-            this.update(callback);
+            this.update();
         } else {
             throw new Error(`No interrupt found for player ${player_id}.`)
         }

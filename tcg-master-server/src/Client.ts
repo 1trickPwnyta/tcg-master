@@ -11,7 +11,7 @@ export abstract class Client {
 
     public abstract error(...parts: any[]): void;
 
-    public abstract prompt(text: string, choices: Choice[], force?: boolean, callback?: () => void): void;
+    public abstract prompt(text: string, choices: Choice[], force?: boolean): void;
 
     public wait() { }
 

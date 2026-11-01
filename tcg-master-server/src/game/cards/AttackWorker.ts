@@ -7,14 +7,10 @@ import { CardWorker_Energy } from "./CardWorker_Energy.js";
 import { CardWorker_Pokemon } from "./CardWorker_Pokemon.js";
 
 export abstract class AttackWorker {
-    public readonly dbid: string;
+    public abstract readonly dbid: string;
     public abstract readonly name: string;
     public abstract readonly cost: EnergyType[];
     public abstract readonly damage: number;
-
-    public constructor(parent: CardWorker_Pokemon, dbid: string) {
-        this.dbid = `${parent.dbid}.${dbid}`;
-    }
 
     public execute(context: AttackContext): boolean {
         if (!this.costSatisfied(context.attacker.attachments.cards.map(c => CardDatabase.find<CardWorker_Energy>(c.dbid)))) {

@@ -7,7 +7,7 @@ export class GameWorker_Turn extends GameWorker {
         return this.state.turn!;
     }
 
-    public update(callback?: () => void) {
+    public update() {
         const playerWithNoPokemon = this.state.players.find(p => !p.active.cards.length && !p.bench.cards.length);
         if (playerWithNoPokemon) {
             this.game.endGame(this.state.players.find(p => p.id !== playerWithNoPokemon.id)!.id);
@@ -25,7 +25,7 @@ export class GameWorker_Turn extends GameWorker {
                     force: true,
                     args: [ p.id ]
                 }))
-            }, callback);
+            });
             return;
         }
 
@@ -52,10 +52,10 @@ export class GameWorker_Turn extends GameWorker {
                     }
                 ],
                 force: true
-            }, callback);
+            });
         } else {
             this.game.endTurn();
-            this.game.update(callback);
+            this.game.update();
         }
     }
 };

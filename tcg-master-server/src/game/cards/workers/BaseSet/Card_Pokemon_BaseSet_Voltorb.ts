@@ -12,9 +12,10 @@ export class Card_Pokemon_BaseSet_Voltorb extends CardWorker_Pokemon {
 
     public override readonly attacks: AttackWorker[] = [
         new class extends AttackWorker {
+            dbid = "BaseSet.Voltorb.Tackle";
             name = "Tackle";
             cost = [ EnergyType.Colorless ];
             damage = 10;
-        }(this, "Tackle")
+        }()
     ];
 }
