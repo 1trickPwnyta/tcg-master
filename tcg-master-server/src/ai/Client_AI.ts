@@ -63,7 +63,7 @@ export class Client_AI extends Client {
         }
 
         console.log(`${text} [ ${choices.map(c => c.text).join(", ")}${!force ? ", (cancel)" : ""} ]`);
-        this.interrupt_id = this.game!.interrupts.getInterrupt(this.player_id!)!.id!;
+        this.interrupt_id = this.game!.interrupts.get(this.player_id!)!.id!;
 
         const worker = new Worker(path.join(import.meta.dirname, "AIWorker.js"));
         worker.on("message", (scores: ScoredChoice[]) => {
@@ -74,10 +74,10 @@ export class Client_AI extends Client {
                 this.movesUsed.set(hash, []);
             }
             this.movesUsed.set(hash, [ ...this.movesUsed.get(hash)!, choice.i ]);
-            if (this.interrupt_id === this.game!.interrupts.getInterrupt(this.player_id!)?.id) {
+            if (this.interrupt_id === this.game!.interrupts.get(this.player_id!)?.id) {
                 console.log(`> ${choice.i ?? "(cancel)"}`);
                 this.interrupt_id = null;
-                this.game!.interrupts.resolveInterrupt(this.player_id!, choice.i);
+                this.game!.interrupts.resolve(this.player_id!, choice.i);
             } else {
                 throw new Error(`Attempted to respond to interrupt ${this.interrupt_id} but it wasn't available.`);
             }

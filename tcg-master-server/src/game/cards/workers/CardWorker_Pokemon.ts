@@ -26,7 +26,7 @@ export abstract class CardWorker_Pokemon extends CardWorker {
                 context.game.sendError(context.player, "Your bench is full.");
                 return false;
             } else {
-                context.game.moveCard(context.card.id, context.player.hand.id, context.player.bench.id);
+                context.game.cards.move(context.card.id, context.player.hand.id, context.player.bench.id);
                 context.game.send(context.player, "placed", context.card, "on", context.player.pronouns.possessive, "bench.");
                 return true;
             }

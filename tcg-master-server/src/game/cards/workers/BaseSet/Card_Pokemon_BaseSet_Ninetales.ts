@@ -30,8 +30,8 @@ export class Card_Pokemon_BaseSet_Ninetales extends CardWorker_Pokemon {
             )
             .withPostEffect((context: AttackContext, _knockedOut: boolean, benched_id?: number) => {
                 if (benched_id !== undefined) {
-                    context.game.moveCard(context.game.players.inactive.active.cards[0].id, context.game.players.inactive.active.id, context.game.players.inactive.bench.id);
-                    context.game.moveCard(benched_id, context.game.players.inactive.bench.id, context.game.players.inactive.active.id);
+                    context.game.cards.move(context.game.players.inactive.active.cards[0].id, context.game.players.inactive.active.id, context.game.players.inactive.bench.id);
+                    context.game.cards.move(benched_id, context.game.players.inactive.bench.id, context.game.players.inactive.active.id);
                     context.game.send(context.game.search.getCard(benched_id), "was lured out!");
                 }
             })

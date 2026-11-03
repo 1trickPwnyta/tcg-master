@@ -33,10 +33,10 @@ export class StateWorker_Retreat extends StateWorker {
             return false;
         } else if (replacement_id) {
             while (paid.length) {
-                context.game.moveCard(paid.pop()!, card.attachments.id, player.discard.id);
+                context.game.cards.move(paid.pop()!, card.attachments.id, player.discard.id);
             }
-            context.game.moveCard(player.active.cards[0].id, player.active.id, player.bench.id);
-            context.game.moveCard(replacement_id, player.bench.id, player.active.id);
+            context.game.cards.move(player.active.cards[0].id, player.active.id, player.bench.id);
+            context.game.cards.move(replacement_id, player.bench.id, player.active.id);
             context.game.send(player, "'s", card, "retreated to the bench.");
             context.game.send(player, "sent out", player.active.cards[0], "!");
             return true;

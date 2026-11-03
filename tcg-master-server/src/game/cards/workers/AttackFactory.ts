@@ -102,7 +102,7 @@ export class AttackFactory {
                 }
             };
             worker.postEffects.push((context: AttackContext, _knockedOut: boolean, energy_id: number) => {
-                context.game.moveCard(energy_id, context.attacker.attachments.id, context.game.players.get(context.attacker.owner_id)!.discard.id);
+                context.game.cards.move(energy_id, context.attacker.attachments.id, context.game.players.get(context.attacker.owner_id)!.discard.id);
             });
         }
         if (this.poison) {
@@ -128,7 +128,7 @@ export class AttackFactory {
         }
         if (this.sleep) {
             worker.postEffects.push((context: AttackContext, knockedOut: boolean) => {
-                if (!knockedOut && this.sleep === "always" || context.game.flipCoin(context.game.activePlayer.id)) {
+                if (!knockedOut && this.sleep === "always" || context.game.flipCoin(context.game.players.active.id)) {
                     //context.game.sleepPokemon(context.game.inactivePlayer.id, context.defender.id);
                 }
             });

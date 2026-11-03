@@ -39,7 +39,7 @@ export class Client_AIWorker extends Client_AI {
         if (this.depth < MAX_DEPTH) {
 
             const state = this.game!.getState();
-            this.interrupt_id = this.game!.interrupts.getInterrupt(this.player_id!)!.id!;
+            this.interrupt_id = this.game!.interrupts.get(this.player_id!)!.id!;
             const allChoices = Client_AI.getAIChoices({
                 prompt: text,
                 choices: choices,
@@ -76,7 +76,7 @@ export class Client_AIWorker extends Client_AI {
                                     this.callback = null;
                                 }
                             } else {
-                                this.game!.interrupts.resolveInterrupt(this.player_id!, score.choice.i);
+                                this.game!.interrupts.resolve(this.player_id!, score.choice.i);
                                 if (this.callback) {
                                     scoreMemory.set(hash, score.score);
                                     this.callback(this.invalid ? null : score.score);
@@ -90,7 +90,7 @@ export class Client_AIWorker extends Client_AI {
                 }
                 const clone = JSON.parse(JSON.stringify(state));
                 const game = new GameEngine(clients[0], clients[1], undefined, clone);
-                game.interrupts.resolveInterrupt(this.player_id!, choice.i);
+                game.interrupts.resolve(this.player_id!, choice.i);
             }
 
         } else if (this.callback) {

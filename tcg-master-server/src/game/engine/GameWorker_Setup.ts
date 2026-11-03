@@ -26,7 +26,7 @@ export class GameWorker_Setup extends GameWorker {
                         player.deck.cards.push(card);
                     }
                 }
-                this.game.shuffleDeck(player.id);
+                this.game.cards.shuffleDeck(player.id);
                 player.mulligans = this.setupDraw(player);
             }
             this.game.update();
@@ -87,12 +87,12 @@ export class GameWorker_Setup extends GameWorker {
     }
 
     private setupDraw(player: PlayerState, mulligans: number = 0): number {
-        this.game.draw(player.id, 7);
+        this.game.cards.draw(player.id, 7);
         if (this.game.basicPokemonInHand(player.id).length) {
             return mulligans;
         } else {
             this.game.send(player, "has no basic Pokémon in", player.pronouns.possessive, "hand.", player.pronouns.subjective.capitalizeFirst(), "must take a mulligan.");
-            this.game.shuffleHandIntoDeck(player.id);
+            this.game.cards.shuffleHandIntoDeck(player.id);
             return this.setupDraw(player, mulligans + 1);
         }
     }

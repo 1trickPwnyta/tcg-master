@@ -4,30 +4,30 @@ import { StateActor } from "./StateActor.js";
 
 export class InterruptActor extends StateActor {
     public interrupt(interrupt: Interrupt) {
-        this.assignInterruptId(interrupt);
+        this.assignId(interrupt);
         this.state.interrupt = interrupt;
         this.game.sendInterrupt(interrupt);
     }
 
-    public stackInterrupt(interrupt: Interrupt) {
+    public stack(interrupt: Interrupt) {
         if (this.state.interrupt) {
             this.state.interruptStack.push(this.state.interrupt);
         }
         this.interrupt(interrupt);
     }
 
-    private assignInterruptId(interrupt: Interrupt) {
+    private assignId(interrupt: Interrupt) {
         if (!interrupt.id) {
             interrupt.id = this.state.nextInterrupt_id++;
         }
         if (interrupt.interrupts) {
             for (const sub of interrupt.interrupts) {
-                this.assignInterruptId(sub);
+                this.assignId(sub);
             }
         }
     }
 
-    public getInterrupt(player_id: number, root?: Interrupt): InterruptSync | null {
+    public get(player_id: number, root?: Interrupt): InterruptSync | null {
         if (this.state.interrupt?.player === player_id) {
             return this.state.interrupt as InterruptSync;
         } else if (root?.player === player_id) {
@@ -36,7 +36,7 @@ export class InterruptActor extends StateActor {
             const interrupts = (root ?? this.state.interrupt)?.interrupts;
             if (interrupts) {
                 for (const interrupt of interrupts) {
-                    if (this.getInterrupt(player_id, interrupt)) {
+                    if (this.get(player_id, interrupt)) {
                         return interrupt as InterruptSync;
                     }
                 }
@@ -45,28 +45,28 @@ export class InterruptActor extends StateActor {
         return null;
     }
 
-    private closeInterrupt(interrupt_id: number) {
+    private close(interrupt_id: number) {
         if (this.state.interrupt?.id === interrupt_id) {
             this.state.interrupt = null;
             return;
         }
-        this.closeInterruptRecursive(interrupt_id, this.state.interrupt);
-        this.cleanInterrupts(this.state.interrupt);
+        this.closeRecursive(interrupt_id, this.state.interrupt);
+        this.clean(this.state.interrupt);
     }
 
-    private closeInterruptRecursive(interrupt_id: number, root: Interrupt | null) {
+    private closeRecursive(interrupt_id: number, root: Interrupt | null) {
         if (root?.interrupts) {
             for (let i = 0; i < root.interrupts.length; i++) {
                 if (root.interrupts[i].id === interrupt_id) {
                     root.interrupts.splice(i, 1);
                     return;
                 }
-                this.closeInterruptRecursive(interrupt_id, root.interrupts[i]);
+                this.closeRecursive(interrupt_id, root.interrupts[i]);
             }
         }
     }
 
-    private cleanInterrupts(root: Interrupt | null) {
+    private clean(root: Interrupt | null) {
         if (this.state.interrupt?.interrupts && !this.state.interrupt.interrupts.length) {
             this.state.interrupt = null;
             return;
@@ -76,13 +76,13 @@ export class InterruptActor extends StateActor {
                 if (root.interrupts[i].interrupts && !root.interrupts[i].interrupts?.length) {
                     root.interrupts.splice(i, 1);
                 }
-                this.cleanInterrupts(root.interrupts[i]);
+                this.clean(root.interrupts[i]);
             }
         }
     }
 
-    public resolveInterrupt(player_id: number, choice: number | null) {
-        const interrupt = this.getInterrupt(player_id);
+    public resolve(player_id: number, choice: number | null) {
+        const interrupt = this.get(player_id);
         if (interrupt) {
             let resolved = true;
             if (choice !== null) {
@@ -91,7 +91,7 @@ export class InterruptActor extends StateActor {
                 InterruptResolver.cancel(this.game, interrupt, player_id);
             }
             if (resolved) {
-                this.closeInterrupt(interrupt.id!);
+                this.close(interrupt.id!);
             }
             this.game.getClient(player_id).wait();
             this.game.update();

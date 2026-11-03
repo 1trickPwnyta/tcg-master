@@ -17,7 +17,7 @@ export class StateWorker_UseTrainer extends StateWorker {
                 player: context.game.players.active,
                 card: card
             }, target_id);
-            context.game.moveCard(card.id, context.game.players.active.limbo.id, context.game.players.active.discard.id);
+            context.game.cards.move(card.id, context.game.players.active.limbo.id, context.game.players.active.discard.id);
         } else {
             throw new Error("Can't find the Trainer card used.");
         }

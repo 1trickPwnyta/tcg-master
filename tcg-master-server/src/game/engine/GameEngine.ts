@@ -9,11 +9,11 @@ import { Client } from "../../Client.js";
 import { IToken } from "../../IToken.js";
 import { GameWorker_Setup } from "./GameWorker_Setup.js";
 import { GameWorker_Turn } from "./GameWorker_Turn.js";
-import { InterruptResolution } from "../InterruptResolution.js";
 import { CardWorker_Energy } from "../cards/workers/CardWorker_Energy.js";
 import { InterruptActor } from "../state/actors/InterruptActor.js";
 import { SearchActor } from "../state/actors/SearchActor.js";
 import { PlayerActor } from "../state/actors/PlayerActor.js";
+import { CardActor } from "../state/actors/CardActor.js";
 
 export class GameEngine {
     private readonly clients: Client[];
@@ -27,6 +27,7 @@ export class GameEngine {
     public readonly players: PlayerActor;
     public readonly interrupts: InterruptActor;
     public readonly search: SearchActor;
+    public readonly cards: CardActor;
 
     public constructor(client1?: Client, client2?: Client, options: { prizes?: number } = {}, clonedState?: GameState) {
         this.setup = new GameWorker_Setup(this);
@@ -47,6 +48,7 @@ export class GameEngine {
         this.clients = [ client1, client2 ];
         client1.player_id = client1.player_id ?? 1;
         client2.player_id = client2.player_id ?? clonedState?.players.find(p => p.id !== client1.player_id)?.id ?? 2;
+
         this.state = clonedState ?? {
             players: [ PlayerActor.makePlayer(1, "Pikachu"), PlayerActor.makePlayer(2, "COM") ],
             turn: null,
@@ -63,6 +65,7 @@ export class GameEngine {
         this.players = new PlayerActor(this);
         this.interrupts = new InterruptActor(this);
         this.search = new SearchActor(this);
+        this.cards = new CardActor(this);
 
         if (!this.simulation) {
             this.update();
@@ -161,71 +164,6 @@ export class GameEngine {
         }
     }
 
-    public checkActivePokemon(): Interrupt | null {
-        const playersWithNoActive = this.state.players.filter(p => !p.active.cards.length && p.bench.cards.length);
-        if (playersWithNoActive.length) {
-            return {
-                interrupts: playersWithNoActive.map(p => ({
-                    player: p.id,
-                    prompt: "Select a Pokémon from your bench to be your active Pokémon.",
-                    choices: p.bench.cards.map(c => ({ text: c.name, target_id: c.id })),
-                    resolution: InterruptResolution.Promote,
-                    force: true,
-                    args: [ p.id ]
-                }))
-            };
-        } else {
-            return null;
-        }
-    }
-
-    public shuffleDeck(player_id: number) {
-        const player = this.players.get(player_id);
-        for (let i = player.deck.cards.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            const temp = player.deck.cards[i];
-            player.deck.cards[i] = player.deck.cards[j];
-            player.deck.cards[j] = temp;
-        }
-        this.send(player, "shuffled", player.pronouns.possessive, "deck.");
-    }
-
-    public shuffleHandIntoDeck(player_id: number) {
-        const player = this.players.get(player_id);
-        while (player.hand.cards.length) {
-            player.deck.cards.push(player.hand.cards.pop()!);
-        }
-        this.shuffleDeck(player_id);
-    }
-
-    public draw(player_id: number, amount: number = 1) {
-        const player = this.players.get(player_id);
-        amount = Math.min(amount, player.deck.cards.length);
-        const cardsDrawn = [];
-        for (let i = 0; i < amount; i++) {
-            const card = player.deck.cards.pop()!;
-            player.hand.cards.push(card);
-            cardsDrawn.push(card);
-        }
-        if (amount > 5) {
-            this.send(player, "drew", amount, `card${amount > 1 ? "s" : ""}.`)
-        } else {
-            this.sendTo(this.players.getOpponent(player.id).id, player, "drew", amount, `card${amount > 1 ? "s" : ""}.`)
-            this.sendTo(player.id, "You drew", ...Client.getCardList(cardsDrawn));
-        }
-    }
-
-    public takePrize(player_id: number) {
-        const player = this.players.get(player_id);
-        const card = player.prizes.cards.pop()!;
-        player.hand.cards.push(card);
-        this.sendTo(this.players.getOpponent(player.id).id, player, "took a prize.");
-        this.sendTo(player.id, "You took", card, "as a prize.");
-        if (player.prizes.cards.length <= 0) {
-            this.endGame(player_id);
-        }
-    }
-
     public basicPokemonInHand(player_id: number): CardState[] {
         const player = this.players.get(player_id);
         return player.hand.cards.filter(c => {
@@ -235,25 +173,6 @@ export class GameEngine {
             }
             return false;
         });
-    }
-
-    public moveCard(card_id: number, from_id: number, to_id: number) {
-        const card = this.search.getCard(card_id)!;
-        const owner = this.players.get(card.owner_id)!;
-        const from = this.search.getLocation(from_id)!;
-        const to = this.search.getLocation(to_id)!;
-        if (owner.active.id !== to_id) {
-            card.orientation = "normal";
-            card.poison = false;
-        }
-        if (owner.active.id !== to_id && owner.bench.id !== to_id) {
-            card.damage = 0;
-            for (const attachment of card.attachments.cards) {
-                this.moveCard(attachment.id, card.attachments.id, owner.discard.id);
-            }
-        }
-        from.cards.splice(from.cards.indexOf(card), 1);
-        to.cards.push(card);
     }
 
     public getEnergy(card_id: number): { card: CardState, worker: CardWorker_Energy }[] {
@@ -271,9 +190,9 @@ export class GameEngine {
             this.send(player, "'s", card, "took", { name: amount.toString(), type: "damage" }, `damage${source ? ` due to ${source}` : ""}!`);
             if (card.damage >= CardDatabase.find<CardWorker_Pokemon>(card.dbid).hp) {
                 this.send(player, "'s", card, "was knocked out!");
-                this.moveCard(card.id, this.search.findCard(card.id)!.id, player.discard.id);
-                this.takePrize(this.players.getOpponent(player.id).id);
-                const interrupt = this.checkActivePokemon();
+                this.cards.move(card.id, this.search.findCard(card.id)!.id, player.discard.id);
+                this.cards.takePrize(this.players.getOpponent(player.id).id);
+                const interrupt = this.turns.checkActivePokemon();
                 if (interrupt) {
                     this.interrupts.interrupt(interrupt);
                 }
@@ -323,7 +242,7 @@ export class GameEngine {
         this.state.betweenTurns = false;
         this.send();
         this.send("Beginning of", this.players.active, "'s turn.");
-        this.draw(player_id);
+        this.cards.draw(player_id);
         this.update();
     }
 

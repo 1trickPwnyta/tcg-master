@@ -5,7 +5,7 @@ import { StateContext, StateWorker } from "./StateWorker.js";
 @ResolvesInterrupt(InterruptResolution.UseMulliganBonus)
 export class StateWorker_UseMulliganBonus extends StateWorker {
     public override execute(context: StateContext, amount: number, player_id: number): boolean {
-        context.game.draw(player_id, amount);
+        context.game.cards.draw(player_id, amount);
         context.game.players.get(player_id).mulliganBonusUsed = true;
         return true;
     }

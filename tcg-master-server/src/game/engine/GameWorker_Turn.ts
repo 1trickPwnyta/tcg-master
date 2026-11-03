@@ -1,4 +1,5 @@
 import { InterruptResolution } from "../InterruptResolution.js";
+import { Interrupt } from "../state/Interrupt.js";
 import { Turn } from "../state/Turn.js";
 import { GameWorker } from "./GameWorker.js";
 
@@ -14,7 +15,7 @@ export class GameWorker_Turn extends GameWorker {
             return;
         }
 
-        const interrupt = this.game.checkActivePokemon();
+        const interrupt = this.checkActivePokemon();
         if (interrupt) {
             this.game.interrupts.interrupt(interrupt);
             return;
@@ -47,6 +48,24 @@ export class GameWorker_Turn extends GameWorker {
         } else {
             this.game.endTurn();
             this.game.update();
+        }
+    }
+
+    public checkActivePokemon(): Interrupt | null {
+        const playersWithNoActive = this.state.players.filter(p => !p.active.cards.length && p.bench.cards.length);
+        if (playersWithNoActive.length) {
+            return {
+                interrupts: playersWithNoActive.map(p => ({
+                    player: p.id,
+                    prompt: "Select a Pokémon from your bench to be your active Pokémon.",
+                    choices: p.bench.cards.map(c => ({ text: c.name, target_id: c.id })),
+                    resolution: InterruptResolution.Promote,
+                    force: true,
+                    args: [ p.id ]
+                }))
+            };
+        } else {
+            return null;
         }
     }
 };

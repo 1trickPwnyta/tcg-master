@@ -16,8 +16,8 @@ export class Card_Trainer_BaseSet_Switch extends CardWorker_Trainer {
         }
         if (target_id !== undefined) {
             context.game.send(context.player, "switched", context.player.active.cards[0], "with", context.game.search.getCard(target_id), ".");
-            context.game.moveCard(context.player.active.cards[0].id, context.player.active.id, context.player.bench.id);
-            context.game.moveCard(target_id, context.player.bench.id, context.player.active.id);
+            context.game.cards.move(context.player.active.cards[0].id, context.player.active.id, context.player.bench.id);
+            context.game.cards.move(target_id, context.player.bench.id, context.player.active.id);
             return true;
         } else {
             context.game.interrupts.interrupt({

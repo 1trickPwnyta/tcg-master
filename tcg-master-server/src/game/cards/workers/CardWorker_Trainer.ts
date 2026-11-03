@@ -11,11 +11,11 @@ export abstract class CardWorker_Trainer extends CardWorker {
     }
 
     public override play(context: PlayContext): boolean {
-        context.game.moveCard(context.card.id, context.player.hand.id, context.player.limbo.id);
+        context.game.cards.move(context.card.id, context.player.hand.id, context.player.limbo.id);
         if (!this.targeting) {
             context.game.send(context.player, "used", context.card, ".");
             this.execute(context);
-            context.game.moveCard(context.card.id, context.player.limbo.id, context.player.discard.id);
+            context.game.cards.move(context.card.id, context.player.limbo.id, context.player.discard.id);
         } else {
             this.execute(context);
         }

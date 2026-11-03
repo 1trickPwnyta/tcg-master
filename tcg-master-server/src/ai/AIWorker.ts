@@ -26,7 +26,7 @@ parentPort?.on("message", async (context: AIContext) => {
         }
         
         const game = new GameEngine(clients[0], clients[1], undefined, structuredClone(context.state));
-        game.interrupts.resolveInterrupt(context.player_id, choice.i);
+        game.interrupts.resolve(context.player_id, choice.i);
         if (game.getState().winner_id) {
             clientCallback(game.getState().winner_id === context.player_id ? Number.MAX_VALUE : Number.MIN_VALUE);
         }

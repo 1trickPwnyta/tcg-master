@@ -10,7 +10,7 @@ export class Card_Trainer_BaseSet_Bill extends CardWorker_Trainer {
 
     public override execute(context: PlayContext): boolean {
         const player = context.game.players.active;
-        context.game.draw(player.id, 2);
+        context.game.cards.draw(player.id, 2);
         return true;
     }
 };
