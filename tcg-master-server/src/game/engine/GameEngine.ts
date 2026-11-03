@@ -1,18 +1,16 @@
 import { Client_AI } from "../../ai/Client_AI.js";
 import { GameState } from "../state/GameState.js";
-import { Interrupt, InterruptSync } from "../state/Interrupt.js";
+import { Interrupt } from "../state/Interrupt.js";
 import { PlayerState } from "../state/PlayerState.js";
 import { CardState } from "../state/CardState.js";
 import { CardDatabase } from "../cards/CardDatabase.js";
 import { CardWorker_Pokemon } from "../cards/workers/CardWorker_Pokemon.js";
 import { Client } from "../../Client.js";
 import { IToken } from "../../IToken.js";
-import { InterruptResolver } from "../InterruptResolver.js";
 import { GameWorker_Setup } from "./GameWorker_Setup.js";
 import { GameWorker_Turn } from "./GameWorker_Turn.js";
 import { LocationState } from "../state/LocationState.js";
 import { InterruptResolution } from "../InterruptResolution.js";
-import { CardOrientation } from "../CardOrientation.js";
 import { CardWorker_Energy } from "../cards/workers/CardWorker_Energy.js";
 
 export class GameEngine {
@@ -214,79 +212,6 @@ export class GameEngine {
     public sendError(player: PlayerState, ...parts: (IToken | string)[]) {
         if (!this.state.winner_id) {
             this.clients.find(c => c.player_id === player.id)?.error(...parts);
-        }
-    }
-
-    public getInterrupt(player_id: number, root?: Interrupt): InterruptSync | null {
-        if (this.state.interrupt?.player === player_id) {
-            return this.state.interrupt as InterruptSync;
-        } else if (root?.player === player_id) {
-            return root as InterruptSync;
-        } else {
-            const interrupts = (root ?? this.state.interrupt)?.interrupts;
-            if (interrupts) {
-                for (const interrupt of interrupts) {
-                    if (this.getInterrupt(player_id, interrupt)) {
-                        return interrupt as InterruptSync;
-                    }
-                }
-            }
-        }
-        return null;
-    }
-
-    private closeInterrupt(interrupt_id: number) {
-        if (this.state.interrupt?.id === interrupt_id) {
-            this.state.interrupt = null;
-            return;
-        }
-        this.closeInterruptRecursive(interrupt_id, this.state.interrupt);
-        this.cleanInterrupts(this.state.interrupt);
-    }
-
-    private closeInterruptRecursive(interrupt_id: number, root: Interrupt | null) {
-        if (root?.interrupts) {
-            for (let i = 0; i < root.interrupts.length; i++) {
-                if (root.interrupts[i].id === interrupt_id) {
-                    root.interrupts.splice(i, 1);
-                    return;
-                }
-                this.closeInterruptRecursive(interrupt_id, root.interrupts[i]);
-            }
-        }
-    }
-
-    private cleanInterrupts(root: Interrupt | null) {
-        if (this.state.interrupt?.interrupts && !this.state.interrupt.interrupts.length) {
-            this.state.interrupt = null;
-            return;
-        }
-        if (root?.interrupts) {
-            for (let i = 0; i < root.interrupts.length; i++) {
-                if (root.interrupts[i].interrupts && !root.interrupts[i].interrupts?.length) {
-                    root.interrupts.splice(i, 1);
-                }
-                this.cleanInterrupts(root.interrupts[i]);
-            }
-        }
-    }
-
-    public resolveInterrupt(player_id: number, choice: number | null) {
-        const interrupt = this.getInterrupt(player_id);
-        if (interrupt) {
-            let resolved = true;
-            if (choice !== null) {
-                resolved = InterruptResolver.resolve(this, interrupt, choice);
-            } else if (interrupt.cancelResolution) {
-                InterruptResolver.cancel(this, interrupt, player_id);
-            }
-            if (resolved) {
-                this.closeInterrupt(interrupt.id!);
-            }
-            this.getClient(player_id).wait();
-            this.update();
-        } else {
-            throw new Error(`No interrupt found for player ${player_id}.`)
         }
     }
 

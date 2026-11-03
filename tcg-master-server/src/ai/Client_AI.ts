@@ -1,13 +1,11 @@
 import { Client } from "../Client.js";
 import { Card_Pokemon_BaseSet_Staryu } from "../game/cards/workers/BaseSet/Card_Pokemon_BaseSet_Staryu.js";
-import { Card } from "../game/cards/Card.js";
 import { GameEngine } from "../game/engine/GameEngine.js";
-import { Player } from "../game/Player.js";
-import { AIPlanner } from "./AIPlanner.js";
 import { Choice } from "../game/state/Interrupt.js";
 import { GameState } from "../game/state/GameState.js";
 import path from "path";
 import { Worker } from "worker_threads";
+import { InterruptActor } from "../game/state/actors/InterruptActor.js";
 
 export type AIChoice = {
     i: number | null;
@@ -44,8 +42,6 @@ export class Client_AI extends Client {
 
     private readonly id: string = crypto.randomUUID();
     public override name: string = "COM";
-    public planner: AIPlanner | null = null;
-    private witnessedCards: Map<(new (game: GameEngine, owner: Player) => Card), number> = new Map<(new (game: GameEngine, owner: Player) => Card), number>();
     public invalid: boolean = false;
     private readonly movesUsed: Map<number, (number | null)[]> = new Map<number, (number | null)[]>();
     protected interrupt_id: number | null = null;
@@ -68,28 +64,24 @@ export class Client_AI extends Client {
         }
 
         console.log(`${text} [ ${choices.map(c => c.text).join(", ")}${!force ? ", (cancel)" : ""} ]`);
-        this.interrupt_id = this.game!.getInterrupt(this.player_id!)!.id!;
+        const state = this.game!.getState();
+        this.interrupt_id = InterruptActor.getInterrupt(state, this.player_id!)!.id!;
 
         const worker = new Worker(path.join(import.meta.dirname, "AIWorker.js"));
         worker.on("message", (scores: ScoredChoice[]) => {
             worker.terminate();
-            const state = this.game!.getStateHash();
-            try {
-                const choice = scores.filter(s => s.score !== null && !(this.movesUsed.get(state) ?? []).includes(s.choice.i)).sort((a, b) => b.score! - a.score!)[0].choice;
-                if (!this.movesUsed.has(state)) {
-                    this.movesUsed.set(state, []);
-                }
-                this.movesUsed.set(state, [ ...this.movesUsed.get(state)!, choice.i ]);
-                if (this.interrupt_id === this.game?.getInterrupt(this.player_id!)?.id) {
-                    console.log(`> ${choice.i ?? "(cancel)"}`);
-                    this.interrupt_id = null;
-                    this.game!.resolveInterrupt(this.player_id!, choice.i);
-                } else {
-                    throw new Error(`Attempted to respond to interrupt ${this.interrupt_id} but it wasn't available.`);
-                }
-            } catch (e) {
-                debugger;
-                throw e;
+            const hash = this.game!.getStateHash();
+            const choice = scores.filter(s => s.score !== null && !(this.movesUsed.get(hash) ?? []).includes(s.choice.i)).sort((a, b) => b.score! - a.score!)[0]?.choice ?? scores[0].choice;
+            if (!this.movesUsed.has(hash)) {
+                this.movesUsed.set(hash, []);
+            }
+            this.movesUsed.set(hash, [ ...this.movesUsed.get(hash)!, choice.i ]);
+            if (this.interrupt_id === InterruptActor.getInterrupt(state, this.player_id!)?.id) {
+                console.log(`> ${choice.i ?? "(cancel)"}`);
+                this.interrupt_id = null;
+                InterruptActor.resolveInterrupt(this.game!, state, this.player_id!, choice.i);
+            } else {
+                throw new Error(`Attempted to respond to interrupt ${this.interrupt_id} but it wasn't available.`);
             }
         });
         worker.postMessage({

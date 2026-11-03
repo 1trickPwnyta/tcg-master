@@ -4,6 +4,7 @@ import "../extensions.js";
 import "../loader.js"
 import { Client_AIWorker } from "./Client_AIWorker.js";
 import { AIContext, Client_AI, ScoredChoice } from "./Client_AI.js";
+import { InterruptActor } from "../game/state/actors/InterruptActor.js";
 
 parentPort?.on("message", async (context: AIContext) => {
     const choices = Client_AI.getAIChoices(context);
@@ -26,7 +27,7 @@ parentPort?.on("message", async (context: AIContext) => {
         }
         
         const game = new GameEngine(clients[0], clients[1], undefined, structuredClone(context.state));
-        game.resolveInterrupt(context.player_id, choice.i);
+        InterruptActor.resolveInterrupt(game, game.getState(), context.player_id, choice.i);
         if (game.getState().winner_id) {
             clientCallback(game.getState().winner_id === context.player_id ? Number.MAX_VALUE : Number.MIN_VALUE);
         }
