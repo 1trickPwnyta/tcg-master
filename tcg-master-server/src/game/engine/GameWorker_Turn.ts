@@ -47,7 +47,7 @@ export class GameWorker_Turn extends GameWorker {
     public update() {
         const playerWithNoPokemon = this.state.players.find(p => !p.active.cards.length && !p.bench.cards.length);
         if (playerWithNoPokemon) {
-            this.game.endGame(this.state.players.find(p => p.id !== playerWithNoPokemon.id)!.id);
+            this.game.end(this.state.players.find(p => p.id !== playerWithNoPokemon.id)!.id);
             return;
         }
 

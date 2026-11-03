@@ -2,14 +2,10 @@ import { Client_AI } from "../../ai/Client_AI.js";
 import { GameState } from "../state/GameState.js";
 import { Interrupt } from "../state/Interrupt.js";
 import { PlayerState } from "../state/PlayerState.js";
-import { CardState } from "../state/CardState.js";
-import { CardDatabase } from "../cards/CardDatabase.js";
-import { CardWorker_Pokemon } from "../cards/workers/CardWorker_Pokemon.js";
 import { Client } from "../../Client.js";
 import { IToken } from "../../IToken.js";
 import { GameWorker_Setup } from "./GameWorker_Setup.js";
 import { GameWorker_Turn } from "./GameWorker_Turn.js";
-import { CardWorker_Energy } from "../cards/workers/CardWorker_Energy.js";
 import { InterruptActor } from "../state/actors/InterruptActor.js";
 import { SearchActor } from "../state/actors/SearchActor.js";
 import { PlayerActor } from "../state/actors/PlayerActor.js";
@@ -133,6 +129,16 @@ export class GameEngine {
         }
     }
 
+    public end(winner_id: number) {
+        this.state.interrupt = null;
+        const winner = this.players.get(winner_id);
+        this.send(winner, "has no more prizes left.", winner, "wins!");
+        this.state.winner_id = winner_id;
+        for (const client of this.clients) {
+            client.notify_gameOver(winner);
+        }
+    }
+
     public sendInterrupt(interrupt: Interrupt) {
         if (this.simulation && this.promptsGiven > 0) {
             return;
@@ -164,34 +170,6 @@ export class GameEngine {
     public sendError(player: PlayerState, ...parts: (IToken | string)[]) {
         if (!this.state.winner_id) {
             this.clients.find(c => c.player_id === player.id)?.error(...parts);
-        }
-    }
-
-    public basicPokemonInHand(player_id: number): CardState[] {
-        const player = this.players.get(player_id);
-        return player.hand.cards.filter(c => {
-            const worker = CardDatabase.find(c.dbid)
-            if (worker instanceof CardWorker_Pokemon) {
-                return worker.stage === "basic";
-            }
-            return false;
-        });
-    }
-
-    public getEnergy(card_id: number): { card: CardState, worker: CardWorker_Energy }[] {
-        return this.search.getCard(card_id)!.attachments.cards.filter(c => c.kind === "energy").map(c => ({
-            card: c,
-            worker: CardDatabase.find<CardWorker_Energy>(c.dbid)
-        }));
-    }
-
-    public endGame(winner_id: number) {
-        this.state.interrupt = null;
-        const winner = this.players.get(winner_id);
-        this.send(winner, "has no more prizes left.", winner, "wins!");
-        this.state.winner_id = winner_id;
-        for (const client of this.clients) {
-            client.notify_gameOver(winner);
         }
     }
 };

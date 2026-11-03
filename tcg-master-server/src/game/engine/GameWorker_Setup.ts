@@ -53,20 +53,20 @@ export class GameWorker_Setup extends GameWorker {
                 interrupts: this.state.players.map(p => ({
                     player: p.id,
                     prompt: "Select a basic Pokémon as your active Pokémon.",
-                    choices: this.game.basicPokemonInHand(p.id).map(c => ({ text: c.name, target_id: c.id })),
+                    choices: this.game.cards.basicPokemonInHand(p.id).map(c => ({ text: c.name, target_id: c.id })),
                     resolution: InterruptResolution.MoveCard,
                     args: [ p.hand.id, p.active.id ],
                     force: true
                 }))
             });
         } else {
-            const playersNotReady = this.state.players.filter(p => !p.setupComplete && this.game.basicPokemonInHand(p.id).length && p.bench.cards.length < 5);
+            const playersNotReady = this.state.players.filter(p => !p.setupComplete && this.game.cards.basicPokemonInHand(p.id).length && p.bench.cards.length < 5);
             if (playersNotReady.length) {
                 this.game.interrupts.interrupt({
                     interrupts: playersNotReady.map(p => ({
                         player: p.id,
                         prompt: "Choose other basic Pokémon to put on the bench.",
-                        choices: this.game.basicPokemonInHand(p.id).map(c => ({ text: c.name, target_id: c.id })),
+                        choices: this.game.cards.basicPokemonInHand(p.id).map(c => ({ text: c.name, target_id: c.id })),
                         resolution: InterruptResolution.MoveCard,
                         cancelResolution: InterruptResolution.SkipBench,
                         args: [ p.hand.id, p.bench.id ]
@@ -88,7 +88,7 @@ export class GameWorker_Setup extends GameWorker {
 
     private setupDraw(player: PlayerState, mulligans: number = 0): number {
         this.game.cards.draw(player.id, 7);
-        if (this.game.basicPokemonInHand(player.id).length) {
+        if (this.game.cards.basicPokemonInHand(player.id).length) {
             return mulligans;
         } else {
             this.game.send(player, "has no basic Pokémon in", player.pronouns.possessive, "hand.", player.pronouns.subjective.capitalizeFirst(), "must take a mulligan.");

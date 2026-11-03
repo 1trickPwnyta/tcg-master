@@ -1,8 +1,17 @@
 import { CardDatabase } from "../../cards/CardDatabase.js";
+import { CardWorker_Energy } from "../../cards/workers/CardWorker_Energy.js";
 import { CardWorker_Pokemon } from "../../cards/workers/CardWorker_Pokemon.js";
+import { CardState } from "../CardState.js";
 import { StateActor } from "./StateActor.js";
 
 export class PokemonActor extends StateActor {
+    public getEnergy(card_id: number): { card: CardState, worker: CardWorker_Energy }[] {
+        return this.game.search.getCard(card_id)!.attachments.cards.filter(c => c.kind === "energy").map(c => ({
+            card: c,
+            worker: CardDatabase.find<CardWorker_Energy>(c.dbid)
+        }));
+    }
+
     public damage(player_id: number, card_id: number, amount: number, source?: string): boolean {
         if (amount) {
             const player = this.game.players.get(player_id)!;

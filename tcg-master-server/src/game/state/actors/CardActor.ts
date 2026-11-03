@@ -1,7 +1,21 @@
 import { Client } from "../../../Client.js";
+import { CardDatabase } from "../../cards/CardDatabase.js";
+import { CardWorker_Pokemon } from "../../cards/workers/CardWorker_Pokemon.js";
+import { CardState } from "../CardState.js";
 import { StateActor } from "./StateActor.js";
 
 export class CardActor extends StateActor {
+    public basicPokemonInHand(player_id: number): CardState[] {
+        const player = this.game.players.get(player_id);
+        return player.hand.cards.filter(c => {
+            const worker = CardDatabase.find(c.dbid)
+            if (worker instanceof CardWorker_Pokemon) {
+                return worker.stage === "basic";
+            }
+            return false;
+        });
+    }
+
     public move(card_id: number, from_id: number, to_id: number) {
         const card = this.game.search.getCard(card_id)!;
         const owner = this.game.players.get(card.owner_id)!;
@@ -64,7 +78,7 @@ export class CardActor extends StateActor {
         this.game.sendTo(this.game.players.getOpponent(player.id).id, player, "took a prize.");
         this.game.sendTo(player.id, "You took", card, "as a prize.");
         if (player.prizes.cards.length <= 0) {
-            this.game.endGame(player_id);
+            this.game.end(player_id);
         }
     }
 };

@@ -91,7 +91,7 @@ export class AttackFactory {
                     return {
                         player: context.game.players.active.id,
                         prompt: `Discard which Energy card from ${context.attacker.name}}?`,
-                        choices: context.game.getEnergy(context.attacker.id).filter(e => e.worker.type == this.discardType).map(e => ({
+                        choices: context.game.pokemon.getEnergy(context.attacker.id).filter(e => e.worker.type == this.discardType).map(e => ({
                             text: e.card.name, target_id: e.card.id
                         })),
                         resolution: InterruptResolution.AttackTargets,
