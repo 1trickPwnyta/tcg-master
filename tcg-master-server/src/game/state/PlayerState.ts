@@ -2,7 +2,7 @@ import { IToken } from "../../IToken.js";
 import { LocationState } from "./LocationState.js";
 
 export interface PlayerState {
-    id: string;
+    id: number;
     token: IToken;
     name: string;
     pronouns: {
@@ -11,6 +11,7 @@ export interface PlayerState {
     };
     active: LocationState;
     bench: LocationState;
+    limbo: LocationState;
     hand: LocationState;
     discard: LocationState;
     prizes: LocationState;

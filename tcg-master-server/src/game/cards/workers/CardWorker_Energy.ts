@@ -1,12 +1,14 @@
-import { IToken } from "../../IToken.js";
-import { EnergyType } from "../EnergyType.js";
-import { InterruptResolution } from "../InterruptResolution.js";
+import { IToken } from "../../../IToken.js";
+import { EnergyType } from "../../EnergyType.js";
+import { InterruptResolution } from "../../InterruptResolution.js";
 import { CardWorker, PlayContext } from "./CardWorker.js";
 
 export abstract class CardWorker_Energy extends CardWorker {
+    public override readonly kind = "energy";
     public abstract readonly type: EnergyType;
     public abstract readonly basic: boolean;
     public readonly amount: number = 1;
+    public abstract readonly text: string | null;
 
     public get token(): IToken {
         let symbol = "";
@@ -33,5 +35,15 @@ export abstract class CardWorker_Energy extends CardWorker {
             });
             return true;
         }
+    }
+
+    public override getDetails(): any[] {
+        return [
+            this.name,
+            ...(this.basic ? [ "(basic)" ] : []),
+            "Provides",
+            Array.from({ length: this.amount }, () => this.type.symbol),
+            ...(this.text ? [ "<br />", this.text ] : [])
+        ];
     }
 };

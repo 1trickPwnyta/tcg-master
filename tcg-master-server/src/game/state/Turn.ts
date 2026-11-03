@@ -1,6 +1,6 @@
 export interface Turn {
     number: number;
-    player: string;
+    player: number;
     energyPlayed: boolean;
     attacked: boolean;
 };

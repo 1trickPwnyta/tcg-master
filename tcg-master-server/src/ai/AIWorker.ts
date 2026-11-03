@@ -1,6 +1,5 @@
 import { parentPort } from "worker_threads";
 import { GameEngine } from "../game/engine/GameEngine.js";
-import { Client_HumanSimulator } from "./Client_HumanSimulator.js";
 import "../extensions.js";
 import "../loader.js"
 import { Client_AIWorker } from "./Client_AIWorker.js";
@@ -11,21 +10,25 @@ parentPort?.on("message", async (context: AIContext) => {
     const scores: ScoredChoice[] = [];
     let received = 0;
     for (const choice of choices) {
-        const clientCallback = () => {
-            if (!client.invalid) {
-                const score = client.evaluate();
+        const clients: Client_AIWorker[] = [];
+        const clientCallback = (score: number | null) => {
+            if (score !== null) {
                 scores.push({ choice: choice, score: score });
             }
             if (++received === choices.length) {
                 parentPort?.postMessage(scores);
             }
         };
-        const client = new Client_AIWorker(1, clientCallback);
-        client.player_id = context.player_id;
-        const game = new GameEngine(client, new Client_HumanSimulator("SIM"), undefined, structuredClone(context.state));
+        for (const player of context.state.players) {
+            const client = new Client_AIWorker(1, context.player_id, clientCallback);
+            client.player_id = player.id;
+            clients.push(client);
+        }
+        
+        const game = new GameEngine(clients[0], clients[1], undefined, structuredClone(context.state));
         game.resolveInterrupt(context.player_id, choice.i);
         if (game.getState().winner_id) {
-            clientCallback();
+            clientCallback(game.getState().winner_id === context.player_id ? Number.MAX_VALUE : Number.MIN_VALUE);
         }
     }
 });

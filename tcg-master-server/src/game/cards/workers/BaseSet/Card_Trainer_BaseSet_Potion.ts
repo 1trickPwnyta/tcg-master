@@ -1,23 +1,28 @@
-import { Card } from "../../Card.js";
-import { Card_Pokemon } from "../../Card_Pokemon.js";
-import { Card_Trainer } from "../../Card_Trainer.js";
-import { ITargeter } from "../../ITargeter.js";
-import { TargetSelector } from "../../TargetSelector.js";
+import { InterruptResolution } from "../../../InterruptResolution.js";
+import { Card } from "../../CardDatabase.js";
+import { PlayContext } from "../CardWorker.js";
+import { CardWorker_Trainer } from "../CardWorker_Trainer.js";
 
-export class Card_Trainer_BaseSet_Potion extends Card_Trainer implements ITargeter<Card_Pokemon> {
+@Card("BaseSet.Potion")
+export class Card_Trainer_BaseSet_Potion extends CardWorker_Trainer {
     public override readonly name: string = "Potion";
     public override readonly text: string = "Remove 2 damage counters from 1 of your Pokémon (1 if that Pokémon has only 1).";
-    protected override targetSelector: TargetSelector<Card> = new TargetSelector<Card_Pokemon>(this);
+    public override readonly targeting: boolean = true;
 
-    public get prompt(): string {
-        return "Use Potion on which Pokémon?";
-    }
-
-    public get choices(): Card_Pokemon[] {
-        return this.owner.allPokemonInPlay.filter(p => p.damageCounters);
-    }
-
-    protected override effect(target: Card_Pokemon) {
-        target.healDamage(20);
+    public override execute(context: PlayContext, target_id?: number): boolean {
+        if (target_id !== undefined) {
+            context.game.healPokemon(context.player.id, target_id, 20);
+            return true;
+        } else {
+            context.game.interrupt({
+                player: context.player.id,
+                prompt: "Heal which Pokémon?",
+                choices: [ ...context.player.active.cards.map(c => ({ text: `${c.name} (active)`, target_id: c.id })), ...context.player.bench.cards.map(c => ({ text: c.name, target_id: c.id })) ],
+                resolution: InterruptResolution.UseTrainer,
+                cancelResolution: InterruptResolution.CancelTrainer,
+                args: [ context.card.id ]
+            });
+            return true;
+        }
     }
 };

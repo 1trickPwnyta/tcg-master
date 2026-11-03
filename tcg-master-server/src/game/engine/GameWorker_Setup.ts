@@ -1,5 +1,5 @@
 import { CardDatabase } from "../cards/CardDatabase.js";
-import { CardWorker } from "../cards/CardWorker.js";
+import { CardWorker } from "../cards/workers/CardWorker.js";
 import { InterruptResolution } from "../InterruptResolution.js";
 import { CardState } from "../state/CardState.js";
 import { Interrupt } from "../state/Interrupt.js";
@@ -7,17 +7,22 @@ import { PlayerState } from "../state/PlayerState.js";
 import { GameWorker } from "./GameWorker.js";
 
 export class GameWorker_Setup extends GameWorker {
+    private nextCardId: number = 100;
+
     public update() {
         if (this.state.players.find(p => p.deck.cards.length === 0)) {
             this.game.send("Starting game between", this.state.players[0], "and", this.state.players[1], ".");
             for (const player of this.state.players) {
                 const deck = [
-                    { card: CardDatabase.find("BaseSet.Voltorb"), count: 30 },
-                    { card: CardDatabase.find("BaseSet.LightningEnergy"), count: 30 }
+                    { card: CardDatabase.find("BaseSet.Ninetales"), count: 8 },
+                    { card: CardDatabase.find("BaseSet.Vulpix"), count: 12 },
+                    { card: CardDatabase.find("BaseSet.FireEnergy"), count: 20 },
+                    { card: CardDatabase.find("BaseSet.Switch"), count: 10 },
+                    { card: CardDatabase.find("BaseSet.Potion"), count: 10 }
                 ];
                 for (const blueprint of deck) {
                     for (let i = 0; i < blueprint.count; i++) {
-                        const card = this.makeCard(blueprint.card);
+                        const card = this.makeCard(blueprint.card, player);
                         player.deck.cards.push(card);
                     }
                 }
@@ -33,7 +38,7 @@ export class GameWorker_Setup extends GameWorker {
                         return {
                             player: p.id,
                             prompt: "Will you draw additional cards?",
-                            choices: Array.from({ length: opponent.mulligans }, (_, i) => ({ text: (i + 1).toString(), target_id: (i + 1).toString() })),
+                            choices: Array.from({ length: opponent.mulligans }, (_, i) => ({ text: (i + 1).toString(), target_id: i + 1 })),
                             resolution: InterruptResolution.UseMulliganBonus,
                             cancelResolution: InterruptResolution.SkipMulliganBonus,
                             args: [ p.id ]
@@ -77,7 +82,6 @@ export class GameWorker_Setup extends GameWorker {
                 this.game.send(firstPlayer, "will go first.");
                 this.game.send();
                 this.game.beginTurn(firstPlayer.id);
-                this.game.update();
             }
         }
     }
@@ -93,16 +97,18 @@ export class GameWorker_Setup extends GameWorker {
         }
     }
 
-    private makeCard(worker: CardWorker): CardState {
+    private makeCard(worker: CardWorker, owner: PlayerState): CardState {
         return {
-            id: crypto.randomUUID(),
+            id: this.nextCardId++,
             dbid: worker.dbid,
+            kind: worker.kind,
             token: worker.token,
             name: worker.name,
+            owner_id: owner.id,
             damage: 0,
             poison: false,
             orientation: "normal",
-            attachments: { id: crypto.randomUUID(), name: `${worker.name}'s attachments`, cards: [] }
+            attachments: { id: this.nextCardId++, name: `${worker.name}'s attachments`, cards: [] }
         };
     }
 };

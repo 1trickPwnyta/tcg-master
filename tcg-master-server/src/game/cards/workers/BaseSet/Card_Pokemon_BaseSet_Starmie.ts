@@ -1,58 +1,62 @@
-import { CardOrientation } from "../../../CardOrientation.js";
 import { EnergyType } from "../../../EnergyType.js";
-import { Attack } from "../../Attack.js";
-import { Card } from "../../Card.js";
-import { Card_Energy } from "../../Card_Energy.js";
-import { Card_Pokemon, EvolutionStage } from "../../Card_Pokemon.js";
+import { InterruptResolution } from "../../../InterruptResolution.js";
+import { Interrupt } from "../../../state/Interrupt.js";
+import { Card } from "../../CardDatabase.js";
 import { EvolutionTree } from "../../EvolutionTree.js";
-import { ITargeter } from "../../ITargeter.js";
-import { TargetSelector } from "../../TargetSelector.js";
+import { AttackContext, AttackWorker } from "../AttackWorker.js";
+import { CardWorker_Pokemon } from "../CardWorker_Pokemon.js";
 
-export class Card_Pokemon_BaseSet_Starmie extends Card_Pokemon {
+@Card("BaseSet.Starmie")
+export class Card_Pokemon_BaseSet_Starmie extends CardWorker_Pokemon {
     public override readonly name: string = "Starmie";
     public override readonly type: EnergyType = EnergyType.Water;
-    public override readonly stage: EvolutionStage = EvolutionStage.Stage1;
+    public override readonly stage = "stage1";
     public override readonly evolutionTree: EvolutionTree = EvolutionTree.Staryu;
     public override readonly hp: number = 60;
-    public override readonly attacks: Attack[] = [ new Attack_Recover(this), new Attack_StarFreeze(this) ];
     public override readonly weakness: EnergyType | null = EnergyType.Lightning;
     public override readonly retreatCost: number = 1;
-}
 
-class Attack_Recover extends Attack implements ITargeter<Card_Energy> {
-    public override readonly name: string = "Recover";
-    public override readonly cost: EnergyType[] = [ EnergyType.Water, EnergyType.Water ];
-    public override readonly damage: number = 0;
-    public override readonly text: string = `Discard 1 ${EnergyType.Water} Energy card attached to Starmie in order to use this attack. Remove all damage counters from Starmie.`;
-    protected override readonly targetSelector: TargetSelector<Card> = new TargetSelector<Card_Energy>(this);
+    public override readonly attacks = [
+        new class extends AttackWorker {
+            dbid = "BaseSet.Starmie.Recover";
+            name = "Recover";
+            cost = [ EnergyType.Water, EnergyType.Water ];
+            damage = 0;
+            text = `Discard 1 ${EnergyType.Water} Energy card attached to Starmie in order to use this attack. Remove all damage counters from Starmie.`;
 
-    public get prompt(): string {
-        return `Select a ${EnergyType.Water} energy card to discard from ${this.parent}.`;
-    }
+            protected override validateTargets(context: AttackContext, energy_id?: number): Interrupt | null {
+                if (energy_id === undefined) {
+                    return {
+                        player: context.game.activePlayer.id,
+                        prompt: "Discard which Energy card from Starmie?",
+                        choices: context.game.getEnergy(context.attacker.id).filter(e => e.worker.type == EnergyType.Water).map(e => ({
+                            text: e.card.name, target_id: e.card.id
+                        })),
+                        resolution: InterruptResolution.AttackTargets,
+                        args: [ this.dbid ]
+                    };
+                } else {
+                    return null;
+                }
+            }
 
-    public get choices(): Card_Energy[] {
-        return this.parent.energy.cards.filter(c => c.type == EnergyType.Water);
-    }
+            protected override postEffect(context: AttackContext, _knockedOut: boolean, energy_id: number): void {
+                context.game.moveCard(energy_id, context.attacker.attachments.id, context.game.getPlayer(context.attacker.owner_id)!.discard.id);
+                context.game.healPokemon(context.game.activePlayer.id, context.attacker.id, context.attacker.damage);
+            }
+        }(),
+        new class extends AttackWorker {
+            dbid = "BaseSet.Starmie.StarFreeze";
+            name = "Star Freeze";
+            cost = [ EnergyType.Water, EnergyType.Colorless, EnergyType.Colorless ];
+            damage = 20;
+            text = "Flip a coin. If heads, the Defending Pokémon is now Paralyzed.";
 
-    protected override preEffect(energy: Card_Energy): number {
-        energy.discard();
-        return 0;
-    }
-
-    protected override postEffect() {
-        this.parent.healDamage(this.parent.damage);
-    }
-}
-
-class Attack_StarFreeze extends Attack {
-    public override readonly name: string = "Star Freeze";
-    public override readonly cost: EnergyType[] = [ EnergyType.Water, EnergyType.Colorless, EnergyType.Colorless ];
-    public override readonly damage: number = 20;
-    public override readonly text: string = "Flip a coin. If heads, the Defending Pokémon is now Paralyzed.";
-
-    protected override postEffect(_attacker: Card_Pokemon, defender: Card_Pokemon) {
-        if (defender.inPlay && this.owner.flipCoin()) {
-            defender.orientation = CardOrientation.Paralyzed;
-        }
-    }
-}
+            protected override postEffect(context: AttackContext, knockedOut: boolean): void {
+                if (!knockedOut && context.game.flipCoin(context.game.activePlayer.id)) {
+                    context.game.paralyzePokemon(context.game.inactivePlayer.id, context.defender.id);
+                }
+            }
+        }()
+    ];
+};

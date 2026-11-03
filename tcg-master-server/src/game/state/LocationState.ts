@@ -1,7 +1,7 @@
 import { CardState } from "./CardState.js";
 
 export interface LocationState {
-    id: string;
+    id: number;
     name: string;
     cards: CardState[];
 };

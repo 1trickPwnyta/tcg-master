@@ -8,5 +8,7 @@ export interface GameState {
     interrupt: Interrupt | null;
     interruptStack: Interrupt[];
     rules: { prizes: number };
-    winner_id?: string;
+    betweenTurns: boolean;
+    winner_id?: number;
+    nextInterrupt_id: number;
 };

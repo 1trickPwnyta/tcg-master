@@ -1,13 +1,13 @@
 import { CardDatabase } from "../../cards/CardDatabase.js";
-import { CardWorker_Energy } from "../../cards/CardWorker_Energy.js";
-import { CardWorker_Pokemon } from "../../cards/CardWorker_Pokemon.js";
+import { CardWorker_Energy } from "../../cards/workers/CardWorker_Energy.js";
+import { CardWorker_Pokemon } from "../../cards/workers/CardWorker_Pokemon.js";
 import { InterruptResolution } from "../../InterruptResolution.js";
 import { ResolvesInterrupt } from "../../InterruptResolver.js";
 import { StateContext, StateWorker } from "./StateWorker.js";
 
 @ResolvesInterrupt(InterruptResolution.Retreat)
 export class StateWorker_Retreat extends StateWorker {
-    public override execute(context: StateContext, replacement_id: string): boolean {
+    public override execute(context: StateContext, replacement_id: number): boolean {
         const player = context.game.activePlayer;
         if (!player.bench.cards.length) {
             context.game.sendError(player, "There are no Pokémon on your bench to switch with.");
@@ -15,6 +15,10 @@ export class StateWorker_Retreat extends StateWorker {
         }
 
         const card = player.active.cards[0];
+        if (card.orientation === "paralyzed") {
+            context.game.sendError(player, card, "can't retreat due to paralysis.");
+            return false;
+        }
         const worker = CardDatabase.find<CardWorker_Pokemon>(card.dbid);
         const energy = card.attachments.cards.map(c => ({ id: c.id, worker: CardDatabase.find<CardWorker_Energy>(c.dbid) }));
         const paid = [];
@@ -28,6 +32,9 @@ export class StateWorker_Retreat extends StateWorker {
             context.game.sendError(player, card, "doesn't have enough energy to retreat.");
             return false;
         } else if (replacement_id) {
+            while (paid.length) {
+                context.game.moveCard(paid.pop()!, card.attachments.id, player.discard.id);
+            }
             context.game.moveCard(player.active.cards[0].id, player.active.id, player.bench.id);
             context.game.moveCard(replacement_id, player.bench.id, player.active.id);
             context.game.send(player, "'s", card, "retreated to the bench.");

@@ -4,11 +4,11 @@ import { GameEngine } from "../game/engine/GameEngine.js";
 export class CommandContext {
     public name: string;
     public client: Client;
-    public readonly player_id: string;
+    public readonly player_id: number;
     public readonly game: GameEngine;
     public args: string[];
 
-    public constructor(client: Client, player_id: string, game: GameEngine, caller: string) {
+    public constructor(client: Client, player_id: number, game: GameEngine, caller: string) {
         const tokens = caller.split(" ");
         this.name = tokens[0];
         this.args = tokens.slice(1);

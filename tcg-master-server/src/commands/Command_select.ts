@@ -1,4 +1,3 @@
-import { InvalidSelectionError } from "../game/interaction/prompts/Prompt.js";
 import { Command } from "./Command.js";
 import { CommandContext } from "./CommandContext.js";
 
@@ -17,7 +16,7 @@ export class Command_select extends Command {
                 return;
             }
 
-            context.client.send(new InvalidSelectionError().message);
+            context.client.error("Invalid selection.");
         }
     }
 }

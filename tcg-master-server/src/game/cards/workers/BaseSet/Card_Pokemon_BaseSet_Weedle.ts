@@ -1,28 +1,32 @@
 import { EnergyType } from "../../../EnergyType.js";
-import { Attack } from "../../Attack.js";
-import { Card_Pokemon, EvolutionStage } from "../../Card_Pokemon.js";
+import { Card } from "../../CardDatabase.js";
 import { EvolutionTree } from "../../EvolutionTree.js";
+import { AttackContext, AttackWorker } from "../AttackWorker.js";
+import { CardWorker_Pokemon } from "../CardWorker_Pokemon.js";
 
-export class Card_Pokemon_BaseSet_Weedle extends Card_Pokemon {
+@Card("BaseSet.Weedle")
+export class Card_Pokemon_BaseSet_Weedle extends CardWorker_Pokemon {
     public override readonly name: string = "Weedle";
     public override readonly type: EnergyType = EnergyType.Grass;
-    public override readonly stage: EvolutionStage = EvolutionStage.Basic;
+    public override readonly stage = "basic";
     public override readonly evolutionTree: EvolutionTree = new EvolutionTree("Weedle");
     public override readonly hp: number = 40;
-    public override readonly attacks: Attack[] = [ new Attack_PoisonSting(this) ];
-    public override readonly weakness: EnergyType | null = EnergyType.Fire;
+    public override readonly weakness = EnergyType.Fire;
     public override readonly retreatCost: number = 1;
-}
 
-class Attack_PoisonSting extends Attack {
-    public override readonly name: string = "Poison Sting";
-    public override readonly cost: EnergyType[] = [ EnergyType.Grass ];
-    public override readonly damage: number = 10;
-    public override readonly text: string = "Flip a coin. If heads, the Defending Pokémon is now Poisoned.";
+    public override readonly attacks = [
+        new class extends AttackWorker {
+            dbid = "BaseSet.Weedle.PoisonSting";
+            name = "Poison Sting";
+            cost = [ EnergyType.Grass ];
+            damage = 10;
+            text = "Flip a coin. If heads, the Defending Pokémon is now Poisoned.";
 
-    protected override postEffect(_attacker: Card_Pokemon, defender: Card_Pokemon) {
-        if (defender.inPlay && this.owner.flipCoin()) {
-            defender.poison();
-        }
-    }
-}
+            protected override postEffect(context: AttackContext, knockedOut: boolean): void {
+                if (!knockedOut && context.game.flipCoin(context.game.activePlayer.id)) {
+                    context.game.poisonPokemon(context.game.inactivePlayer.id, context.defender.id);
+                }
+            }
+        }()
+    ];
+};

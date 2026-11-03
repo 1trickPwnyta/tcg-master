@@ -5,11 +5,11 @@ import { StateContext, StateWorker } from "./StateWorker.js";
 
 @ResolvesInterrupt(InterruptResolution.PlayCard)
 export class StateWorker_PlayCard extends StateWorker {
-    public override execute(context: StateContext, card_id: string): boolean {
+    public override execute(context: StateContext, card_id: number): boolean {
         if (card_id) {
-            const card = context.game.findCard(card_id)!;
+            const card = context.game.getCard(card_id)!;
             const worker = CardDatabase.find(card.dbid);
-            return worker.play({ game: context.game, state: context.state, card: card });
+            return worker.play({ game: context.game, state: context.state, player: context.game.activePlayer, card: card });
         } else {
             const player = context.game.activePlayer;
             context.game.interrupt({

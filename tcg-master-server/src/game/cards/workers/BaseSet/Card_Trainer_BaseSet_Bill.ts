@@ -1,11 +1,16 @@
-import { Card_Trainer } from "../../Card_Trainer.js";
+import { Card } from "../../CardDatabase.js";
+import { PlayContext } from "../CardWorker.js";
+import { CardWorker_Trainer } from "../CardWorker_Trainer.js";
 
-export class Card_Trainer_BaseSet_Bill extends Card_Trainer {
+@Card("BaseSet.Bill")
+export class Card_Trainer_BaseSet_Bill extends CardWorker_Trainer {
     public override readonly name: string = "Bill";
     public override readonly text: string = "Draw 2 cards.";
+    public override readonly targeting: boolean = false;
 
-    protected override execute(): boolean {
-        this.owner.draw(2);
+    public override execute(context: PlayContext): boolean {
+        const player = context.game.activePlayer;
+        context.game.draw(player.id, 2);
         return true;
     }
 };

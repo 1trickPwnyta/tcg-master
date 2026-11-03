@@ -1,25 +1,25 @@
 import { InterruptResolution } from "../InterruptResolution.js";
 
 export interface InterruptSync {
-    id?: string;
+    id?: number;
     interrupts?: Interrupt[];
-    player: string;
+    player: number;
     prompt: string;
     choices: Choice[];
     force?: boolean;
     resolution?: InterruptResolution;
     cancelResolution?: InterruptResolution;
-    args?: string[];
+    args?: (number | string)[];
 };
 
 export interface InterruptAsync {
-    id?: string;
+    id?: number;
     interrupts: Interrupt[];
-    player?: string;
+    player?: number;
     prompt?: string;
     choices?: Choice[];
     force?: boolean;
 };
 
-export type Choice = { text: string, target_id?: string, resolution?: InterruptResolution, args?: string[] };
+export type Choice = { text: string, target_id?: number | string, resolution?: InterruptResolution, args?: number[] };
 export type Interrupt = InterruptSync | InterruptAsync;

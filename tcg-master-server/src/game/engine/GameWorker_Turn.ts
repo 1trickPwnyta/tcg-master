@@ -14,18 +14,9 @@ export class GameWorker_Turn extends GameWorker {
             return;
         }
 
-        const playersWithNoActive = this.state.players.filter(p => !p.active.cards.length && p.bench.cards.length);
-        if (playersWithNoActive.length) {
-            this.game.interrupt({
-                interrupts: playersWithNoActive.map(p => ({
-                    player: p.id,
-                    prompt: "Select a Pokémon from your bench to be your active Pokémon.",
-                    choices: p.bench.cards.map(c => ({ text: c.name, target_id: c.id })),
-                    resolution: InterruptResolution.Promote,
-                    force: true,
-                    args: [ p.id ]
-                }))
-            });
+        const interrupt = this.game.checkActivePokemon();
+        if (interrupt) {
+            this.game.interrupt(interrupt);
             return;
         }
 

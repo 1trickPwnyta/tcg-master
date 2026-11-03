@@ -17,8 +17,8 @@ export class EvolutionTree {
         return this;
     }
 
-    public evolvesDirect(current: string, next: string): boolean {
-        return this.next.some(n => n.name == next);
+    public evolvesDirect(to: string): boolean {
+        return this.next.some(n => n.name == to);
     }
 
     public static readonly Staryu: EvolutionTree = new EvolutionTree("Staryu").then("Starmie");

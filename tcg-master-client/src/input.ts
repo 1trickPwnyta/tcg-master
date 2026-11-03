@@ -24,6 +24,7 @@ export class Input {
         Input.socket.on("ASK", Input.prompt);
         Input.socket.on("WAIT", Input.wait)
         Input.socket.on("NEW", () => $("#console").empty());
+        Input.socket.on("END", Input.gameOver);
     }
 
     public static send(input: string) {
@@ -53,6 +54,11 @@ export class Input {
 
     public static wait() {
         $("#prompt").text("Please stand by...");
+        $("#choices").html("");
+    }
+
+    public static gameOver() {
+        $("#prompt").text("Game over!");
         $("#choices").html("");
     }
 };

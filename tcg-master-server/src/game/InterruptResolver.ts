@@ -22,11 +22,11 @@ export class InterruptResolver {
         }
     }
 
-    public static cancel(game: GameEngine, interrupt: InterruptSync, player_id: string) {
+    public static cancel(game: GameEngine, interrupt: InterruptSync, player_id: number) {
         const key = interrupt.cancelResolution!;
         const worker = workers.get(key);
         if (worker) {
-            worker.execute({ game: game, state: game.getState() }, player_id);
+            worker.execute({ game: game, state: game.getState() }, player_id, ...(interrupt.args ?? []));
         } else {
             throw new Error(`No worker for ${key}.`);
         }

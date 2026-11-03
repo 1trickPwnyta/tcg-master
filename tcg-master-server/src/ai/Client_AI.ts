@@ -5,9 +5,9 @@ import { GameEngine } from "../game/engine/GameEngine.js";
 import { Player } from "../game/Player.js";
 import { AIPlanner } from "./AIPlanner.js";
 import { Choice } from "../game/state/Interrupt.js";
-import { Worker } from "worker_threads";
-import path from "path";
 import { GameState } from "../game/state/GameState.js";
+import path from "path";
+import { Worker } from "worker_threads";
 
 export type AIChoice = {
     i: number | null;
@@ -19,8 +19,8 @@ export type AIContext = {
     prompt: string;
     choices: Choice[];
     force: boolean;
-    interrupt_id: string;
-    player_id: string;
+    interrupt_id: number;
+    player_id: number;
     state: GameState;
     attemptedChoices?: Map<string, number>
 };
@@ -33,7 +33,7 @@ export type ScoredChoice = {
 export class Client_AI extends Client {
     public static getAIChoices(context: AIContext): AIChoice[] {
         return [ ...context.choices, ...(!context.force ? [ null ] : []) ].map((c, i) => {
-            const key = context.prompt + context.choices.map(c => c.text + c.target_id).join("") + c?.text + c?.target_id;
+            const key = context.player_id + context.prompt + context.choices.map(c => c.text + c.target_id).join("") + c?.text + c?.target_id;
             return {
                 i: c ? i : null,
                 key: key,
@@ -47,8 +47,8 @@ export class Client_AI extends Client {
     public planner: AIPlanner | null = null;
     private witnessedCards: Map<(new (game: GameEngine, owner: Player) => Card), number> = new Map<(new (game: GameEngine, owner: Player) => Card), number>();
     public invalid: boolean = false;
-    protected readonly attemptedChoices: Map<string, number> = new Map<string, number>();
-    protected interrupt_id: string | null = null;
+    private readonly movesUsed: Map<number, (number | null)[]> = new Map<number, (number | null)[]>();
+    protected interrupt_id: number | null = null;
 
     public constructor() {
         super();
@@ -73,14 +73,23 @@ export class Client_AI extends Client {
         const worker = new Worker(path.join(import.meta.dirname, "AIWorker.js"));
         worker.on("message", (scores: ScoredChoice[]) => {
             worker.terminate();
-            const choice = scores.filter(s => s.score !== null).sort((a, b) => b.score! - a.score!)[0].choice;
-            this.attemptedChoices.set(choice.key, (this.attemptedChoices.get(choice.key) ?? 0) + 1);
-            if (this.interrupt_id === this.game?.getInterrupt(this.player_id!)?.id) {
-                console.log(`> ${choice.i ?? "(cancel)"}`);
-                this.interrupt_id = null;
-                this.game!.resolveInterrupt(this.player_id!, choice.i);
-            } else {
-                throw new Error(`Attempted to respond to interrupt ${this.interrupt_id} but it wasn't available.`);
+            const state = this.game!.getStateHash();
+            try {
+                const choice = scores.filter(s => s.score !== null && !(this.movesUsed.get(state) ?? []).includes(s.choice.i)).sort((a, b) => b.score! - a.score!)[0].choice;
+                if (!this.movesUsed.has(state)) {
+                    this.movesUsed.set(state, []);
+                }
+                this.movesUsed.set(state, [ ...this.movesUsed.get(state)!, choice.i ]);
+                if (this.interrupt_id === this.game?.getInterrupt(this.player_id!)?.id) {
+                    console.log(`> ${choice.i ?? "(cancel)"}`);
+                    this.interrupt_id = null;
+                    this.game!.resolveInterrupt(this.player_id!, choice.i);
+                } else {
+                    throw new Error(`Attempted to respond to interrupt ${this.interrupt_id} but it wasn't available.`);
+                }
+            } catch (e) {
+                debugger;
+                throw e;
             }
         });
         worker.postMessage({
@@ -91,10 +100,6 @@ export class Client_AI extends Client {
             player_id: this.player_id!,
             state: this.game!.getState()
         });
-    }
-
-    public override notify_endOfTurn(): void {
-        this.attemptedChoices.clear();
     }
 
     public witness(player: Player, card: Card) {

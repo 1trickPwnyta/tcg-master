@@ -2,8 +2,8 @@ import { Socket } from "socket.io";
 import { Client } from "./Client.js";
 import { CommandContext } from "./commands/CommandContext.js";
 import { Command, CommandNotFoundError } from "./commands/Command.js";
-import { IToken } from "./IToken.js";
 import { Choice } from "./game/state/Interrupt.js";
+import { PlayerState } from "./game/state/PlayerState.js";
 
 export class Client_Human extends Client {
     public override name: string = "Pikachu";
@@ -59,5 +59,9 @@ export class Client_Human extends Client {
 
     public override wait() {
         this.socket.emit("WAIT");
+    }
+
+    public override notify_gameOver(_winner: PlayerState): void {
+        this.socket.emit("END");
     }
 };
