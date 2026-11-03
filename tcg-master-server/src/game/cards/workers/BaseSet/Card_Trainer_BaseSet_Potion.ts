@@ -14,7 +14,7 @@ export class Card_Trainer_BaseSet_Potion extends CardWorker_Trainer {
             context.game.healPokemon(context.player.id, target_id, 20);
             return true;
         } else {
-            context.game.interrupt({
+            context.game.interrupts.interrupt({
                 player: context.player.id,
                 prompt: "Heal which Pokémon?",
                 choices: [ ...context.player.active.cards.map(c => ({ text: `${c.name} (active)`, target_id: c.id })), ...context.player.bench.cards.map(c => ({ text: c.name, target_id: c.id })) ],

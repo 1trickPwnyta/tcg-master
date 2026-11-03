@@ -89,7 +89,7 @@ export class AttackFactory {
             worker.validateTargets = (context: AttackContext, energy_id?: number) => {
                 if (energy_id === undefined) {
                     return {
-                        player: context.game.activePlayer.id,
+                        player: context.game.players.active.id,
                         prompt: `Discard which Energy card from ${context.attacker.name}}?`,
                         choices: context.game.getEnergy(context.attacker.id).filter(e => e.worker.type == this.discardType).map(e => ({
                             text: e.card.name, target_id: e.card.id
@@ -102,27 +102,27 @@ export class AttackFactory {
                 }
             };
             worker.postEffects.push((context: AttackContext, _knockedOut: boolean, energy_id: number) => {
-                context.game.moveCard(energy_id, context.attacker.attachments.id, context.game.getPlayer(context.attacker.owner_id)!.discard.id);
+                context.game.moveCard(energy_id, context.attacker.attachments.id, context.game.players.get(context.attacker.owner_id)!.discard.id);
             });
         }
         if (this.poison) {
             worker.postEffects.push((context: AttackContext, knockedOut: boolean) => {
-                if (!knockedOut && this.poison === "always" || context.game.flipCoin(context.game.activePlayer.id)) {
-                    context.game.poisonPokemon(context.game.inactivePlayer.id, context.defender.id);
+                if (!knockedOut && this.poison === "always" || context.game.flipCoin(context.game.players.active.id)) {
+                    context.game.poisonPokemon(context.game.players.inactive.id, context.defender.id);
                 }
             });
         }
         if (this.paralyze) {
             worker.postEffects.push((context: AttackContext, knockedOut: boolean) => {
-                if (!knockedOut && this.paralyze === "always" || context.game.flipCoin(context.game.activePlayer.id)) {
-                    context.game.paralyzePokemon(context.game.inactivePlayer.id, context.defender.id);
+                if (!knockedOut && this.paralyze === "always" || context.game.flipCoin(context.game.players.active.id)) {
+                    context.game.paralyzePokemon(context.game.players.inactive.id, context.defender.id);
                 }
             });
         }
         if (this.confuse) {
             worker.postEffects.push((context: AttackContext, knockedOut: boolean) => {
-                if (!knockedOut && this.confuse === "always" || context.game.flipCoin(context.game.activePlayer.id)) {
-                    context.game.confusePokemon(context.game.inactivePlayer.id, context.defender.id);
+                if (!knockedOut && this.confuse === "always" || context.game.flipCoin(context.game.players.active.id)) {
+                    context.game.confusePokemon(context.game.players.inactive.id, context.defender.id);
                 }
             });
         }

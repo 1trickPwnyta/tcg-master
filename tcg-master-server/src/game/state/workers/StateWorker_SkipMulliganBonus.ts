@@ -5,7 +5,7 @@ import { StateContext, StateWorker } from "./StateWorker.js";
 @ResolvesInterrupt(InterruptResolution.SkipMulliganBonus)
 export class StateWorker_SkipMulliganBonus extends StateWorker {
     public override execute(context: StateContext, player_id: number): boolean {
-        context.game.getPlayer(player_id).mulliganBonusUsed = true;
+        context.game.players.get(player_id).mulliganBonusUsed = true;
         return true;
     }
 };

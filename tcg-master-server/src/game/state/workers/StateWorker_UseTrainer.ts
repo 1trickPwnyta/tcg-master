@@ -10,14 +10,14 @@ export class StateWorker_UseTrainer extends StateWorker {
         const card = context.game.search.getCard(card_id);
         if (card) {
             const worker = CardDatabase.find<CardWorker_Trainer>(card.dbid);
-            context.game.send(context.game.activePlayer, "used", card, ".");
+            context.game.send(context.game.players.active, "used", card, ".");
             worker.execute({
                 game: context.game,
                 state: context.state,
-                player: context.game.activePlayer,
+                player: context.game.players.active,
                 card: card
             }, target_id);
-            context.game.moveCard(card.id, context.game.activePlayer.limbo.id, context.game.activePlayer.discard.id);
+            context.game.moveCard(card.id, context.game.players.active.limbo.id, context.game.players.active.discard.id);
         } else {
             throw new Error("Can't find the Trainer card used.");
         }

@@ -26,7 +26,7 @@ export class Card_Pokemon_BaseSet_Squirtle extends CardWorker_Pokemon {
             .costs(EnergyType.Water, EnergyType.Colorless)
             .reads("Flip a coin. If heads, prevent all damage done to Squirtle during your opponent's next turn. <em>(Any other effects of attacks still happen.)</em>")
             .withPostEffect((context: AttackContext, _knockedOut: boolean) => {
-                if (context.game.flipCoin(context.game.activePlayer.id)) {
+                if (context.game.flipCoin(context.game.players.active.id)) {
                     context.attacker.damagePrevention = -1;
                 }
             })

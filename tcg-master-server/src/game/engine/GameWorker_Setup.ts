@@ -31,7 +31,7 @@ export class GameWorker_Setup extends GameWorker {
             }
             this.game.update();
         } else if (this.state.players.find(p => p.mulligans && !this.state.players.find(o => o.id !== p.id)!.mulliganBonusUsed)) {
-            this.game.interrupt({
+            this.game.interrupts.interrupt({
                 interrupts: this.state.players.map((p): Interrupt | undefined => {
                     const opponent = this.state.players.find(o => o.id !== p.id)!;
                     if (opponent.mulligans) {
@@ -49,7 +49,7 @@ export class GameWorker_Setup extends GameWorker {
                 }).filter(i => i !== undefined)
             });
         } else if (this.state.players.find(p => !p.active.cards.length)) {
-            this.game.interrupt({
+            this.game.interrupts.interrupt({
                 interrupts: this.state.players.map(p => ({
                     player: p.id,
                     prompt: "Select a basic Pokémon as your active Pokémon.",
@@ -62,7 +62,7 @@ export class GameWorker_Setup extends GameWorker {
         } else {
             const playersNotReady = this.state.players.filter(p => !p.setupComplete && this.game.basicPokemonInHand(p.id).length && p.bench.cards.length < 5);
             if (playersNotReady.length) {
-                this.game.interrupt({
+                this.game.interrupts.interrupt({
                     interrupts: playersNotReady.map(p => ({
                         player: p.id,
                         prompt: "Choose other basic Pokémon to put on the bench.",
@@ -108,7 +108,7 @@ export class GameWorker_Setup extends GameWorker {
             damage: 0,
             poison: false,
             orientation: "normal",
-            attachments: { id: this.nextCardId++, name: `${worker.name}'s attachments`, cards: [] }
+            attachments: { id: this.nextCardId++, cards: [] }
         };
     }
 };

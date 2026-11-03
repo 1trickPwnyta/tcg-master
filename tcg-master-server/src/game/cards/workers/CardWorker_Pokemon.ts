@@ -22,7 +22,7 @@ export abstract class CardWorker_Pokemon extends CardWorker {
 
     public override play(context: PlayContext): boolean {
         if (this.stage === "basic") {
-            if (context.game.activePlayer.bench.cards.length >= 5) {
+            if (context.game.players.active.bench.cards.length >= 5) {
                 context.game.sendError(context.player, "Your bench is full.");
                 return false;
             } else {
@@ -36,7 +36,7 @@ export abstract class CardWorker_Pokemon extends CardWorker {
                 return worker.evolutionTree.evolvesDirect(this.name);
             });
             if (cards.length) {
-                context.game.interrupt({
+                context.game.interrupts.interrupt({
                     player: context.player.id,
                     prompt: `Which Pokémon will evolve into ${this.name}?`,
                     choices: cards.map(c => ({ text: c == context.player.active.cards[0] ? `${c.name} (active)` : c.name, target_id: c.id })),

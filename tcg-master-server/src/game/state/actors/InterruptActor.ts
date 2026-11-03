@@ -3,6 +3,30 @@ import { Interrupt, InterruptSync } from "../Interrupt.js";
 import { StateActor } from "./StateActor.js";
 
 export class InterruptActor extends StateActor {
+    public interrupt(interrupt: Interrupt) {
+        this.assignInterruptId(interrupt);
+        this.state.interrupt = interrupt;
+        this.game.sendInterrupt(interrupt);
+    }
+
+    public stackInterrupt(interrupt: Interrupt) {
+        if (this.state.interrupt) {
+            this.state.interruptStack.push(this.state.interrupt);
+        }
+        this.interrupt(interrupt);
+    }
+
+    private assignInterruptId(interrupt: Interrupt) {
+        if (!interrupt.id) {
+            interrupt.id = this.state.nextInterrupt_id++;
+        }
+        if (interrupt.interrupts) {
+            for (const sub of interrupt.interrupts) {
+                this.assignInterruptId(sub);
+            }
+        }
+    }
+
     public getInterrupt(player_id: number, root?: Interrupt): InterruptSync | null {
         if (this.state.interrupt?.player === player_id) {
             return this.state.interrupt as InterruptSync;

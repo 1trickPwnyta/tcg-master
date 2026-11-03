@@ -24,14 +24,14 @@ export class AttackWorker {
 
     public execute(context: AttackContext, ...targets: number[]): boolean {
         if (!this.costSatisfied(context.attacker.attachments.cards.map(c => CardDatabase.find<CardWorker_Energy>(c.dbid)))) {
-            context.game.sendError(context.game.activePlayer, context.attacker, "doesn't have enough energy to use", this.name, ".");
+            context.game.sendError(context.game.players.active, context.attacker, "doesn't have enough energy to use", this.name, ".");
             return false;
         } else {
             const interrupt = this.validateTargets(context, ...targets);
             if (interrupt) {
-                context.game.interrupt(interrupt);
+                context.game.interrupts.interrupt(interrupt);
             } else {
-                context.game.send(context.game.activePlayer, "'s", context.attacker, "used", this.name, "!");
+                context.game.send(context.game.players.active, "'s", context.attacker, "used", this.name, "!");
                 let damage = this.damage;
                 if (context.defender.damagePrevention !== undefined) {
                     if (context.defender.damagePrevention < 0) {
@@ -41,7 +41,7 @@ export class AttackWorker {
                         damage = Math.max(0, damage);
                     }
                 }
-                const knockedOut = context.game.damagePokemon(context.game.inactivePlayer.id, context.defender.id, damage);
+                const knockedOut = context.game.damagePokemon(context.game.players.inactive.id, context.defender.id, damage);
                 for (const effect of this.postEffects) {
                     effect(context, knockedOut, ...targets);
                 }

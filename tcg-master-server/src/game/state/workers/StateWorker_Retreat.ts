@@ -8,7 +8,7 @@ import { StateContext, StateWorker } from "./StateWorker.js";
 @ResolvesInterrupt(InterruptResolution.Retreat)
 export class StateWorker_Retreat extends StateWorker {
     public override execute(context: StateContext, replacement_id: number): boolean {
-        const player = context.game.activePlayer;
+        const player = context.game.players.active;
         if (!player.bench.cards.length) {
             context.game.sendError(player, "There are no Pokémon on your bench to switch with.");
             return false;
@@ -41,7 +41,7 @@ export class StateWorker_Retreat extends StateWorker {
             context.game.send(player, "sent out", player.active.cards[0], "!");
             return true;
         } else {
-            context.game.interrupt({
+            context.game.interrupts.interrupt({
                 player: player.id,
                 prompt: `Which Pokémon on your bench will replace ${card.name}?`,
                 choices: player.bench.cards.map(c => ({ text: c.name, target_id: c.id })),

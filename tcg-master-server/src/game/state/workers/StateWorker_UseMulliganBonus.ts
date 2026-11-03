@@ -6,7 +6,7 @@ import { StateContext, StateWorker } from "./StateWorker.js";
 export class StateWorker_UseMulliganBonus extends StateWorker {
     public override execute(context: StateContext, amount: number, player_id: number): boolean {
         context.game.draw(player_id, amount);
-        context.game.getPlayer(player_id).mulliganBonusUsed = true;
+        context.game.players.get(player_id).mulliganBonusUsed = true;
         return true;
     }
 };

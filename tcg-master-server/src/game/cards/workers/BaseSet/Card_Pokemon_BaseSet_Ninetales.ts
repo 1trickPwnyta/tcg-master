@@ -20,18 +20,18 @@ export class Card_Pokemon_BaseSet_Ninetales extends CardWorker_Pokemon {
         AttackFactory.makeAttack("BaseSet.Ninetales.Lure", "Lure")
             .costs(EnergyType.Colorless, EnergyType.Colorless)
             .reads("If your opponent has any Benched Pokémon, choose 1 of them and switch it with their Active Pokémon.")
-            .targets((context: AttackContext, benched_id?: number) => benched_id === undefined && context.game.inactivePlayer.bench.cards.length ? {
-                    player: context.game.activePlayer.id,
+            .targets((context: AttackContext, benched_id?: number) => benched_id === undefined && context.game.players.inactive.bench.cards.length ? {
+                    player: context.game.players.active.id,
                     prompt: "Which Pokémon will be lured out?",
-                    choices: context.game.inactivePlayer.bench.cards.map(c => ({ text: c.name, target_id: c.id })),
+                    choices: context.game.players.inactive.bench.cards.map(c => ({ text: c.name, target_id: c.id })),
                     resolution: InterruptResolution.AttackTargets,
                     args: [ this.dbid ]
                 } : null
             )
             .withPostEffect((context: AttackContext, _knockedOut: boolean, benched_id?: number) => {
                 if (benched_id !== undefined) {
-                    context.game.moveCard(context.game.inactivePlayer.active.cards[0].id, context.game.inactivePlayer.active.id, context.game.inactivePlayer.bench.id);
-                    context.game.moveCard(benched_id, context.game.inactivePlayer.bench.id, context.game.inactivePlayer.active.id);
+                    context.game.moveCard(context.game.players.inactive.active.cards[0].id, context.game.players.inactive.active.id, context.game.players.inactive.bench.id);
+                    context.game.moveCard(benched_id, context.game.players.inactive.bench.id, context.game.players.inactive.active.id);
                     context.game.send(context.game.search.getCard(benched_id), "was lured out!");
                 }
             })

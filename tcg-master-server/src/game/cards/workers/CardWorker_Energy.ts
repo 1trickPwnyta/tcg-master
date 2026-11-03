@@ -20,14 +20,14 @@ export abstract class CardWorker_Energy extends CardWorker {
 
     public override play(context: PlayContext): boolean {
         if (context.state.turn?.energyPlayed) {
-            context.game.sendError(context.game.activePlayer, "You already played an Energy card this turn.");
+            context.game.sendError(context.game.players.active, "You already played an Energy card this turn.");
             return false;
         } else {
-            context.game.interrupt({
-                player: context.game.activePlayer.id,
+            context.game.interrupts.interrupt({
+                player: context.game.players.active.id,
                 prompt: `Attach ${context.card.name} to which Pokémon?`,
-                choices: [ context.game.activePlayer.active.cards[0], ...context.game.activePlayer.bench.cards ].map(c => ({
-                    text: c.name + (c == context.game.activePlayer.active.cards[0] ? " (active)" : ""),
+                choices: [ context.game.players.active.active.cards[0], ...context.game.players.active.bench.cards ].map(c => ({
+                    text: c.name + (c == context.game.players.active.active.cards[0] ? " (active)" : ""),
                     target_id: c.id
                 })),
                 resolution: InterruptResolution.AttachEnergy,

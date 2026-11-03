@@ -16,12 +16,12 @@ export class GameWorker_Turn extends GameWorker {
 
         const interrupt = this.game.checkActivePokemon();
         if (interrupt) {
-            this.game.interrupt(interrupt);
+            this.game.interrupts.interrupt(interrupt);
             return;
         }
 
         if (!this.turn.attacked) {
-            this.game.interrupt({
+            this.game.interrupts.interrupt({
                 player: this.turn.player,
                 prompt: "Your turn.",
                 choices: [

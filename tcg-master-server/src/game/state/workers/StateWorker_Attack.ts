@@ -7,7 +7,7 @@ import { StateContext, StateWorker } from "./StateWorker.js";
 @ResolvesInterrupt(InterruptResolution.Attack)
 export class StateWorker_Attack extends StateWorker {
     public override execute(context: StateContext, attack_id: string, ...args: number[]): boolean {
-        const player = context.game.activePlayer;
+        const player = context.game.players.active;
         const card = player.active.cards[0];
         if (card.orientation === "paralyzed") {
             context.game.sendError(player, card, "can't attack due to paralysis.");
@@ -24,9 +24,9 @@ export class StateWorker_Attack extends StateWorker {
                 }
             }
             const attack = worker.attacks.find(a => a.dbid === attack_id)!;
-            return attack.execute({ game: context.game, state: context.state, attacker: card, defender: context.game.inactivePlayer.active.cards[0] }, ...args);
+            return attack.execute({ game: context.game, state: context.state, attacker: card, defender: context.game.players.inactive.active.cards[0] }, ...args);
         } else {
-            context.game.interrupt({
+            context.game.interrupts.interrupt({
                 player: player.id,
                 prompt: `Which attack will ${card.name} use?`,
                 choices: worker.attacks.map(a => ({ text: a.name, target_id: a.dbid })),

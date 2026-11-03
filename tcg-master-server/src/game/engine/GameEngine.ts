@@ -13,6 +13,7 @@ import { InterruptResolution } from "../InterruptResolution.js";
 import { CardWorker_Energy } from "../cards/workers/CardWorker_Energy.js";
 import { InterruptActor } from "../state/actors/InterruptActor.js";
 import { SearchActor } from "../state/actors/SearchActor.js";
+import { PlayerActor } from "../state/actors/PlayerActor.js";
 
 export class GameEngine {
     private readonly clients: Client[];
@@ -23,6 +24,7 @@ export class GameEngine {
     private readonly setup: GameWorker_Setup;
     private readonly turns: GameWorker_Turn;
 
+    public readonly players: PlayerActor;
     public readonly interrupts: InterruptActor;
     public readonly search: SearchActor;
 
@@ -46,40 +48,7 @@ export class GameEngine {
         client1.player_id = client1.player_id ?? 1;
         client2.player_id = client2.player_id ?? clonedState?.players.find(p => p.id !== client1.player_id)?.id ?? 2;
         this.state = clonedState ?? {
-            players: [
-                {
-                    id: client1.player_id,
-                    token: { name: "Pikachu", type: "player" },
-                    name: "Pikachu",
-                    pronouns: { subjective: "they", possessive: "their" },
-                    active: { id: 10, name: "Pikachu's active", cards: [] },
-                    bench: { id: 11, name: "Pikachu's bench", cards: [] },
-                    limbo: { id: 16, name: "Pikachu's limbo", cards: [] },
-                    hand: { id: 12, name: "Pikachu's hand", cards: [] },
-                    discard: { id: 13, name: "Pikachu's discard", cards: [] },
-                    prizes: { id: 14, name: "Pikachu's prizes", cards: [] },
-                    deck: { id: 15, name: "Pikachu's deck", cards: [] },
-                    mulligans: 0,
-                    mulliganBonusUsed: false,
-                    setupComplete: false
-                },
-                {
-                    id: client2.player_id,
-                    token: { name: "COM", type: "player" },
-                    name: "COM",
-                    pronouns: { subjective: "they", possessive: "their" },
-                    active: { id: 20, name: "COM's active", cards: [] },
-                    bench: { id: 21, name: "COM's bench", cards: [] },
-                    limbo: { id: 26, name: "COM's limbo", cards: [] },
-                    hand: { id: 22, name: "COM's hand", cards: [] },
-                    discard: { id: 23, name: "COM's discard", cards: [] },
-                    prizes: { id: 24, name: "COM's prizes", cards: [] },
-                    deck: { id: 25, name: "COM's deck", cards: [] },
-                    mulligans: 0,
-                    mulliganBonusUsed: false,
-                    setupComplete: false
-                }
-            ],
+            players: [ PlayerActor.makePlayer(1, "Pikachu"), PlayerActor.makePlayer(2, "COM") ],
             turn: null,
             betweenTurns: false,
             interrupt: null,
@@ -91,6 +60,7 @@ export class GameEngine {
         };
         this.simulation = clonedState !== undefined;
 
+        this.players = new PlayerActor(this);
         this.interrupts = new InterruptActor(this);
         this.search = new SearchActor(this);
 
@@ -131,18 +101,10 @@ export class GameEngine {
         return this.clients.find(c => c.player_id === player_id)!;
     }
 
-    public getPlayer(player_id: number): PlayerState {
-        return this.state.players.find(p => p.id === player_id)!;
-    }
-
-    public getOpponent(player_id: number): PlayerState {
-        return this.state.players.find(p => p.id !== player_id)!;
-    }
-
     public flipCoin(player_id?: number): boolean {
         const heads = Math.random() < 0.5;
         if (player_id) {
-            this.send(this.getPlayer(player_id), "flipped a coin... It was", heads ? "heads" : "tails", "!");
+            this.send(this.players.get(player_id), "flipped a coin... It was", heads ? "heads" : "tails", "!");
         } else {
             this.send("A coin was flipped... It was", heads ? "heads" : "tails", "!");
         }
@@ -152,44 +114,20 @@ export class GameEngine {
     public update() {
         if (!this.state.winner_id) {
             if (this.state.interrupt) {
-                this.interrupt(this.state.interrupt);
+                this.interrupts.interrupt(this.state.interrupt);
             } else if (this.state.interruptStack.length) {
-                this.interrupt(this.state.interruptStack.pop()!);
+                this.interrupts.interrupt(this.state.interruptStack.pop()!);
             } else if (!this.state.turn) {
                 this.setup.update();
             } else if (this.state.betweenTurns) {
-                this.beginTurn(this.inactivePlayer.id);
+                this.beginTurn(this.players.inactive.id);
             } else {
                 this.turns.update();
             }
         }
     }
 
-    public interrupt(interrupt: Interrupt) {
-        this.assignInterruptId(interrupt);
-        this.state.interrupt = interrupt;
-        this.sendInterrupt(interrupt);
-    }
-
-    public stackInterrupt(interrupt: Interrupt) {
-        if (this.state.interrupt) {
-            this.state.interruptStack.push(this.state.interrupt);
-        }
-        this.interrupt(interrupt);
-    }
-
-    private assignInterruptId(interrupt: Interrupt) {
-        if (!interrupt.id) {
-            interrupt.id = this.state.nextInterrupt_id++;
-        }
-        if (interrupt.interrupts) {
-            for (const sub of interrupt.interrupts) {
-                this.assignInterruptId(sub);
-            }
-        }
-    }
-
-    private sendInterrupt(interrupt: Interrupt) {
+    public sendInterrupt(interrupt: Interrupt) {
         if (this.simulation && this.promptsGiven > 0) {
             return;
         }
@@ -242,7 +180,7 @@ export class GameEngine {
     }
 
     public shuffleDeck(player_id: number) {
-        const player = this.getPlayer(player_id);
+        const player = this.players.get(player_id);
         for (let i = player.deck.cards.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
             const temp = player.deck.cards[i];
@@ -253,7 +191,7 @@ export class GameEngine {
     }
 
     public shuffleHandIntoDeck(player_id: number) {
-        const player = this.getPlayer(player_id);
+        const player = this.players.get(player_id);
         while (player.hand.cards.length) {
             player.deck.cards.push(player.hand.cards.pop()!);
         }
@@ -261,7 +199,7 @@ export class GameEngine {
     }
 
     public draw(player_id: number, amount: number = 1) {
-        const player = this.getPlayer(player_id);
+        const player = this.players.get(player_id);
         amount = Math.min(amount, player.deck.cards.length);
         const cardsDrawn = [];
         for (let i = 0; i < amount; i++) {
@@ -272,16 +210,16 @@ export class GameEngine {
         if (amount > 5) {
             this.send(player, "drew", amount, `card${amount > 1 ? "s" : ""}.`)
         } else {
-            this.sendTo(this.getOpponent(player.id).id, player, "drew", amount, `card${amount > 1 ? "s" : ""}.`)
+            this.sendTo(this.players.getOpponent(player.id).id, player, "drew", amount, `card${amount > 1 ? "s" : ""}.`)
             this.sendTo(player.id, "You drew", ...Client.getCardList(cardsDrawn));
         }
     }
 
     public takePrize(player_id: number) {
-        const player = this.getPlayer(player_id);
+        const player = this.players.get(player_id);
         const card = player.prizes.cards.pop()!;
         player.hand.cards.push(card);
-        this.sendTo(this.getOpponent(player.id).id, player, "took a prize.");
+        this.sendTo(this.players.getOpponent(player.id).id, player, "took a prize.");
         this.sendTo(player.id, "You took", card, "as a prize.");
         if (player.prizes.cards.length <= 0) {
             this.endGame(player_id);
@@ -289,7 +227,7 @@ export class GameEngine {
     }
 
     public basicPokemonInHand(player_id: number): CardState[] {
-        const player = this.getPlayer(player_id);
+        const player = this.players.get(player_id);
         return player.hand.cards.filter(c => {
             const worker = CardDatabase.find(c.dbid)
             if (worker instanceof CardWorker_Pokemon) {
@@ -299,17 +237,9 @@ export class GameEngine {
         });
     }
 
-    public get activePlayer(): PlayerState {
-        return this.state.players.find(p => p.id === this.state.turn!.player)!;
-    }
-
-    public get inactivePlayer(): PlayerState {
-        return this.state.players.find(p => p.id !== this.state.turn!.player)!;
-    }
-
     public moveCard(card_id: number, from_id: number, to_id: number) {
         const card = this.search.getCard(card_id)!;
-        const owner = this.getPlayer(card.owner_id)!;
+        const owner = this.players.get(card.owner_id)!;
         const from = this.search.getLocation(from_id)!;
         const to = this.search.getLocation(to_id)!;
         if (owner.active.id !== to_id) {
@@ -335,17 +265,17 @@ export class GameEngine {
 
     public damagePokemon(player_id: number, card_id: number, amount: number, source?: string): boolean {
         if (amount) {
-            const player = this.getPlayer(player_id)!;
+            const player = this.players.get(player_id)!;
             const card = this.search.getCard(card_id)!;
             card.damage += amount;
             this.send(player, "'s", card, "took", { name: amount.toString(), type: "damage" }, `damage${source ? ` due to ${source}` : ""}!`);
             if (card.damage >= CardDatabase.find<CardWorker_Pokemon>(card.dbid).hp) {
                 this.send(player, "'s", card, "was knocked out!");
                 this.moveCard(card.id, this.search.findCard(card.id)!.id, player.discard.id);
-                this.takePrize(this.getOpponent(player.id).id);
+                this.takePrize(this.players.getOpponent(player.id).id);
                 const interrupt = this.checkActivePokemon();
                 if (interrupt) {
-                    this.interrupt(interrupt);
+                    this.interrupts.interrupt(interrupt);
                 }
                 return true;
             }
@@ -355,7 +285,7 @@ export class GameEngine {
     }
 
     public healPokemon(player_id: number, card_id: number, amount: number) {
-        const player = this.getPlayer(player_id)!;
+        const player = this.players.get(player_id)!;
         const card = this.search.getCard(card_id)!;
         amount = Math.min(amount, card.damage);
         card.damage -= amount;
@@ -363,21 +293,21 @@ export class GameEngine {
     }
 
     public poisonPokemon(player_id: number, card_id: number) {
-        const player = this.getPlayer(player_id)!;
+        const player = this.players.get(player_id)!;
         const card = this.search.getCard(card_id)!;
         card.poison = true;
         this.send(player, "'s", card, "was poisoned!");
     }
 
     public confusePokemon(player_id: number, card_id: number) {
-        const player = this.getPlayer(player_id)!;
+        const player = this.players.get(player_id)!;
         const card = this.search.getCard(card_id)!;
         card.orientation = "confused";
         this.send(player, "'s", card, "got confused!");
     }
 
     public paralyzePokemon(player_id: number, card_id: number) {
-        const player = this.getPlayer(player_id)!;
+        const player = this.players.get(player_id)!;
         const card = this.search.getCard(card_id)!;
         card.orientation = "paralyzed";
         this.send(player, "'s", card, "was paralyzed!");
@@ -392,13 +322,13 @@ export class GameEngine {
         };
         this.state.betweenTurns = false;
         this.send();
-        this.send("Beginning of", this.activePlayer, "'s turn.");
+        this.send("Beginning of", this.players.active, "'s turn.");
         this.draw(player_id);
         this.update();
     }
 
     public endTurn() {
-        this.send("End of", this.activePlayer, "'s turn.");
+        this.send("End of", this.players.active, "'s turn.");
         this.send();
         for (const player of this.state.players) {
             const active = player.active.cards[0];
@@ -421,7 +351,7 @@ export class GameEngine {
 
     public endGame(winner_id: number) {
         this.state.interrupt = null;
-        const winner = this.getPlayer(winner_id);
+        const winner = this.players.get(winner_id);
         this.send(winner, "has no more prizes left.", winner, "wins!");
         this.state.winner_id = winner_id;
         for (const client of this.clients) {

@@ -20,7 +20,7 @@ export class Card_Trainer_BaseSet_Switch extends CardWorker_Trainer {
             context.game.moveCard(target_id, context.player.bench.id, context.player.active.id);
             return true;
         } else {
-            context.game.interrupt({
+            context.game.interrupts.interrupt({
                 player: context.player.id,
                 prompt: `Switch ${context.player.active.cards[0].name} with which benched Pokémon?`,
                 choices: context.player.bench.cards.map(c => ({ text: c.name, target_id: c.id })),
