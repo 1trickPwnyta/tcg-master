@@ -41,7 +41,7 @@ export class AttackWorker {
                         damage = Math.max(0, damage);
                     }
                 }
-                const knockedOut = context.game.damagePokemon(context.game.players.inactive.id, context.defender.id, damage);
+                const knockedOut = context.game.pokemon.damage(context.game.players.inactive.id, context.defender.id, damage);
                 for (const effect of this.postEffects) {
                     effect(context, knockedOut, ...targets);
                 }

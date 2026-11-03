@@ -14,6 +14,7 @@ import { InterruptActor } from "../state/actors/InterruptActor.js";
 import { SearchActor } from "../state/actors/SearchActor.js";
 import { PlayerActor } from "../state/actors/PlayerActor.js";
 import { CardActor } from "../state/actors/CardActor.js";
+import { PokemonActor } from "../state/actors/PokemonActor.js";
 
 export class GameEngine {
     private readonly clients: Client[];
@@ -21,13 +22,14 @@ export class GameEngine {
     private simulation: boolean = false;
     private promptsGiven: number = 0;
 
-    private readonly setup: GameWorker_Setup;
-    private readonly turns: GameWorker_Turn;
+    public readonly setup: GameWorker_Setup;
+    public readonly turns: GameWorker_Turn;
 
     public readonly players: PlayerActor;
     public readonly interrupts: InterruptActor;
     public readonly search: SearchActor;
     public readonly cards: CardActor;
+    public readonly pokemon: PokemonActor;
 
     public constructor(client1?: Client, client2?: Client, options: { prizes?: number } = {}, clonedState?: GameState) {
         this.setup = new GameWorker_Setup(this);
@@ -66,6 +68,7 @@ export class GameEngine {
         this.interrupts = new InterruptActor(this);
         this.search = new SearchActor(this);
         this.cards = new CardActor(this);
+        this.pokemon = new PokemonActor(this);
 
         if (!this.simulation) {
             this.update();
@@ -182,56 +185,6 @@ export class GameEngine {
         }));
     }
 
-    public damagePokemon(player_id: number, card_id: number, amount: number, source?: string): boolean {
-        if (amount) {
-            const player = this.players.get(player_id)!;
-            const card = this.search.getCard(card_id)!;
-            card.damage += amount;
-            this.send(player, "'s", card, "took", { name: amount.toString(), type: "damage" }, `damage${source ? ` due to ${source}` : ""}!`);
-            if (card.damage >= CardDatabase.find<CardWorker_Pokemon>(card.dbid).hp) {
-                this.send(player, "'s", card, "was knocked out!");
-                this.cards.move(card.id, this.search.findCard(card.id)!.id, player.discard.id);
-                this.cards.takePrize(this.players.getOpponent(player.id).id);
-                const interrupt = this.turns.checkActivePokemon();
-                if (interrupt) {
-                    this.interrupts.interrupt(interrupt);
-                }
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    public healPokemon(player_id: number, card_id: number, amount: number) {
-        const player = this.players.get(player_id)!;
-        const card = this.search.getCard(card_id)!;
-        amount = Math.min(amount, card.damage);
-        card.damage -= amount;
-        this.send(player, "'s", card, "was healed for ", { name: amount.toString(), type: "heal" }, "HP.");
-    }
-
-    public poisonPokemon(player_id: number, card_id: number) {
-        const player = this.players.get(player_id)!;
-        const card = this.search.getCard(card_id)!;
-        card.poison = true;
-        this.send(player, "'s", card, "was poisoned!");
-    }
-
-    public confusePokemon(player_id: number, card_id: number) {
-        const player = this.players.get(player_id)!;
-        const card = this.search.getCard(card_id)!;
-        card.orientation = "confused";
-        this.send(player, "'s", card, "got confused!");
-    }
-
-    public paralyzePokemon(player_id: number, card_id: number) {
-        const player = this.players.get(player_id)!;
-        const card = this.search.getCard(card_id)!;
-        card.orientation = "paralyzed";
-        this.send(player, "'s", card, "was paralyzed!");
-    }
-
     public beginTurn(player_id: number) {
         this.state.turn = {
             number: (this.state.turn?.number ?? 0) + 1,
@@ -252,7 +205,7 @@ export class GameEngine {
         for (const player of this.state.players) {
             const active = player.active.cards[0];
             if (active?.poison) {
-                this.damagePokemon(player.id, active.id, 10, "poison");
+                this.pokemon.damage(player.id, active.id, 10, "poison");
             }
             if (active?.orientation === "paralyzed" && this.state.turn?.player === player.id) {
                 active.orientation = "normal";

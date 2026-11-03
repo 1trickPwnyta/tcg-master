@@ -21,7 +21,7 @@ export class Card_Pokemon_BaseSet_Starmie extends CardWorker_Pokemon {
             .reads(`Discard 1 ${EnergyType.Water} Energy card attached to Starmie in order to use this attack. Remove all damage counters from Starmie.`)
             .discards(1, EnergyType.Water)
             .withPostEffect((context: AttackContext, _knockedOut: boolean) => {
-                context.game.healPokemon(context.game.players.active.id, context.attacker.id, context.attacker.damage);
+                context.game.pokemon.heal(context.game.players.active.id, context.attacker.id, context.attacker.damage);
             })
             .finalize(),
         AttackFactory.makeAttack("BaseSet.Starmie.StarFreeze", "Star Freeze")

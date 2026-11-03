@@ -108,21 +108,21 @@ export class AttackFactory {
         if (this.poison) {
             worker.postEffects.push((context: AttackContext, knockedOut: boolean) => {
                 if (!knockedOut && this.poison === "always" || context.game.flipCoin(context.game.players.active.id)) {
-                    context.game.poisonPokemon(context.game.players.inactive.id, context.defender.id);
+                    context.game.pokemon.poison(context.game.players.inactive.id, context.defender.id);
                 }
             });
         }
         if (this.paralyze) {
             worker.postEffects.push((context: AttackContext, knockedOut: boolean) => {
                 if (!knockedOut && this.paralyze === "always" || context.game.flipCoin(context.game.players.active.id)) {
-                    context.game.paralyzePokemon(context.game.players.inactive.id, context.defender.id);
+                    context.game.pokemon.paralyze(context.game.players.inactive.id, context.defender.id);
                 }
             });
         }
         if (this.confuse) {
             worker.postEffects.push((context: AttackContext, knockedOut: boolean) => {
                 if (!knockedOut && this.confuse === "always" || context.game.flipCoin(context.game.players.active.id)) {
-                    context.game.confusePokemon(context.game.players.inactive.id, context.defender.id);
+                    context.game.pokemon.confuse(context.game.players.inactive.id, context.defender.id);
                 }
             });
         }

@@ -18,7 +18,7 @@ export class StateWorker_Attack extends StateWorker {
             if (card.orientation === "confused") {
                 context.game.send(player, "'s", card, "is confused.");
                 if (!context.game.flipCoin(player.id)) {
-                    context.game.damagePokemon(player.id, card.id, 20, "confusion");
+                    context.game.pokemon.damage(player.id, card.id, 20, "confusion");
                     context.state.turn!.attacked = true;
                     return true;
                 }

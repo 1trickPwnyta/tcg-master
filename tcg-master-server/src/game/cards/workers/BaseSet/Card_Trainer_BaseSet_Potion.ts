@@ -11,7 +11,7 @@ export class Card_Trainer_BaseSet_Potion extends CardWorker_Trainer {
 
     public override execute(context: PlayContext, target_id?: number): boolean {
         if (target_id !== undefined) {
-            context.game.healPokemon(context.player.id, target_id, 20);
+            context.game.pokemon.heal(context.player.id, target_id, 20);
             return true;
         } else {
             context.game.interrupts.interrupt({
