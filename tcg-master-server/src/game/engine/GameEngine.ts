@@ -9,9 +9,10 @@ import { Client } from "../../Client.js";
 import { IToken } from "../../IToken.js";
 import { GameWorker_Setup } from "./GameWorker_Setup.js";
 import { GameWorker_Turn } from "./GameWorker_Turn.js";
-import { LocationState } from "../state/LocationState.js";
 import { InterruptResolution } from "../InterruptResolution.js";
 import { CardWorker_Energy } from "../cards/workers/CardWorker_Energy.js";
+import { InterruptActor } from "../state/actors/InterruptActor.js";
+import { SearchActor } from "../state/actors/SearchActor.js";
 
 export class GameEngine {
     private readonly clients: Client[];
@@ -21,6 +22,9 @@ export class GameEngine {
 
     private readonly setup: GameWorker_Setup;
     private readonly turns: GameWorker_Turn;
+
+    public readonly interrupts: InterruptActor;
+    public readonly search: SearchActor;
 
     public constructor(client1?: Client, client2?: Client, options: { prizes?: number } = {}, clonedState?: GameState) {
         this.setup = new GameWorker_Setup(this);
@@ -86,6 +90,10 @@ export class GameEngine {
             nextInterrupt_id: 1000
         };
         this.simulation = clonedState !== undefined;
+
+        this.interrupts = new InterruptActor(this);
+        this.search = new SearchActor(this);
+
         if (!this.simulation) {
             this.update();
         }
@@ -299,79 +307,11 @@ export class GameEngine {
         return this.state.players.find(p => p.id !== this.state.turn!.player)!;
     }
 
-    public getCard(card_id: number, root?: LocationState): CardState | null {
-        if (!root) {
-            for (const player of this.state.players) {
-                for (const location of [ player.active, player.bench, player.limbo, player.hand, player.discard, player.prizes, player.deck ]) {
-                    const card = this.getCard(card_id, location);
-                    if (card) {
-                        return card;
-                    }
-                }
-            }
-        } else {
-            for (const card of root.cards) {
-                if (card.id === card_id) {
-                    return card;
-                } else {
-                    const sub = this.getCard(card_id, card.attachments);
-                    if (sub) {
-                        return sub;
-                    }
-                }
-            }
-        }
-
-        return null;
-    }
-
-    public findCard(card_id: number, root?: LocationState): LocationState | null {
-        if (!root) {
-            for (const player of this.state.players) {
-                for (const location of [ player.active, player.bench, player.limbo, player.hand, player.discard, player.prizes, player.deck ]) {
-                    const sub = this.findCard(card_id, location);
-                    if (sub) {
-                        return sub;
-                    }
-                }
-            }
-        } else {
-            for (const card of root.cards) {
-                if (card.id === card_id) {
-                    return root;
-                } else {
-                    const sub = this.findCard(card_id, card.attachments);
-                    if (sub) {
-                        return sub;
-                    }
-                }
-            }
-        }
-
-        return null;
-    }
-
-    public getLocation(location_id: number): LocationState | null {
-        for (const player of this.state.players) {
-            for (const location of [ player.active, player.bench, player.limbo, player.deck, player.discard, player.hand, player.prizes ]) {
-                if (location.id === location_id) {
-                    return location;
-                }
-            }
-            for (const card of [ ...player.active.cards, ...player.bench.cards ]) {
-                if (card.attachments.id === location_id) {
-                    return card.attachments;
-                }
-            }
-        }
-        return null;
-    }
-
     public moveCard(card_id: number, from_id: number, to_id: number) {
-        const card = this.getCard(card_id)!;
+        const card = this.search.getCard(card_id)!;
         const owner = this.getPlayer(card.owner_id)!;
-        const from = this.getLocation(from_id)!;
-        const to = this.getLocation(to_id)!;
+        const from = this.search.getLocation(from_id)!;
+        const to = this.search.getLocation(to_id)!;
         if (owner.active.id !== to_id) {
             card.orientation = "normal";
             card.poison = false;
@@ -387,7 +327,7 @@ export class GameEngine {
     }
 
     public getEnergy(card_id: number): { card: CardState, worker: CardWorker_Energy }[] {
-        return this.getCard(card_id)!.attachments.cards.filter(c => c.kind === "energy").map(c => ({
+        return this.search.getCard(card_id)!.attachments.cards.filter(c => c.kind === "energy").map(c => ({
             card: c,
             worker: CardDatabase.find<CardWorker_Energy>(c.dbid)
         }));
@@ -396,12 +336,12 @@ export class GameEngine {
     public damagePokemon(player_id: number, card_id: number, amount: number, source?: string): boolean {
         if (amount) {
             const player = this.getPlayer(player_id)!;
-            const card = this.getCard(card_id)!;
+            const card = this.search.getCard(card_id)!;
             card.damage += amount;
             this.send(player, "'s", card, "took", { name: amount.toString(), type: "damage" }, `damage${source ? ` due to ${source}` : ""}!`);
             if (card.damage >= CardDatabase.find<CardWorker_Pokemon>(card.dbid).hp) {
                 this.send(player, "'s", card, "was knocked out!");
-                this.moveCard(card.id, this.findCard(card.id)!.id, player.discard.id);
+                this.moveCard(card.id, this.search.findCard(card.id)!.id, player.discard.id);
                 this.takePrize(this.getOpponent(player.id).id);
                 const interrupt = this.checkActivePokemon();
                 if (interrupt) {
@@ -416,7 +356,7 @@ export class GameEngine {
 
     public healPokemon(player_id: number, card_id: number, amount: number) {
         const player = this.getPlayer(player_id)!;
-        const card = this.getCard(card_id)!;
+        const card = this.search.getCard(card_id)!;
         amount = Math.min(amount, card.damage);
         card.damage -= amount;
         this.send(player, "'s", card, "was healed for ", { name: amount.toString(), type: "heal" }, "HP.");
@@ -424,21 +364,21 @@ export class GameEngine {
 
     public poisonPokemon(player_id: number, card_id: number) {
         const player = this.getPlayer(player_id)!;
-        const card = this.getCard(card_id)!;
+        const card = this.search.getCard(card_id)!;
         card.poison = true;
         this.send(player, "'s", card, "was poisoned!");
     }
 
     public confusePokemon(player_id: number, card_id: number) {
         const player = this.getPlayer(player_id)!;
-        const card = this.getCard(card_id)!;
+        const card = this.search.getCard(card_id)!;
         card.orientation = "confused";
         this.send(player, "'s", card, "got confused!");
     }
 
     public paralyzePokemon(player_id: number, card_id: number) {
         const player = this.getPlayer(player_id)!;
-        const card = this.getCard(card_id)!;
+        const card = this.search.getCard(card_id)!;
         card.orientation = "paralyzed";
         this.send(player, "'s", card, "was paralyzed!");
     }

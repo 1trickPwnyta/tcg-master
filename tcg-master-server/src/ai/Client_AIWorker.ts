@@ -5,7 +5,6 @@ import { CardDatabase } from "../game/cards/CardDatabase.js";
 import { CardWorker_Pokemon } from "../game/cards/workers/CardWorker_Pokemon.js";
 import { CardWorker_Energy } from "../game/cards/workers/CardWorker_Energy.js";
 import { PlayerState } from "../game/state/PlayerState.js";
-import { InterruptActor } from "../game/state/actors/InterruptActor.js";
 
 const MAX_DEPTH = 4;
 
@@ -40,7 +39,7 @@ export class Client_AIWorker extends Client_AI {
         if (this.depth < MAX_DEPTH) {
 
             const state = this.game!.getState();
-            this.interrupt_id = InterruptActor.getInterrupt(state, this.player_id!)!.id!;
+            this.interrupt_id = this.game!.interrupts.getInterrupt(this.player_id!)!.id!;
             const allChoices = Client_AI.getAIChoices({
                 prompt: text,
                 choices: choices,
@@ -77,7 +76,7 @@ export class Client_AIWorker extends Client_AI {
                                     this.callback = null;
                                 }
                             } else {
-                                InterruptActor.resolveInterrupt(this.game!, state, this.player_id!, score.choice.i);
+                                this.game!.interrupts.resolveInterrupt(this.player_id!, score.choice.i);
                                 if (this.callback) {
                                     scoreMemory.set(hash, score.score);
                                     this.callback(this.invalid ? null : score.score);
@@ -91,7 +90,7 @@ export class Client_AIWorker extends Client_AI {
                 }
                 const clone = JSON.parse(JSON.stringify(state));
                 const game = new GameEngine(clients[0], clients[1], undefined, clone);
-                InterruptActor.resolveInterrupt(game, game.getState(), this.player_id!, choice.i);
+                game.interrupts.resolveInterrupt(this.player_id!, choice.i);
             }
 
         } else if (this.callback) {

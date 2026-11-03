@@ -32,7 +32,7 @@ export class Card_Pokemon_BaseSet_Ninetales extends CardWorker_Pokemon {
                 if (benched_id !== undefined) {
                     context.game.moveCard(context.game.inactivePlayer.active.cards[0].id, context.game.inactivePlayer.active.id, context.game.inactivePlayer.bench.id);
                     context.game.moveCard(benched_id, context.game.inactivePlayer.bench.id, context.game.inactivePlayer.active.id);
-                    context.game.send(context.game.getCard(benched_id), "was lured out!");
+                    context.game.send(context.game.search.getCard(benched_id), "was lured out!");
                 }
             })
             .finalize(),

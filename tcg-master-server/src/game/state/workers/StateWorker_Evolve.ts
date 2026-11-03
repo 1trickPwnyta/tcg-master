@@ -5,9 +5,9 @@ import { StateContext, StateWorker } from "./StateWorker.js";
 @ResolvesInterrupt(InterruptResolution.Evolve)
 export class StateWorker_Evolve extends StateWorker {
     public override execute(context: StateContext, card_id: number, evolution_id: number): boolean {
-        const location = context.game.findCard(card_id);
+        const location = context.game.search.findCard(card_id);
         const card = location?.cards.find(c => c.id === card_id);
-        const evolution = context.game.getCard(evolution_id);
+        const evolution = context.game.search.getCard(evolution_id);
         if (location && card && evolution) {
             context.game.moveCard(evolution_id, context.game.activePlayer.hand.id, location.id);
             evolution.damage = card.damage;

@@ -7,7 +7,7 @@ import { StateContext, StateWorker } from "./StateWorker.js";
 export class StateWorker_PlayCard extends StateWorker {
     public override execute(context: StateContext, card_id: number): boolean {
         if (card_id) {
-            const card = context.game.getCard(card_id)!;
+            const card = context.game.search.getCard(card_id)!;
             const worker = CardDatabase.find(card.dbid);
             return worker.play({ game: context.game, state: context.state, player: context.game.activePlayer, card: card });
         } else {

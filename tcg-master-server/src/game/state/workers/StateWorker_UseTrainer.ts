@@ -7,7 +7,7 @@ import { StateContext, StateWorker } from "./StateWorker.js";
 @ResolvesInterrupt(InterruptResolution.UseTrainer)
 export class StateWorker_UseTrainer extends StateWorker {
     public override execute(context: StateContext, target_id: number, card_id: number): boolean {
-        const card = context.game.getCard(card_id);
+        const card = context.game.search.getCard(card_id);
         if (card) {
             const worker = CardDatabase.find<CardWorker_Trainer>(card.dbid);
             context.game.send(context.game.activePlayer, "used", card, ".");

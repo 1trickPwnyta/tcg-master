@@ -1,19 +1,18 @@
-import { GameEngine } from "../../engine/GameEngine.js";
 import { InterruptResolver } from "../../InterruptResolver.js";
-import { GameState } from "../GameState.js";
 import { Interrupt, InterruptSync } from "../Interrupt.js";
+import { StateActor } from "./StateActor.js";
 
-export class InterruptActor {
-    public static getInterrupt(state: GameState, player_id: number, root?: Interrupt): InterruptSync | null {
-        if (state.interrupt?.player === player_id) {
-            return state.interrupt as InterruptSync;
+export class InterruptActor extends StateActor {
+    public getInterrupt(player_id: number, root?: Interrupt): InterruptSync | null {
+        if (this.state.interrupt?.player === player_id) {
+            return this.state.interrupt as InterruptSync;
         } else if (root?.player === player_id) {
             return root as InterruptSync;
         } else {
-            const interrupts = (root ?? state.interrupt)?.interrupts;
+            const interrupts = (root ?? this.state.interrupt)?.interrupts;
             if (interrupts) {
                 for (const interrupt of interrupts) {
-                    if (InterruptActor.getInterrupt(state, player_id, interrupt)) {
+                    if (this.getInterrupt(player_id, interrupt)) {
                         return interrupt as InterruptSync;
                     }
                 }
@@ -22,30 +21,30 @@ export class InterruptActor {
         return null;
     }
 
-    private static closeInterrupt(state: GameState, interrupt_id: number) {
-        if (state.interrupt?.id === interrupt_id) {
-            state.interrupt = null;
+    private closeInterrupt(interrupt_id: number) {
+        if (this.state.interrupt?.id === interrupt_id) {
+            this.state.interrupt = null;
             return;
         }
-        InterruptActor.closeInterruptRecursive(state, interrupt_id, state.interrupt);
-        InterruptActor.cleanInterrupts(state, state.interrupt);
+        this.closeInterruptRecursive(interrupt_id, this.state.interrupt);
+        this.cleanInterrupts(this.state.interrupt);
     }
 
-    private static closeInterruptRecursive(state: GameState, interrupt_id: number, root: Interrupt | null) {
+    private closeInterruptRecursive(interrupt_id: number, root: Interrupt | null) {
         if (root?.interrupts) {
             for (let i = 0; i < root.interrupts.length; i++) {
                 if (root.interrupts[i].id === interrupt_id) {
                     root.interrupts.splice(i, 1);
                     return;
                 }
-                InterruptActor.closeInterruptRecursive(state, interrupt_id, root.interrupts[i]);
+                this.closeInterruptRecursive(interrupt_id, root.interrupts[i]);
             }
         }
     }
 
-    private static cleanInterrupts(state: GameState, root: Interrupt | null) {
-        if (state.interrupt?.interrupts && !state.interrupt.interrupts.length) {
-            state.interrupt = null;
+    private cleanInterrupts(root: Interrupt | null) {
+        if (this.state.interrupt?.interrupts && !this.state.interrupt.interrupts.length) {
+            this.state.interrupt = null;
             return;
         }
         if (root?.interrupts) {
@@ -53,25 +52,25 @@ export class InterruptActor {
                 if (root.interrupts[i].interrupts && !root.interrupts[i].interrupts?.length) {
                     root.interrupts.splice(i, 1);
                 }
-                InterruptActor.cleanInterrupts(state, root.interrupts[i]);
+                this.cleanInterrupts(root.interrupts[i]);
             }
         }
     }
 
-    public static resolveInterrupt(game: GameEngine, state: GameState, player_id: number, choice: number | null) {
-        const interrupt = InterruptActor.getInterrupt(state, player_id);
+    public resolveInterrupt(player_id: number, choice: number | null) {
+        const interrupt = this.getInterrupt(player_id);
         if (interrupt) {
             let resolved = true;
             if (choice !== null) {
-                resolved = InterruptResolver.resolve(game, interrupt, choice);
+                resolved = InterruptResolver.resolve(this.game, interrupt, choice);
             } else if (interrupt.cancelResolution) {
-                InterruptResolver.cancel(game, interrupt, player_id);
+                InterruptResolver.cancel(this.game, interrupt, player_id);
             }
             if (resolved) {
-                InterruptActor.closeInterrupt(state, interrupt.id!);
+                this.closeInterrupt(interrupt.id!);
             }
-            game.getClient(player_id).wait();
-            game.update();
+            this.game.getClient(player_id).wait();
+            this.game.update();
         } else {
             throw new Error(`No interrupt found for player ${player_id}.`)
         }
