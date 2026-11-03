@@ -81,7 +81,7 @@ export class GameWorker_Setup extends GameWorker {
                 const firstPlayer = this.game.flipCoin() ? this.state.players[0] : this.state.players[1];
                 this.game.send(firstPlayer, "will go first.");
                 this.game.send();
-                this.game.beginTurn(firstPlayer.id);
+                this.game.turns.begin(firstPlayer.id);
             }
         }
     }

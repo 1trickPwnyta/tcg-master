@@ -17,7 +17,7 @@ import { CardActor } from "../state/actors/CardActor.js";
 import { PokemonActor } from "../state/actors/PokemonActor.js";
 
 export class GameEngine {
-    private readonly clients: Client[];
+    public readonly clients: Client[];
     private state: GameState;
     private simulation: boolean = false;
     private promptsGiven: number = 0;
@@ -126,7 +126,7 @@ export class GameEngine {
             } else if (!this.state.turn) {
                 this.setup.update();
             } else if (this.state.betweenTurns) {
-                this.beginTurn(this.players.inactive.id);
+                this.turns.begin(this.players.inactive.id);
             } else {
                 this.turns.update();
             }
@@ -183,42 +183,6 @@ export class GameEngine {
             card: c,
             worker: CardDatabase.find<CardWorker_Energy>(c.dbid)
         }));
-    }
-
-    public beginTurn(player_id: number) {
-        this.state.turn = {
-            number: (this.state.turn?.number ?? 0) + 1,
-            player: player_id,
-            energyPlayed: false,
-            attacked: false
-        };
-        this.state.betweenTurns = false;
-        this.send();
-        this.send("Beginning of", this.players.active, "'s turn.");
-        this.cards.draw(player_id);
-        this.update();
-    }
-
-    public endTurn() {
-        this.send("End of", this.players.active, "'s turn.");
-        this.send();
-        for (const player of this.state.players) {
-            const active = player.active.cards[0];
-            if (active?.poison) {
-                this.pokemon.damage(player.id, active.id, 10, "poison");
-            }
-            if (active?.orientation === "paralyzed" && this.state.turn?.player === player.id) {
-                active.orientation = "normal";
-                this.send(player, "'s", active, "was cured of paralysis!");
-            }
-            if (this.state.turn?.player !== player.id) {
-                active.damagePrevention = undefined;
-            }
-        }
-        for (const client of this.clients) {
-            client.notify_endOfTurn();
-        }
-        this.state.betweenTurns = true;
     }
 
     public endGame(winner_id: number) {

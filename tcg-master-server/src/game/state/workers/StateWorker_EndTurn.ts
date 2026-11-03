@@ -5,7 +5,7 @@ import { StateContext, StateWorker } from "./StateWorker.js";
 @ResolvesInterrupt(InterruptResolution.EndTurn)
 export class StateWorker_EndTurn extends StateWorker {
     public override execute(context: StateContext): boolean {
-        context.game.endTurn();
+        context.game.turns.end();
         return true;
     }
 };

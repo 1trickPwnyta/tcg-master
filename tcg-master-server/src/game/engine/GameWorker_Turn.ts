@@ -8,6 +8,42 @@ export class GameWorker_Turn extends GameWorker {
         return this.state.turn!;
     }
 
+    public begin(player_id: number) {
+        this.state.turn = {
+            number: (this.state.turn?.number ?? 0) + 1,
+            player: player_id,
+            energyPlayed: false,
+            attacked: false
+        };
+        this.state.betweenTurns = false;
+        this.game.send();
+        this.game.send("Beginning of", this.game.players.active, "'s turn.");
+        this.game.cards.draw(player_id);
+        this.game.update();
+    }
+
+    public end() {
+        this.game.send("End of", this.game.players.active, "'s turn.");
+        this.game.send();
+        for (const player of this.state.players) {
+            const active = player.active.cards[0];
+            if (active?.poison) {
+                this.game.pokemon.damage(player.id, active.id, 10, "poison");
+            }
+            if (active?.orientation === "paralyzed" && this.state.turn?.player === player.id) {
+                active.orientation = "normal";
+                this.game.send(player, "'s", active, "was cured of paralysis!");
+            }
+            if (this.state.turn?.player !== player.id) {
+                active.damagePrevention = undefined;
+            }
+        }
+        for (const client of this.game.clients) {
+            client.notify_endOfTurn();
+        }
+        this.state.betweenTurns = true;
+    }
+
     public update() {
         const playerWithNoPokemon = this.state.players.find(p => !p.active.cards.length && !p.bench.cards.length);
         if (playerWithNoPokemon) {
@@ -46,7 +82,7 @@ export class GameWorker_Turn extends GameWorker {
                 force: true
             });
         } else {
-            this.game.endTurn();
+            this.end();
             this.game.update();
         }
     }
