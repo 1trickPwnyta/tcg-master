@@ -6,12 +6,21 @@ import { Interrupt } from "../../state/Interrupt.js";
 import { CardDatabase } from "../CardDatabase.js";
 import { CardWorker_Energy } from "./CardWorker_Energy.js";
 
-export abstract class AttackWorker {
-    public abstract readonly dbid: string;
-    public abstract readonly name: string;
-    public abstract readonly cost: EnergyType[];
-    public abstract readonly damage: number;
-    public abstract readonly text: string | null;
+export class AttackWorker {
+    public readonly dbid: string;
+    public readonly name: string;
+    public cost: EnergyType[] = [];
+    public damage: number = 0;
+    public text: string | null = null;
+
+    public canUse: (context: AttackContext) => boolean = () => true;
+    public validateTargets: (context: AttackContext, ...targets: number[]) => Interrupt | null = () => null;
+    public postEffects: ((context: AttackContext, knockedOut: boolean, ...targets: number[]) => void)[] = [];
+
+    public constructor(dbid: string, name: string) {
+        this.dbid = dbid;
+        this.name = name;
+    }
 
     public execute(context: AttackContext, ...targets: number[]): boolean {
         if (!this.costSatisfied(context.attacker.attachments.cards.map(c => CardDatabase.find<CardWorker_Energy>(c.dbid)))) {
@@ -33,22 +42,14 @@ export abstract class AttackWorker {
                     }
                 }
                 const knockedOut = context.game.damagePokemon(context.game.inactivePlayer.id, context.defender.id, damage);
-                this.postEffect(context, knockedOut, ...targets);
+                for (const effect of this.postEffects) {
+                    effect(context, knockedOut, ...targets);
+                }
                 context.state.turn!.attacked = true;
             }
             return true;
         }
     }
-
-    protected canUse(context: AttackContext) {
-        return true;
-    }
-
-    protected validateTargets(context: AttackContext, ...targets: number[]): Interrupt | null {
-        return null;
-    }
-
-    protected postEffect(context: AttackContext, knockedOut: boolean, ...targets: number[]) { }
 
     public costUnsatisfied(energy: CardWorker_Energy[]): EnergyType[] {
         const reqs = [ ...this.cost ].sort((a, b) => b.resolutionPriority - a.resolutionPriority);

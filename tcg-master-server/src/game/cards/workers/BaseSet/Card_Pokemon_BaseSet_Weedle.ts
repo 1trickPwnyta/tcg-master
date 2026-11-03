@@ -1,7 +1,7 @@
 import { EnergyType } from "../../../EnergyType.js";
 import { Card } from "../../CardDatabase.js";
 import { EvolutionTree } from "../../EvolutionTree.js";
-import { AttackContext, AttackWorker } from "../AttackWorker.js";
+import { AttackFactory } from "../AttackFactory.js";
 import { CardWorker_Pokemon } from "../CardWorker_Pokemon.js";
 
 @Card("BaseSet.Weedle")
@@ -15,18 +15,11 @@ export class Card_Pokemon_BaseSet_Weedle extends CardWorker_Pokemon {
     public override readonly retreatCost: number = 1;
 
     public override readonly attacks = [
-        new class extends AttackWorker {
-            dbid = "BaseSet.Weedle.PoisonSting";
-            name = "Poison Sting";
-            cost = [ EnergyType.Grass ];
-            damage = 10;
-            text = "Flip a coin. If heads, the Defending Pokémon is now Poisoned.";
-
-            protected override postEffect(context: AttackContext, knockedOut: boolean): void {
-                if (!knockedOut && context.game.flipCoin(context.game.activePlayer.id)) {
-                    context.game.poisonPokemon(context.game.inactivePlayer.id, context.defender.id);
-                }
-            }
-        }()
+        AttackFactory.makeAttack("BaseSet.Weedle.PoisonSting", "Poison Sting")
+            .costs(EnergyType.Grass)
+            .deals(10)
+            .reads("Flip a coin. If heads, the Defending Pokémon is now Poisoned.")
+            .poisons()
+            .finalize()
     ];
 };

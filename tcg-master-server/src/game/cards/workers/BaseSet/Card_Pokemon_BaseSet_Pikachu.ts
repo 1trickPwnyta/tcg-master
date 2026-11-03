@@ -1,7 +1,8 @@
 import { EnergyType } from "../../../EnergyType.js";
 import { Card } from "../../CardDatabase.js";
 import { EvolutionTree } from "../../EvolutionTree.js";
-import { AttackContext, AttackWorker } from "../AttackWorker.js";
+import { AttackFactory } from "../AttackFactory.js";
+import { AttackContext } from "../AttackWorker.js";
 import { CardWorker_Pokemon } from "../CardWorker_Pokemon.js";
 
 @Card("BaseSet.Pikachu")
@@ -15,25 +16,19 @@ export class Card_Pokemon_BaseSet_Pikachu extends CardWorker_Pokemon {
     public override readonly retreatCost: number = 1;
 
     public override readonly attacks = [
-        new class extends AttackWorker {
-            dbid = "BaseSet.Pikachu.Gnaw";
-            name = "Gnaw";
-            cost = [ EnergyType.Colorless ];
-            damage = 10;
-            text = null;
-        }(),
-        new class extends AttackWorker {
-            dbid = "BaseSet.Pikachu.ThunderJolt";
-            name = "Thunder Jolt";
-            cost = [ EnergyType.Lightning, EnergyType.Colorless ];
-            damage = 30;
-            text = "Flip a coin. If tails, Pikachu does 10 damage to itself.";
-
-            protected override postEffect(context: AttackContext, _knockedOut: boolean): void {
+        AttackFactory.makeAttack("BaseSet.Pikachu.Gnaw", "Gnaw")
+            .costs(EnergyType.Colorless)
+            .deals(10)
+            .finalize(),
+        AttackFactory.makeAttack("BaseSet.Pikachu.ThunderJolt", "Thunder Jolt")
+            .costs(EnergyType.Lightning, EnergyType.Colorless)
+            .deals(30)
+            .reads("Flip a coin. If tails, Pikachu does 10 damage to itself.")
+            .withPostEffect((context: AttackContext, _knockedOut: boolean) => {
                 if (!context.game.flipCoin(context.game.activePlayer.id)) {
                     context.game.damagePokemon(context.game.activePlayer.id, context.attacker.id, 10);
                 }
-            }
-        }()
+            })
+            .finalize()
     ];
 };
