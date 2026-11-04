@@ -6,6 +6,7 @@ import path from "path";
 import { Worker } from "worker_threads";
 import { InterruptSync } from "../game/state/interrupts/Interrupt.js";
 import { AIPruner } from "./AIPruner.js";
+import { HistoryEntry } from "./Client_AIWorker.js";
 
 export type AIChoice = {
     i: number | null;
@@ -28,6 +29,7 @@ export type AIContext = {
 export type ScoredChoice = {
     choice: AIChoice;
     score: number;
+    history: HistoryEntry[];
 };
 
 export class Client_AI extends Client {
@@ -58,14 +60,16 @@ export class Client_AI extends Client {
 
         const worker = new Worker(path.join(import.meta.dirname, "AIWorker.js"));
         worker.on("message", (scores: ScoredChoice[]) => {
+            console.log(scores);
             worker.terminate();
             const hash = this.game!.getStateHash();
             const scoresUnused = scores.filter(s => s.score !== null && !(this.movesUsed.get(hash) ?? []).includes(s.choice.i)).sort((a, b) => b.score! - a.score!);
+            console.log(scoresUnused[0]);
             const choice = scoresUnused[0]?.choice ?? scores[0].choice;
             if (!this.movesUsed.has(hash)) {
                 this.movesUsed.set(hash, []);
             }
-            this.movesUsed.set(hash, [ ...this.movesUsed.get(hash)!, choice.i ]);
+            //this.movesUsed.set(hash, [ ...this.movesUsed.get(hash)!, choice.i ]);
             if (this.interrupt_id === this.game!.interrupts.get(this.player_id!)?.id) {
                 console.log(`> ${choice.i ?? "(cancel)"}`);
                 this.interrupt_id = null;

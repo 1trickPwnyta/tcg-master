@@ -14,6 +14,7 @@ export class Card_Pokemon_BaseSet_Ninetales extends CardWorker_Pokemon {
     public override readonly evolutionTree: EvolutionTree = EvolutionTree.Vulpix;
     public override readonly hp: number = 80;
     public override readonly weakness: EnergyType | null = EnergyType.Water;
+    public override readonly resistance = null;
     public override readonly retreatCost: number = 1;
 
     public override readonly attacks = [

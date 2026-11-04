@@ -5,6 +5,7 @@ import { GameState } from "../../state/GameState.js";
 import { Interrupt } from "../../state/interrupts/Interrupt.js";
 import { CardDatabase } from "../CardDatabase.js";
 import { CardWorker_Energy } from "./CardWorker_Energy.js";
+import { CardWorker_Pokemon } from "./CardWorker_Pokemon.js";
 
 export class AttackWorker {
     public readonly dbid: string;
@@ -41,7 +42,8 @@ export class AttackWorker {
                         damage = Math.max(0, damage);
                     }
                 }
-                const knockedOut = context.game.pokemon.damage(context.game.players.inactive.id, context.defender.id, damage);
+                const worker = CardDatabase.find<CardWorker_Pokemon>(context.attacker.dbid);
+                const knockedOut = context.game.pokemon.damage({ owner_id: context.game.players.inactive.id, card_id: context.defender.id, amount: damage, type: worker.type });
                 for (const effect of this.postEffects) {
                     effect(context, knockedOut, ...targets);
                 }

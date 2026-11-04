@@ -79,6 +79,11 @@ export class AIPruner {
             // Don't allow the AI to cancel a menu, for now, because it makes the AI stupid
             //choices.push({ i: null, target: null, key: key, valid: valid });
         }
+
+        // Don't prune every choice
+        if (!choices.some(c => c.valid)) {
+            choices[0].valid = true;
+        }
         
         return choices;
     }

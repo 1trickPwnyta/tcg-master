@@ -13,4 +13,5 @@ export interface CardState {
     orientation: "normal" | "asleep" | "confused" | "paralyzed";
     attachments: LocationState;
     damagePrevention?: number;
+    accuracyChecks?: number;
 };

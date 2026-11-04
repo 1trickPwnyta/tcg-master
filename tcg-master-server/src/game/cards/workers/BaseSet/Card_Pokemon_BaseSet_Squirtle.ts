@@ -13,6 +13,7 @@ export class Card_Pokemon_BaseSet_Squirtle extends CardWorker_Pokemon {
     public override readonly evolutionTree: EvolutionTree = new EvolutionTree("Squirtle");
     public override readonly hp: number = 40;
     public override readonly weakness: EnergyType | null = EnergyType.Lightning;
+    public override readonly resistance = null;
     public override readonly retreatCost: number = 1;
 
     public override readonly attacks = [

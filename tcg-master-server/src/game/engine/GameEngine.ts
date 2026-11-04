@@ -77,7 +77,7 @@ export class GameEngine {
 
     public getStateHash(): number {
         const str = JSON.stringify([
-            this.state.players.map(p => {
+            this.state.players.map(p => [
                 p.active,
                 [ ...p.bench.cards ].sort((a, b) => a.id - b.id),
                 p.limbo,
@@ -85,7 +85,7 @@ export class GameEngine {
                 p.discard,
                 p.prizes,
                 p.deck
-            }),
+            ]),
             this.state.turn,
             this.state.winner_id,
             this.state.interrupt?.player,

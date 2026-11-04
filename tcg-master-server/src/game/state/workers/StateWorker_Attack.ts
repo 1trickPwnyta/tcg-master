@@ -18,9 +18,13 @@ export class StateWorker_Attack extends StateWorker {
             if (card.orientation === "confused") {
                 context.game.send(player, "'s", card, "is confused.");
                 if (!context.game.flipCoin(player.id)) {
-                    context.game.pokemon.damage(player.id, card.id, 20, "confusion");
-                    context.state.turn!.attacked = true;
-                    return true;
+                    context.game.pokemon.damage({ owner_id: player.id, card_id: card.id, amount: 20, source: "confusion", type: worker.type });
+                    return this.failAttack(context);
+                }
+            }
+            for (let i = 0; i < (card.accuracyChecks ?? 0); i++) {
+                if (!context.game.flipCoin(player.id)) {
+                    return this.failAttack(context, card, "'s attack failed.");
                 }
             }
             const attack = worker.attacks.find(a => a.dbid === attack_id)!;
@@ -34,5 +38,13 @@ export class StateWorker_Attack extends StateWorker {
             });
             return true;
         }
+    }
+
+    private failAttack(context: StateContext, ...message: any[]): boolean {
+        if (message.length) {
+            context.game.send(...message);
+        }
+        context.state.turn!.attacked = true;
+        return true;
     }
 };

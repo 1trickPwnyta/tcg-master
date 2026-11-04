@@ -13,6 +13,7 @@ export class Card_Pokemon_BaseSet_Voltorb extends CardWorker_Pokemon {
     public override readonly evolutionTree: EvolutionTree = new EvolutionTree("Voltorb");
     public override readonly hp = 40;
     public override readonly weakness = EnergyType.Fighting;
+    public override readonly resistance = null;
     public override readonly retreatCost = 1;
 
     public override readonly attacks: AttackWorker[] = [

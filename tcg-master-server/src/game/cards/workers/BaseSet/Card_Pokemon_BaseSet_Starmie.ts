@@ -13,6 +13,7 @@ export class Card_Pokemon_BaseSet_Starmie extends CardWorker_Pokemon {
     public override readonly evolutionTree: EvolutionTree = EvolutionTree.Staryu;
     public override readonly hp: number = 60;
     public override readonly weakness: EnergyType | null = EnergyType.Lightning;
+    public override readonly resistance = null;
     public override readonly retreatCost: number = 1;
 
     public override readonly attacks = [

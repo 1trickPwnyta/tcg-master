@@ -7,15 +7,23 @@ import { AIPruner } from "./AIPruner.js";
 
 const MAX_DEPTH = 6;
 
+export type HistoryEntry = {
+    hash: number,
+    prompt: string,
+    choice: number | null,
+    text: string | null,
+    depth: number
+};
+
 export class Client_AIWorker extends Client_AI {
     public override name: string = "WORKER";
     public readonly depth: number;
     public invalid: boolean = false;
-    private callback: ((score: number | null) => void) | null;
+    private callback: ((result: { score: number | null, history: HistoryEntry[] }) => void) | null;
     private for_player: number;
-    private history: { hash: number, choice: number | null }[];
+    private history: HistoryEntry[];
 
-    public constructor(depth: number = 1, for_player: number, callback: (score: number | null) => void = () => { }, history?: { hash: number, choice: number | null }[]) {
+    public constructor(depth: number = 1, for_player: number, callback: ((result: { score: number | null, history: HistoryEntry[] }) => void) = () => { }, history?: HistoryEntry[]) {
         super();
         this.depth = depth;
         this.for_player = for_player;
@@ -27,10 +35,21 @@ export class Client_AIWorker extends Client_AI {
 
     public override error(..._parts: any[]): void {
         this.invalid = true;
+        if (this.callback) {
+            this.callback({ score: null, history: this.history });
+            this.callback = null;
+        }
     }
 
     public override prompt(interrupt: InterruptSync) {
         if (!this.callback) {
+            return;
+        }
+
+        // Can't let the AI see into the other player's turn, for now, because then they want to stall as long as possible to avoid ending their own turn
+        if (interrupt.player !== this.for_player) {
+            this.callback({ score: AIEvaluator.evaluate(this.game!, this.for_player), history: this.history });
+            this.callback = null;
             return;
         }
 
@@ -46,10 +65,10 @@ export class Client_AIWorker extends Client_AI {
                 for (const choice of validChoices) {
                     const clients: Client_AIWorker[] = [];
                     for (const player of state.players) {
-                        const client = new Client_AIWorker(this.depth + 1, this.for_player, (score: number | null) => {
+                        const client = new Client_AIWorker(this.depth + 1, this.for_player, (results: { score: number | null, history: HistoryEntry[] }) => {
                             received.push(choice.key);
-                            if (score !== null) {
-                                scores.push({ choice: choice, score: score });
+                            if (results.score !== null) {
+                                scores.push({ choice: choice, score: results.score, history: results.history });
                             }
                             if (received.length === validChoices.length) {
                                 if (scores.length) {
@@ -61,15 +80,21 @@ export class Client_AIWorker extends Client_AI {
                                         score = sorted[sorted.length - 1];
                                     }
                                     if (this.callback) {
-                                        this.callback(this.invalid ? null : score.score);
+                                        this.callback({ score: this.invalid ? null : score.score, history: score.history });
                                         this.callback = null;
                                     }
                                 } else if (this.callback) {
-                                    this.callback(null);
+                                    this.callback({ score: null, history: this.history });
                                     this.callback = null;
                                 }
                             }
-                        }, [ ...this.history, { hash: hash, choice: choice.i } ]);
+                        }, [ ...this.history, {
+                            hash: hash,
+                            prompt: interrupt.prompt,
+                            choice: choice.i,
+                            text: choice.i !== null ? interrupt.choices[choice.i].text : null,
+                            depth: this.depth
+                        } ]);
                         client.player_id = player.id;
                         clients.push(client);
                     }
@@ -78,19 +103,20 @@ export class Client_AIWorker extends Client_AI {
                     game.interrupts.resolve(this.player_id!, choice.i);
                 }
             } else {
-                this.callback(this.invalid ? null : AIEvaluator.evaluate(this.game!, this.for_player));
+                this.callback({ score: null, history: this.history });
                 this.callback = null;
                 return;
             }
         } else if (this.callback) {
-            this.callback(this.invalid ? null : AIEvaluator.evaluate(this.game!, this.for_player));
+            const score = this.invalid ? null : AIEvaluator.evaluate(this.game!, this.for_player);
+            this.callback({ score: score, history: this.history });
             this.callback = null;
         }
     }
 
     public override notify_gameOver(winner: PlayerState): void {
         if (winner.id === this.player_id && this.callback) {
-            this.callback(AIEvaluator.evaluate(this.game!, this.for_player));
+            this.callback({ score: AIEvaluator.evaluate(this.game!, this.for_player), history: this.history });
         }
         this.callback = null;
     }

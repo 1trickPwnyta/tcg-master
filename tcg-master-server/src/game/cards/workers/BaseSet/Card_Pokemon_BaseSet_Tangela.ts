@@ -12,6 +12,7 @@ export class Card_Pokemon_BaseSet_Tangela extends CardWorker_Pokemon {
     public override readonly evolutionTree: EvolutionTree = new EvolutionTree("Tangela");
     public override readonly hp: number = 50;
     public override readonly weakness: EnergyType | null = EnergyType.Fire;
+    public override readonly resistance = null;
     public override readonly retreatCost: number = 2;
 
     public override readonly attacks = [

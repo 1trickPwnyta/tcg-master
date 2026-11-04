@@ -1,6 +1,7 @@
 import { CardDatabase } from "../game/cards/CardDatabase.js";
 import { CardWorker_Pokemon } from "../game/cards/workers/CardWorker_Pokemon.js";
 import { GameEngine } from "../game/engine/GameEngine.js";
+import { HistoryEntry } from "./Client_AIWorker.js";
 
 export class AIEvaluator {
     public static evaluate(game: GameEngine, for_player: number): number {

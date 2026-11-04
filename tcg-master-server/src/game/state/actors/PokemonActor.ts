@@ -1,8 +1,17 @@
 import { CardDatabase } from "../../cards/CardDatabase.js";
 import { CardWorker_Energy } from "../../cards/workers/CardWorker_Energy.js";
 import { CardWorker_Pokemon } from "../../cards/workers/CardWorker_Pokemon.js";
+import { EnergyType } from "../../EnergyType.js";
 import { CardState } from "../CardState.js";
 import { StateActor } from "./StateActor.js";
+
+export type DamageContext = {
+    owner_id: number;
+    card_id: number;
+    amount: number;
+    source?: string;
+    type?: EnergyType;
+};
 
 export class PokemonActor extends StateActor {
     public getEnergy(card_id: number): { card: CardState, worker: CardWorker_Energy }[] {
@@ -12,12 +21,26 @@ export class PokemonActor extends StateActor {
         }));
     }
 
-    public damage(player_id: number, card_id: number, amount: number, source?: string): boolean {
+    public damage(context: DamageContext): boolean {
+        let amount = context.amount;
+
+        const card = this.game.search.getCard(context.card_id)!;
+        const worker = CardDatabase.find<CardWorker_Pokemon>(card.dbid);
+        if (context.type) {
+            if (worker.weakness === context.type) {
+                amount *= 2;
+            }
+            if (worker.resistance === context.type) {
+                amount -= 30;
+                amount = Math.max(0, amount);
+            }
+        }
+
         if (amount) {
-            const player = this.game.players.get(player_id)!;
-            const card = this.game.search.getCard(card_id)!;
+            const player = this.game.players.get(context.owner_id)!;
+            const card = this.game.search.getCard(context.card_id)!;
             card.damage += amount;
-            this.game.send(player, "'s", card, "took", { name: amount.toString(), type: "damage" }, `damage${source ? ` due to ${source}` : ""}!`);
+            this.game.send(player, "'s", card, "took", { name: amount.toString(), type: "damage" }, `damage${context.source ? ` due to ${context.source}` : ""}!`);
             if (card.damage >= CardDatabase.find<CardWorker_Pokemon>(card.dbid).hp) {
                 this.game.send(player, "'s", card, "was knocked out!");
                 this.game.cards.move(card.id, this.game.search.findCard(card.id)!.id, player.discard.id);

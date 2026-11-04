@@ -12,6 +12,7 @@ export class Card_Pokemon_BaseSet_Weedle extends CardWorker_Pokemon {
     public override readonly evolutionTree: EvolutionTree = new EvolutionTree("Weedle");
     public override readonly hp: number = 40;
     public override readonly weakness = EnergyType.Fire;
+    public override readonly resistance = null;
     public override readonly retreatCost: number = 1;
 
     public override readonly attacks = [

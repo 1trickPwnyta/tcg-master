@@ -28,13 +28,15 @@ export class GameWorker_Turn extends GameWorker {
         for (const player of this.state.players) {
             const active = player.active.cards[0];
             if (active?.poison) {
-                this.game.pokemon.damage(player.id, active.id, 10, "poison");
+                this.game.pokemon.damage({ owner_id: player.id, card_id: active.id, amount: 10, source: "poison" });
             }
-            if (active?.orientation === "paralyzed" && this.state.turn?.player === player.id) {
-                active.orientation = "normal";
-                this.game.send(player, "'s", active, "was cured of paralysis!");
-            }
-            if (this.state.turn?.player !== player.id) {
+            if (this.state.turn?.player === player.id) {
+                if (active?.orientation === "paralyzed") {
+                    active.orientation = "normal";
+                    this.game.send(player, "'s", active, "was cured of paralysis!");
+                }
+                active.accuracyChecks = undefined;
+            } else {
                 active.damagePrevention = undefined;
             }
         }
