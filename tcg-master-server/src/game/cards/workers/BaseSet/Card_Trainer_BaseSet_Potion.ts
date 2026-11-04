@@ -1,4 +1,4 @@
-import { InterruptResolution } from "../../../InterruptResolution.js";
+import { InterruptResolution } from "../../../state/interrupts/InterruptResolution.js";
 import { Card } from "../../CardDatabase.js";
 import { PlayContext } from "../CardWorker.js";
 import { CardWorker_Trainer } from "../CardWorker_Trainer.js";

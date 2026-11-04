@@ -1,6 +1,6 @@
 import { GameEngine } from "./game/engine/GameEngine.js";
 import { CardState } from "./game/state/CardState.js";
-import { Choice } from "./game/state/Interrupt.js";
+import { InterruptSync } from "./game/state/interrupts/Interrupt.js";
 import { PlayerState } from "./game/state/PlayerState.js";
 import { IToken } from "./IToken.js";
 
@@ -13,7 +13,7 @@ export abstract class Client {
 
     public abstract error(...parts: any[]): void;
 
-    public abstract prompt(text: string, choices: Choice[], force?: boolean): void;
+    public abstract prompt(interrupt: InterruptSync): void;
 
     public wait() { }
 

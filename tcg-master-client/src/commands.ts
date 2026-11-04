@@ -12,6 +12,10 @@ const list = {
         [ "Active Pokémon", "check xactive" ],
         [ "Bench", "check xbench" ],
         [ "Discard pile", "check xdiscard" ]
+    ],
+    "Debug": [
+        [ "My score", "debug score" ],
+        [ "Their score", "debug xscore" ]
     ]
 };
 
@@ -31,6 +35,14 @@ for (const item of list["You"]) {
 const opponent = $("#commands-opponent div");
 for (const item of list["Opponent"]) {
     opponent.append($("<button>", {
+        text: item[0],
+        click: () => execute(item[1])
+    }));
+}
+
+const debug = $("#commands-debug div");
+for (const item of list["Debug"]) {
+    debug.append($("<button>", {
         text: item[0],
         click: () => execute(item[1])
     }));

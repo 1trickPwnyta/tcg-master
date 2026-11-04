@@ -3,19 +3,19 @@ import { GameEngine } from "../game/engine/GameEngine.js";
 import "../extensions.js";
 import "../loader.js"
 import { Client_AIWorker } from "./Client_AIWorker.js";
-import { AIContext, Client_AI, ScoredChoice } from "./Client_AI.js";
+import { AIContext, ScoredChoice } from "./Client_AI.js";
 
 parentPort?.on("message", async (context: AIContext) => {
-    const choices = Client_AI.getAIChoices(context);
     const scores: ScoredChoice[] = [];
     let received = 0;
-    for (const choice of choices) {
+    const validChoices = context.choices.filter(c => c.valid);
+    for (const choice of validChoices) {
         const clients: Client_AIWorker[] = [];
         const clientCallback = (score: number | null) => {
             if (score !== null) {
                 scores.push({ choice: choice, score: score });
             }
-            if (++received === choices.length) {
+            if (++received === validChoices.length) {
                 parentPort?.postMessage(scores);
             }
         };
@@ -25,7 +25,7 @@ parentPort?.on("message", async (context: AIContext) => {
             clients.push(client);
         }
         
-        const game = new GameEngine(clients[0], clients[1], undefined, structuredClone(context.state));
+        const game = new GameEngine(clients[0], clients[1], undefined, JSON.parse(JSON.stringify(context.state)));
         game.interrupts.resolve(context.player_id, choice.i);
         if (game.getState().winner_id) {
             clientCallback(game.getState().winner_id === context.player_id ? Number.MAX_VALUE : Number.MIN_VALUE);

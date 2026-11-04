@@ -1,21 +1,24 @@
 import { Client } from "../Client.js";
 import { Card_Pokemon_BaseSet_Staryu } from "../game/cards/workers/BaseSet/Card_Pokemon_BaseSet_Staryu.js";
 import { GameEngine } from "../game/engine/GameEngine.js";
-import { Choice } from "../game/state/Interrupt.js";
 import { GameState } from "../game/state/GameState.js";
 import path from "path";
 import { Worker } from "worker_threads";
+import { InterruptSync } from "../game/state/interrupts/Interrupt.js";
+import { AIPruner } from "./AIPruner.js";
 
 export type AIChoice = {
     i: number | null;
+    target: number | null;
     key: string;
     valid: boolean;
 };
 
 export type AIContext = {
     prompt: string;
-    choices: Choice[];
+    choices: AIChoice[];
     force: boolean;
+    interrupt: InterruptSync;
     interrupt_id: number;
     player_id: number;
     state: GameState;
@@ -28,18 +31,6 @@ export type ScoredChoice = {
 };
 
 export class Client_AI extends Client {
-    public static getAIChoices(context: AIContext): AIChoice[] {
-        return [ ...context.choices, ...(!context.force ? [ null ] : []) ].map((c, i) => {
-            const key = context.player_id + context.prompt + context.choices.map(c => c.text + c.target_id).join("") + c?.text + c?.target_id;
-            return {
-                i: c ? i : null,
-                key: key,
-                valid: (context.attemptedChoices?.get(key) ?? 0) < 5
-            };
-        });
-    }
-
-    private readonly id: string = crypto.randomUUID();
     public override name: string = "COM";
     public invalid: boolean = false;
     private readonly movesUsed: Map<number, (number | null)[]> = new Map<number, (number | null)[]>();
@@ -57,19 +48,20 @@ export class Client_AI extends Client {
         throw new Error(Client.tokenize(...parts).map(t => t.name).join(" "));
     }
 
-    public override prompt(text: string, choices: Choice[], force: boolean = false) {
+    public override prompt(interrupt: InterruptSync) {
         if (this.interrupt_id) {
             return;
         }
 
-        console.log(`${text} [ ${choices.map(c => c.text).join(", ")}${!force ? ", (cancel)" : ""} ]`);
+        console.log(`${interrupt.prompt} [ ${interrupt.choices!.map(c => c.text).join(", ")}${!interrupt.force ? ", (cancel)" : ""} ]`);
         this.interrupt_id = this.game!.interrupts.get(this.player_id!)!.id!;
 
         const worker = new Worker(path.join(import.meta.dirname, "AIWorker.js"));
         worker.on("message", (scores: ScoredChoice[]) => {
             worker.terminate();
             const hash = this.game!.getStateHash();
-            const choice = scores.filter(s => s.score !== null && !(this.movesUsed.get(hash) ?? []).includes(s.choice.i)).sort((a, b) => b.score! - a.score!)[0]?.choice ?? scores[0].choice;
+            const scoresUnused = scores.filter(s => s.score !== null && !(this.movesUsed.get(hash) ?? []).includes(s.choice.i)).sort((a, b) => b.score! - a.score!);
+            const choice = scoresUnused[0]?.choice ?? scores[0].choice;
             if (!this.movesUsed.has(hash)) {
                 this.movesUsed.set(hash, []);
             }
@@ -83,9 +75,10 @@ export class Client_AI extends Client {
             }
         });
         worker.postMessage({
-            prompt: text,
-            choices: choices,
-            force: force,
+            prompt: interrupt.prompt,
+            choices: AIPruner.prune(this.game!, interrupt),
+            force: interrupt.force,
+            interrupt: interrupt,
             interrupt_id: this.interrupt_id,
             player_id: this.player_id!,
             state: this.game!.getState()

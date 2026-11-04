@@ -1,6 +1,7 @@
 import { IToken } from "../../../IToken.js";
 import { EnergyType } from "../../EnergyType.js";
-import { InterruptResolution } from "../../InterruptResolution.js";
+import { InterruptResolution } from "../../state/interrupts/InterruptResolution.js";
+import { InterruptType } from "../../state/interrupts/InterruptType.js";
 import { CardDatabase } from "../CardDatabase.js";
 import { EvolutionTree } from "../EvolutionTree.js";
 import { AttackWorker } from "./AttackWorker.js";

@@ -2,8 +2,8 @@ import { Socket } from "socket.io";
 import { Client } from "./Client.js";
 import { CommandContext } from "./commands/CommandContext.js";
 import { Command, CommandNotFoundError } from "./commands/Command.js";
-import { Choice } from "./game/state/Interrupt.js";
 import { PlayerState } from "./game/state/PlayerState.js";
+import { InterruptSync } from "./game/state/interrupts/Interrupt.js";
 
 export class Client_Human extends Client {
     public override name: string = "Pikachu";
@@ -46,13 +46,13 @@ export class Client_Human extends Client {
         this.socket.emit("ERR", Client.tokenize(...parts));
     }
 
-    public override prompt(text: string, choices: Choice[], force: boolean = false) {
-        const userChoices = choices.map((c, i) => `[${i + 1}] ${c.text}`);
-        if (!force) {
+    public override prompt(interrupt: InterruptSync) {
+        const userChoices = interrupt.choices!.map((c, i) => `[${i + 1}] ${c.text}`);
+        if (!interrupt.force) {
             userChoices.push("[`] (cancel)");
         }
         this.socket.emit("ASK", {
-            text: text,
+            text: interrupt.prompt,
             choices: userChoices
         });
     }

@@ -1,5 +1,5 @@
-import { InterruptResolver } from "../../InterruptResolver.js";
-import { Interrupt, InterruptSync } from "../Interrupt.js";
+import { InterruptResolver } from "../interrupts/InterruptResolver.js";
+import { Interrupt, InterruptSync } from "../interrupts/Interrupt.js";
 import { StateActor } from "./StateActor.js";
 
 export class InterruptActor extends StateActor {
@@ -93,6 +93,7 @@ export class InterruptActor extends StateActor {
             if (resolved) {
                 this.close(interrupt.id!);
             }
+            this.game.players.get(player_id).menus++;
             this.game.getClient(player_id).wait();
             this.game.update();
         } else {

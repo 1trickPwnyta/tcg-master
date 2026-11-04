@@ -1,6 +1,7 @@
 import { IToken } from "../../../IToken.js";
 import { EnergyType } from "../../EnergyType.js";
-import { InterruptResolution } from "../../InterruptResolution.js";
+import { InterruptResolution } from "../../state/interrupts/InterruptResolution.js";
+import { InterruptType } from "../../state/interrupts/InterruptType.js";
 import { CardWorker, PlayContext } from "./CardWorker.js";
 
 export abstract class CardWorker_Energy extends CardWorker {

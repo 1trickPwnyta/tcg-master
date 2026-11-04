@@ -1,9 +1,11 @@
-import { InterruptResolution } from "../InterruptResolution.js";
+import { InterruptResolution } from "./InterruptResolution.js";
+import { InterruptType } from "./InterruptType.js";
 
 export interface InterruptSync {
     id?: number;
     interrupts?: Interrupt[];
     player: number;
+    type?: InterruptType;
     prompt: string;
     choices: Choice[];
     force?: boolean;

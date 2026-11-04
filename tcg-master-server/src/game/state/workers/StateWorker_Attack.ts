@@ -1,7 +1,7 @@
 import { CardDatabase } from "../../cards/CardDatabase.js";
 import { CardWorker_Pokemon } from "../../cards/workers/CardWorker_Pokemon.js";
-import { InterruptResolution } from "../../InterruptResolution.js";
-import { ResolvesInterrupt } from "../../InterruptResolver.js";
+import { InterruptResolution } from "../interrupts/InterruptResolution.js";
+import { ResolvesInterrupt } from "../interrupts/InterruptResolver.js";
 import { StateContext, StateWorker } from "./StateWorker.js";
 
 @ResolvesInterrupt(InterruptResolution.Attack)

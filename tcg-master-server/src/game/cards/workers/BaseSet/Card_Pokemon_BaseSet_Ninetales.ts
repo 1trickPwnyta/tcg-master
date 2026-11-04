@@ -1,5 +1,5 @@
 import { EnergyType } from "../../../EnergyType.js";
-import { InterruptResolution } from "../../../InterruptResolution.js";
+import { InterruptResolution } from "../../../state/interrupts/InterruptResolution.js";
 import { Card } from "../../CardDatabase.js";
 import { EvolutionTree } from "../../EvolutionTree.js";
 import { AttackFactory } from "../AttackFactory.js";
@@ -29,6 +29,7 @@ export class Card_Pokemon_BaseSet_Ninetales extends CardWorker_Pokemon {
                 } : null
             )
             .withPostEffect((context: AttackContext, _knockedOut: boolean, benched_id?: number) => {
+                console.log(benched_id);
                 if (benched_id !== undefined) {
                     context.game.cards.move(context.game.players.inactive.active.cards[0].id, context.game.players.inactive.active.id, context.game.players.inactive.bench.id);
                     context.game.cards.move(benched_id, context.game.players.inactive.bench.id, context.game.players.inactive.active.id);

@@ -1,10 +1,11 @@
 import { CardDatabase } from "../cards/CardDatabase.js";
 import { CardWorker } from "../cards/workers/CardWorker.js";
-import { InterruptResolution } from "../InterruptResolution.js";
+import { InterruptResolution } from "../state/interrupts/InterruptResolution.js";
 import { CardState } from "../state/CardState.js";
-import { Interrupt } from "../state/Interrupt.js";
+import { Interrupt } from "../state/interrupts/Interrupt.js";
 import { PlayerState } from "../state/PlayerState.js";
 import { GameWorker } from "./GameWorker.js";
+import { InterruptType } from "../state/interrupts/InterruptType.js";
 
 export class GameWorker_Setup extends GameWorker {
     private nextCardId: number = 100;
@@ -51,6 +52,7 @@ export class GameWorker_Setup extends GameWorker {
         } else if (this.state.players.find(p => !p.active.cards.length)) {
             this.game.interrupts.interrupt({
                 interrupts: this.state.players.map(p => ({
+                    type: InterruptType.SelectActive,
                     player: p.id,
                     prompt: "Select a basic Pokémon as your active Pokémon.",
                     choices: this.game.cards.basicPokemonInHand(p.id).map(c => ({ text: c.name, target_id: c.id })),
@@ -64,6 +66,7 @@ export class GameWorker_Setup extends GameWorker {
             if (playersNotReady.length) {
                 this.game.interrupts.interrupt({
                     interrupts: playersNotReady.map(p => ({
+                        type: InterruptType.Bench,
                         player: p.id,
                         prompt: "Choose other basic Pokémon to put on the bench.",
                         choices: this.game.cards.basicPokemonInHand(p.id).map(c => ({ text: c.name, target_id: c.id })),

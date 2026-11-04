@@ -1,8 +1,7 @@
 import { CardDatabase } from "../../cards/CardDatabase.js";
-import { CardWorker_Energy } from "../../cards/workers/CardWorker_Energy.js";
 import { CardWorker_Pokemon } from "../../cards/workers/CardWorker_Pokemon.js";
-import { InterruptResolution } from "../../InterruptResolution.js";
-import { ResolvesInterrupt } from "../../InterruptResolver.js";
+import { InterruptResolution } from "../interrupts/InterruptResolution.js";
+import { ResolvesInterrupt } from "../interrupts/InterruptResolver.js";
 import { StateContext, StateWorker } from "./StateWorker.js";
 
 @ResolvesInterrupt(InterruptResolution.Retreat)
@@ -20,13 +19,13 @@ export class StateWorker_Retreat extends StateWorker {
             return false;
         }
         const worker = CardDatabase.find<CardWorker_Pokemon>(card.dbid);
-        const energy = card.attachments.cards.map(c => ({ id: c.id, worker: CardDatabase.find<CardWorker_Energy>(c.dbid) }));
+        const energy = context.game.pokemon.getEnergy(card.id);
         const paid = [];
         let amount = 0;
         while (energy.length && amount < worker.retreatCost) {
             const next = energy.pop()!;
             amount += next.worker.amount;
-            paid.push(next.id);
+            paid.push(next.card.id);
         }
         if (amount < worker.retreatCost) {
             context.game.sendError(player, card, "doesn't have enough energy to retreat.");

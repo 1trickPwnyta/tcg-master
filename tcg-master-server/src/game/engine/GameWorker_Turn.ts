@@ -1,5 +1,5 @@
-import { InterruptResolution } from "../InterruptResolution.js";
-import { Interrupt } from "../state/Interrupt.js";
+import { InterruptResolution } from "../state/interrupts/InterruptResolution.js";
+import { Interrupt } from "../state/interrupts/Interrupt.js";
 import { Turn } from "../state/Turn.js";
 import { GameWorker } from "./GameWorker.js";
 

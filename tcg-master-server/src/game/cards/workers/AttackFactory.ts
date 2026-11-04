@@ -1,7 +1,8 @@
 import { EnergyType } from "../../EnergyType.js";
-import { InterruptResolution } from "../../InterruptResolution.js";
-import { Interrupt } from "../../state/Interrupt.js";
+import { InterruptResolution } from "../../state/interrupts/InterruptResolution.js";
+import { Interrupt } from "../../state/interrupts/Interrupt.js";
 import { AttackContext, AttackWorker } from "./AttackWorker.js";
+import { InterruptType } from "../../state/interrupts/InterruptType.js";
 
 export type EffectTrigger = "always" | "coin";
 
@@ -89,6 +90,7 @@ export class AttackFactory {
             worker.validateTargets = (context: AttackContext, energy_id?: number) => {
                 if (energy_id === undefined) {
                     return {
+                        type: InterruptType.Discard,
                         player: context.game.players.active.id,
                         prompt: `Discard which Energy card from ${context.attacker.name}}?`,
                         choices: context.game.pokemon.getEnergy(context.attacker.id).filter(e => e.worker.type == this.discardType).map(e => ({
@@ -104,6 +106,9 @@ export class AttackFactory {
             worker.postEffects.push((context: AttackContext, _knockedOut: boolean, energy_id: number) => {
                 context.game.cards.move(energy_id, context.attacker.attachments.id, context.game.players.get(context.attacker.owner_id)!.discard.id);
             });
+        }
+        if (this.targeting) {
+            worker.validateTargets = this.targeting;
         }
         if (this.poison) {
             worker.postEffects.push((context: AttackContext, knockedOut: boolean) => {

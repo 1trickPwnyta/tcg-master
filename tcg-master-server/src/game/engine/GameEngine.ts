@@ -1,6 +1,6 @@
 import { Client_AI } from "../../ai/Client_AI.js";
 import { GameState } from "../state/GameState.js";
-import { Interrupt } from "../state/Interrupt.js";
+import { Interrupt, InterruptSync } from "../state/interrupts/Interrupt.js";
 import { PlayerState } from "../state/PlayerState.js";
 import { Client } from "../../Client.js";
 import { IToken } from "../../IToken.js";
@@ -15,7 +15,7 @@ import { PokemonActor } from "../state/actors/PokemonActor.js";
 export class GameEngine {
     public readonly clients: Client[];
     private state: GameState;
-    private simulation: boolean = false;
+    public readonly simulation: boolean = false;
     private promptsGiven: number = 0;
 
     public readonly setup: GameWorker_Setup;
@@ -149,8 +149,7 @@ export class GameEngine {
             }
         } else {
             this.promptsGiven++;
-            this.clients.find(c => c.player_id === interrupt.player)!
-                .prompt(interrupt.prompt!, interrupt.choices!, interrupt.force);
+            this.clients.find(c => c.player_id === interrupt.player)!.prompt(interrupt as InterruptSync);
         }
     }
 

@@ -1,7 +1,7 @@
 import { CardDatabase } from "../../cards/CardDatabase.js";
 import { CardWorker_Trainer } from "../../cards/workers/CardWorker_Trainer.js";
-import { InterruptResolution } from "../../InterruptResolution.js";
-import { ResolvesInterrupt } from "../../InterruptResolver.js";
+import { InterruptResolution } from "../interrupts/InterruptResolution.js";
+import { ResolvesInterrupt } from "../interrupts/InterruptResolver.js";
 import { StateContext, StateWorker } from "./StateWorker.js";
 
 @ResolvesInterrupt(InterruptResolution.UseTrainer)

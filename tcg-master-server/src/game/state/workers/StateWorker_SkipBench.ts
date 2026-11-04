@@ -1,5 +1,5 @@
-import { InterruptResolution } from "../../InterruptResolution.js";
-import { ResolvesInterrupt } from "../../InterruptResolver.js";
+import { InterruptResolution } from "../interrupts/InterruptResolution.js";
+import { ResolvesInterrupt } from "../interrupts/InterruptResolver.js";
 import { StateContext, StateWorker } from "./StateWorker.js";
 
 @ResolvesInterrupt(InterruptResolution.SkipBench)

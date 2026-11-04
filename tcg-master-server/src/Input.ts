@@ -5,12 +5,14 @@ import { Command } from "./commands/Command.js";
 import { Command_check } from "./commands/Command_check.js";
 import { Command_select } from "./commands/Command_select.js";
 import { Client_Human } from "./Client_Human.js";
+import { Command_debug } from "./commands/Command_debug.js";
 
 export class Input {
     static {
         Command.default = new Command_select();
         Command.register(Command.default);
         Command.register(new Command_check());
+        Command.register(new Command_debug());
     }
 
     public static init(server: HttpServer, cors: { origin: string; methods: string[]; credentials: boolean }) {

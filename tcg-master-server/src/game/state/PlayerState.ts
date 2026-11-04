@@ -19,4 +19,5 @@ export interface PlayerState {
     mulligans: number;
     mulliganBonusUsed: boolean;
     setupComplete: boolean;
+    menus: number;
 };

@@ -17,7 +17,8 @@ export class PlayerActor extends StateActor {
             deck: { id: id * 10 + 5, cards: [] },
             mulligans: 0,
             mulliganBonusUsed: false,
-            setupComplete: false
+            setupComplete: false,
+            menus: 0
         };
     }
 

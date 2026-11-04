@@ -1,4 +1,5 @@
-import { InterruptResolution } from "../../../InterruptResolution.js";
+import { InterruptResolution } from "../../../state/interrupts/InterruptResolution.js";
+import { InterruptType } from "../../../state/interrupts/InterruptType.js";
 import { Card } from "../../CardDatabase.js";
 import { PlayContext } from "../CardWorker.js";
 import { CardWorker_Trainer } from "../CardWorker_Trainer.js";
@@ -21,6 +22,7 @@ export class Card_Trainer_BaseSet_Switch extends CardWorker_Trainer {
             return true;
         } else {
             context.game.interrupts.interrupt({
+                type: InterruptType.Switch,
                 player: context.player.id,
                 prompt: `Switch ${context.player.active.cards[0].name} with which benched Pokémon?`,
                 choices: context.player.bench.cards.map(c => ({ text: c.name, target_id: c.id })),

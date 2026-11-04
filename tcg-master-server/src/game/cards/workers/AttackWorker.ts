@@ -2,7 +2,7 @@ import { EnergyType } from "../../EnergyType.js";
 import { GameEngine } from "../../engine/GameEngine.js";
 import { CardState } from "../../state/CardState.js";
 import { GameState } from "../../state/GameState.js";
-import { Interrupt } from "../../state/Interrupt.js";
+import { Interrupt } from "../../state/interrupts/Interrupt.js";
 import { CardDatabase } from "../CardDatabase.js";
 import { CardWorker_Energy } from "./CardWorker_Energy.js";
 
