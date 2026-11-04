@@ -28,6 +28,9 @@ export class AIEvaluator {
         const xunsatisfiedEnergyCosts = xactiveCard ? xactiveCard.attacks.flatMap(a => a.costUnsatisfied(xactiveEnergy)) : [];
         const xactiveHighestDamage = xactiveCard ? ([ ...xactiveCard.attacks.filter(a => a.costSatisfied(xactiveEnergy)) ].sort((a, b) => b.damage - a.damage)[0]?.damage ?? 0) : 0;
     
+        const benchSize = player.bench.cards.length;
+        const xbenchSize = opponent.bench.cards.length;
+
         const handSize = player.hand.cards.length + player.limbo.cards.length;
         const deckSize = player.deck.cards.length;
         const xhandSize = opponent.hand.cards.length + opponent.limbo.cards.length;
@@ -49,6 +52,9 @@ export class AIEvaluator {
         
         score += xactive && activeHighestDamage >= xactiveHp ? 50 : 0;
         score -= active && xactiveHighestDamage >= activeHp ? 50 : 0;
+
+        score += benchSize ? 20 + (benchSize - 1) * 2 : 0;
+        score -= xbenchSize ? 20 + (xbenchSize - 1) * 2 : 0;
 
         score += handSize;
         score -= xhandSize;

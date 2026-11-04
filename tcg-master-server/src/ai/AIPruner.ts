@@ -81,7 +81,7 @@ export class AIPruner {
         }
 
         // Don't prune every choice
-        if (!choices.some(c => c.valid)) {
+        if (choices.length && !choices.some(c => c.valid)) {
             choices[0].valid = true;
         }
         

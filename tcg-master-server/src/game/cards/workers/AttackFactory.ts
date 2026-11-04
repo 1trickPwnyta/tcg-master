@@ -23,6 +23,7 @@ export class AttackFactory {
     private confuse?: EffectTrigger;
     private sleep?: EffectTrigger;
     private targeting?: (context: AttackContext, ...targets: number[]) => Interrupt | null = (_context: AttackContext) => null;
+    private preEffects: ((context: AttackContext) => number)[] = [];
     private postEffects: ((context: AttackContext, knockedOut: boolean, ...targets: number[]) => void)[] = [];
 
     private constructor(dbid: string, name: string) {
@@ -76,6 +77,11 @@ export class AttackFactory {
         return this;
     }
 
+    public withPreEffect(effect: (context: AttackContext) => number): AttackFactory {
+        this.preEffects.push(effect);
+        return this;
+    }
+
     public withPostEffect(effect: (context: AttackContext, knockedOut: boolean, ...targets: number[]) => void): AttackFactory {
         this.postEffects.push(effect);
         return this;
@@ -109,6 +115,9 @@ export class AttackFactory {
         }
         if (this.targeting) {
             worker.validateTargets = this.targeting;
+        }
+        for (const effect of this.preEffects) {
+            worker.preEffects.push(effect);
         }
         if (this.poison) {
             worker.postEffects.push((context: AttackContext, knockedOut: boolean) => {

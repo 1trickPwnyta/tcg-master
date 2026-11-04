@@ -5,7 +5,7 @@ import { PlayerState } from "../game/state/PlayerState.js";
 import { AIEvaluator } from "./AIEvaluator.js";
 import { AIPruner } from "./AIPruner.js";
 
-const MAX_DEPTH = 6;
+const MAX_DEPTH = 8;
 
 export type HistoryEntry = {
     hash: number,

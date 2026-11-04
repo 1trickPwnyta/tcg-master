@@ -28,7 +28,13 @@ export class StateWorker_Attack extends StateWorker {
                 }
             }
             const attack = worker.attacks.find(a => a.dbid === attack_id)!;
-            return attack.execute({ game: context.game, state: context.state, attacker: card, defender: context.game.players.inactive.active.cards[0] }, ...args);
+            return attack.execute({
+                game: context.game,
+                state: context.state,
+                attacker: card,
+                defender: context.game.players.inactive.active.cards[0],
+                attack: attack
+            }, ...args);
         } else {
             context.game.interrupts.interrupt({
                 player: player.id,

@@ -15,9 +15,10 @@ export class GameWorker_Setup extends GameWorker {
             this.game.send("Starting game between", this.state.players[0], "and", this.state.players[1], ".");
             for (const player of this.state.players) {
                 const deck = [
-                    { card: CardDatabase.find("BaseSet.Ninetales"), count: 8 },
-                    { card: CardDatabase.find("BaseSet.Sandshrew"), count: 12 },
-                    { card: CardDatabase.find("BaseSet.FightingEnergy"), count: 20 },
+                    { card: CardDatabase.find("BaseSet.Pikachu"), count: 8 },
+                    { card: CardDatabase.find("BaseSet.Poliwag"), count: 12 },
+                    { card: CardDatabase.find("BaseSet.WaterEnergy"), count: 20 },
+                    { card: CardDatabase.find("BaseSet.LightningEnergy"), count: 0 },
                     { card: CardDatabase.find("BaseSet.Switch"), count: 0 },
                     { card: CardDatabase.find("BaseSet.Potion"), count: 20 }
                 ];

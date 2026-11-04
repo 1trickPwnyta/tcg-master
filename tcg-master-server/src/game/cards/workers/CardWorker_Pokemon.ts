@@ -62,6 +62,8 @@ export abstract class CardWorker_Pokemon extends CardWorker {
             "<br />",
             "Weakness:",
             this.weakness?.symbol,
+            "Resistance:",
+            this.resistance ? `${this.resistance}-30` : "",
             "Retreat:",
             ...Array.from({ length: this.retreatCost }, () => EnergyType.Colorless.symbol)
         ];

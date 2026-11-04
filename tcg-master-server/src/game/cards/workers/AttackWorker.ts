@@ -16,6 +16,7 @@ export class AttackWorker {
 
     public canUse: (context: AttackContext) => boolean = () => true;
     public validateTargets: (context: AttackContext, ...targets: number[]) => Interrupt | null = () => null;
+    public preEffects: ((context: AttackContext) => number)[] = [];
     public postEffects: ((context: AttackContext, knockedOut: boolean, ...targets: number[]) => void)[] = [];
 
     public constructor(dbid: string, name: string) {
@@ -43,6 +44,9 @@ export class AttackWorker {
                     }
                 }
                 const worker = CardDatabase.find<CardWorker_Pokemon>(context.attacker.dbid);
+                for (const effect of this.preEffects) {
+                    damage += effect(context);
+                }
                 const knockedOut = context.game.pokemon.damage({ owner_id: context.game.players.inactive.id, card_id: context.defender.id, amount: damage, type: worker.type });
                 for (const effect of this.postEffects) {
                     effect(context, knockedOut, ...targets);
@@ -53,7 +57,7 @@ export class AttackWorker {
         }
     }
 
-    public costUnsatisfied(energy: CardWorker_Energy[]): EnergyType[] {
+    private analyzeCost(energy: CardWorker_Energy[]): { unsatisfied: EnergyType[], oversatisfied: EnergyType[] } {
         const reqs = [ ...this.cost ].sort((a, b) => b.resolutionPriority - a.resolutionPriority);
         const pool = energy.flatMap(e => Array.from({ length: e.amount }, () => e.type)).sort((a, b) => a.resolutionPriority - b.resolutionPriority);
         const unsatisfied = [];
@@ -71,11 +75,19 @@ export class AttackWorker {
             }
         }
 
-        return unsatisfied;
+        return { unsatisfied: unsatisfied, oversatisfied: pool };
+    }
+
+    public costUnsatisfied(energy: CardWorker_Energy[]): EnergyType[] {
+        return this.analyzeCost(energy).unsatisfied;
     }
 
     public costSatisfied(energy: CardWorker_Energy[]): boolean {
-        return this.costUnsatisfied(energy).length === 0;
+        return this.analyzeCost(energy).unsatisfied.length === 0;
+    }
+
+    public costOversatisfied(energy: CardWorker_Energy[]): EnergyType[] {
+        return this.analyzeCost(energy).oversatisfied;
     }
 
     public getDetails(): any[] {
@@ -93,5 +105,6 @@ export type AttackContext = {
     game: GameEngine,
     state: GameState,
     attacker: CardState,
-    defender: CardState
+    defender: CardState,
+    attack: AttackWorker
 };

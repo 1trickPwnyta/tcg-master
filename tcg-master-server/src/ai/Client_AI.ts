@@ -60,11 +60,9 @@ export class Client_AI extends Client {
 
         const worker = new Worker(path.join(import.meta.dirname, "AIWorker.js"));
         worker.on("message", (scores: ScoredChoice[]) => {
-            console.log(scores);
             worker.terminate();
             const hash = this.game!.getStateHash();
             const scoresUnused = scores.filter(s => s.score !== null && !(this.movesUsed.get(hash) ?? []).includes(s.choice.i)).sort((a, b) => b.score! - a.score!);
-            console.log(scoresUnused[0]);
             const choice = scoresUnused[0]?.choice ?? scores[0].choice;
             if (!this.movesUsed.has(hash)) {
                 this.movesUsed.set(hash, []);
