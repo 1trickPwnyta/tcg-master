@@ -13,7 +13,7 @@ export class Card_Trainer_BaseSet_Potion extends CardWorker_Trainer {
         if (target_id !== undefined) {
             context.game.pokemon.heal(context.player.id, target_id, 20);
             return true;
-        } else {
+        } else if ([ ...context.player.active.cards, ...context.player.bench.cards ].some(c => c.damage)) {
             context.game.interrupts.interrupt({
                 player: context.player.id,
                 prompt: "Heal which Pokémon?",
@@ -23,6 +23,9 @@ export class Card_Trainer_BaseSet_Potion extends CardWorker_Trainer {
                 args: [ context.card.id ]
             });
             return true;
+        } else {
+            context.game.sendError(context.player, "None of your Pokémon can be healed right now.");
+            return false;
         }
     }
 };

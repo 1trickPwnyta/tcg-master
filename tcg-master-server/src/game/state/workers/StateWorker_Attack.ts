@@ -13,6 +13,10 @@ export class StateWorker_Attack extends StateWorker {
             context.game.sendError(player, card, "can't attack due to paralysis.");
             return false;
         }
+        if (card.orientation === "asleep") {
+            context.game.sendError(player, card, "can't attack due to sleep.");
+            return false;
+        }
         const worker = CardDatabase.find<CardWorker_Pokemon>(card.dbid);
         if (attack_id) {
             if (card.orientation === "confused") {

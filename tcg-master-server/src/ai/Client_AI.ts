@@ -67,7 +67,7 @@ export class Client_AI extends Client {
             if (!this.movesUsed.has(hash)) {
                 this.movesUsed.set(hash, []);
             }
-            //this.movesUsed.set(hash, [ ...this.movesUsed.get(hash)!, choice.i ]);
+            this.movesUsed.set(hash, [ ...this.movesUsed.get(hash)!, choice.i ]);
             if (this.interrupt_id === this.game!.interrupts.get(this.player_id!)?.id) {
                 console.log(`> ${choice.i ?? "(cancel)"}`);
                 this.interrupt_id = null;

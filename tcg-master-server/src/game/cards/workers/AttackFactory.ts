@@ -22,7 +22,9 @@ export class AttackFactory {
     private paralyze?: EffectTrigger;
     private confuse?: EffectTrigger;
     private sleep?: EffectTrigger;
-    private targeting?: (context: AttackContext, ...targets: number[]) => Interrupt | null = (_context: AttackContext) => null;
+    private damagePreventionTrigger?: EffectTrigger;
+    private damagePrevention?: number | "damage" | "all";
+    private targeting?: (context: AttackContext, ...targets: number[]) => Interrupt | null;
     private preEffects: ((context: AttackContext) => number)[] = [];
     private postEffects: ((context: AttackContext, knockedOut: boolean, ...targets: number[]) => void)[] = [];
 
@@ -72,6 +74,12 @@ export class AttackFactory {
         return this;
     }
 
+    public prevents(amount: number | "damage" | "all", trigger: EffectTrigger = "coin"): AttackFactory {
+        this.damagePrevention = amount;
+        this.damagePreventionTrigger = trigger;
+        return this;
+    }
+
     public targets(targeting: (context: AttackContext, ...targets: number[]) => Interrupt | null): AttackFactory {
         this.targeting = targeting;
         return this;
@@ -98,7 +106,7 @@ export class AttackFactory {
                     return {
                         type: InterruptType.Discard,
                         player: context.game.players.active.id,
-                        prompt: `Discard which Energy card from ${context.attacker.name}}?`,
+                        prompt: `Discard which Energy card from ${context.attacker.name}?`,
                         choices: context.game.pokemon.getEnergy(context.attacker.id).filter(e => e.worker.type == this.discardType).map(e => ({
                             text: e.card.name, target_id: e.card.id
                         })),
@@ -143,7 +151,18 @@ export class AttackFactory {
         if (this.sleep) {
             worker.postEffects.push((context: AttackContext, knockedOut: boolean) => {
                 if (!knockedOut && this.sleep === "always" || context.game.flipCoin(context.game.players.active.id)) {
-                    //context.game.sleepPokemon(context.game.inactivePlayer.id, context.defender.id);
+                    context.game.pokemon.sleep(context.game.players.inactive.id, context.defender.id);
+                }
+            });
+        }
+        if (this.damagePrevention) {
+            worker.postEffects.push((context: AttackContext) => {
+                if (this.damagePreventionTrigger === "always" || context.game.flipCoin(context.game.players.active.id)) {
+                    switch (this.damagePrevention) {
+                        case "all": break;
+                        case "damage": context.attacker.damagePrevention = -1; break;
+                        default: context.attacker.damagePrevention = this.damagePrevention;
+                    }
                 }
             });
         }

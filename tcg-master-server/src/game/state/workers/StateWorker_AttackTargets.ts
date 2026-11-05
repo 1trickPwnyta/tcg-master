@@ -11,6 +11,12 @@ export class StateWorker_AttackTargets extends StateWorker {
         const card = player.active.cards[0];
         const worker = CardDatabase.find<CardWorker_Pokemon>(card.dbid);
         const attack = worker.attacks.find(a => a.dbid === attack_id)!;
-        return attack.execute({ game: context.game, state: context.state, attacker: card, defender: context.game.players.inactive.active.cards[0] }, target_id);
+        return attack.execute({
+            game: context.game,
+            state: context.state,
+            attack: attack,
+            attacker: card,
+            defender: context.game.players.inactive.active.cards[0]
+        }, target_id);
     }
 };

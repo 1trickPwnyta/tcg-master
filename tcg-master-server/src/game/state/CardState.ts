@@ -13,5 +13,11 @@ export interface CardState {
     orientation: "normal" | "asleep" | "confused" | "paralyzed";
     attachments: LocationState;
     damagePrevention?: number;
+    damageThreshold?: number;
     accuracyChecks?: number;
+    status: CardStatus[];
+};
+
+export enum CardStatus {
+    GastlyDestinyBond
 };

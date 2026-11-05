@@ -46,8 +46,10 @@ export class Client_AIWorker extends Client_AI {
             return;
         }
 
-        // Can't let the AI see into the other player's turn, for now, because then they want to stall as long as possible to avoid ending their own turn
-        if (interrupt.player !== this.for_player) {
+        // For now, don't let the AI see into the other player's turn (except when it has to make a choice during the other player's turn)
+        // because then they want to stall as long as possible to avoid ending their own turn because god forbid the opponent do something they don't like
+        // If this interrupt isn't for you and it's not your turn, just return the evaluation score immediately
+        if (interrupt.player !== this.for_player && this.game?.getState().turn && this.game.getState().turn?.player !== this.for_player) {
             this.callback({ score: AIEvaluator.evaluate(this.game!, this.for_player), history: this.history });
             this.callback = null;
             return;

@@ -18,6 +18,10 @@ export class StateWorker_Retreat extends StateWorker {
             context.game.sendError(player, card, "can't retreat due to paralysis.");
             return false;
         }
+        if (card.orientation === "asleep") {
+            context.game.sendError(player, card, "can't retreat due to sleep.");
+            return false;
+        }
         const worker = CardDatabase.find<CardWorker_Pokemon>(card.dbid);
         const energy = context.game.pokemon.getEnergy(card.id);
         const paid = [];

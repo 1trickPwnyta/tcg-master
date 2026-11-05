@@ -2,6 +2,7 @@ import { InterruptResolution } from "../state/interrupts/InterruptResolution.js"
 import { Interrupt } from "../state/interrupts/Interrupt.js";
 import { Turn } from "../state/Turn.js";
 import { GameWorker } from "./GameWorker.js";
+import { CardStatus } from "../state/CardState.js";
 
 export class GameWorker_Turn extends GameWorker {
     private get turn(): Turn {
@@ -30,6 +31,13 @@ export class GameWorker_Turn extends GameWorker {
             if (active?.poison) {
                 this.game.pokemon.damage({ owner_id: player.id, card_id: active.id, amount: 10, source: "poison" });
             }
+            if (active?.orientation === "asleep") {
+                this.game.send(player, "'s", active, "is asleep.");
+                if (this.game.flipCoin(player.id)) {
+                    active.orientation = "normal";
+                    this.game.send(player, "'s", active, "woke up!");
+                }
+            }
             if (this.state.turn?.player === player.id) {
                 if (active?.orientation === "paralyzed") {
                     active.orientation = "normal";
@@ -38,6 +46,8 @@ export class GameWorker_Turn extends GameWorker {
                 active.accuracyChecks = undefined;
             } else {
                 active.damagePrevention = undefined;
+                active.damageThreshold = undefined;
+                this.game.pokemon.removeStatus(active.id, CardStatus.GastlyDestinyBond);
             }
         }
         for (const client of this.game.clients) {

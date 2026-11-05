@@ -1,11 +1,11 @@
-import { CardDatabase } from "../cards/CardDatabase.js";
-import { CardWorker } from "../cards/workers/CardWorker.js";
 import { InterruptResolution } from "../state/interrupts/InterruptResolution.js";
 import { CardState } from "../state/CardState.js";
 import { Interrupt } from "../state/interrupts/Interrupt.js";
 import { PlayerState } from "../state/PlayerState.js";
 import { GameWorker } from "./GameWorker.js";
 import { InterruptType } from "../state/interrupts/InterruptType.js";
+import { DefDatabase } from "../../defs/DefDatabase.js";
+import { CardDef_Pokemon } from "../../defs/CardDef_Pokemon.js";
 
 export class GameWorker_Setup extends GameWorker {
     private nextCardId: number = 100;
@@ -15,16 +15,16 @@ export class GameWorker_Setup extends GameWorker {
             this.game.send("Starting game between", this.state.players[0], "and", this.state.players[1], ".");
             for (const player of this.state.players) {
                 const deck = [
-                    { card: CardDatabase.find("BaseSet.Pikachu"), count: 8 },
-                    { card: CardDatabase.find("BaseSet.Poliwag"), count: 12 },
-                    { card: CardDatabase.find("BaseSet.WaterEnergy"), count: 20 },
-                    { card: CardDatabase.find("BaseSet.LightningEnergy"), count: 0 },
-                    { card: CardDatabase.find("BaseSet.Switch"), count: 0 },
-                    { card: CardDatabase.find("BaseSet.Potion"), count: 20 }
+                    //{ card: CardDatabase.find("BaseSet.Ponyta"), count: 8 },
+                    //{ card: CardDatabase.find("BaseSet.Gastly"), count: 12 },
+                    //{ card: CardDatabase.find("BaseSet.PsychicEnergy"), count: 10 },
+                    //{ card: CardDatabase.find("BaseSet.FireEnergy"), count: 10 },
+                    //{ card: CardDatabase.find("BaseSet.Switch"), count: 0 },
+                    { card: DefDatabase.get<CardDef_Pokemon>("BaseSet.Weedle"), count: 60 }
                 ];
                 for (const blueprint of deck) {
                     for (let i = 0; i < blueprint.count; i++) {
-                        const card = this.makeCard(blueprint.card, player);
+                        const card = this.makeCard(blueprint.card!, player);
                         player.deck.cards.push(card);
                     }
                 }
@@ -101,18 +101,19 @@ export class GameWorker_Setup extends GameWorker {
         }
     }
 
-    private makeCard(worker: CardWorker, owner: PlayerState): CardState {
+    private makeCard(def: CardDef_Pokemon, owner: PlayerState): CardState {
         return {
             id: this.nextCardId++,
-            dbid: worker.dbid,
-            kind: worker.kind,
-            token: worker.token,
-            name: worker.name,
+            dbid: def.name,
+            kind: def.kind,
+            token: def.token,
+            name: def.label,
             owner_id: owner.id,
             damage: 0,
             poison: false,
             orientation: "normal",
-            attachments: { id: this.nextCardId++, cards: [] }
+            attachments: { id: this.nextCardId++, cards: [] },
+            status: []
         };
     }
 };

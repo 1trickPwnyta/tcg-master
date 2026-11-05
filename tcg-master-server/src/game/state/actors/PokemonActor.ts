@@ -2,7 +2,7 @@ import { CardDatabase } from "../../cards/CardDatabase.js";
 import { CardWorker_Energy } from "../../cards/workers/CardWorker_Energy.js";
 import { CardWorker_Pokemon } from "../../cards/workers/CardWorker_Pokemon.js";
 import { EnergyType } from "../../EnergyType.js";
-import { CardState } from "../CardState.js";
+import { CardState, CardStatus } from "../CardState.js";
 import { StateActor } from "./StateActor.js";
 
 export type DamageContext = {
@@ -36,24 +36,34 @@ export class PokemonActor extends StateActor {
             }
         }
 
-        if (amount) {
+        if (card.damageThreshold && card.damageThreshold > amount) {
+            amount = 0;
+        }
+
+        if (amount > 0) {
             const player = this.game.players.get(context.owner_id)!;
             const card = this.game.search.getCard(context.card_id)!;
             card.damage += amount;
             this.game.send(player, "'s", card, "took", { name: amount.toString(), type: "damage" }, `damage${context.source ? ` due to ${context.source}` : ""}!`);
             if (card.damage >= CardDatabase.find<CardWorker_Pokemon>(card.dbid).hp) {
-                this.game.send(player, "'s", card, "was knocked out!");
-                this.game.cards.move(card.id, this.game.search.findCard(card.id)!.id, player.discard.id);
-                this.game.cards.takePrize(this.game.players.getOpponent(player.id).id);
-                const interrupt = this.game.turns.checkActivePokemon();
-                if (interrupt) {
-                    this.game.interrupts.interrupt(interrupt);
-                }
+                this.knockOut(player.id, card.id);
                 return true;
             }
         }
 
         return false;
+    }
+
+    public knockOut(player_id: number, card_id: number) {
+        const player = this.game.players.get(player_id)!;
+        const card = this.game.search.getCard(card_id)!;
+        this.game.send(player, "'s", card, "was knocked out!");
+        this.game.cards.move(card.id, this.game.search.findCard(card.id)!.id, player.discard.id);
+        this.game.cards.takePrize(this.game.players.getOpponent(player.id).id);
+        const interrupt = this.game.turns.checkActivePokemon();
+        if (interrupt) {
+            this.game.interrupts.interrupt(interrupt);
+        }
     }
 
     public heal(player_id: number, card_id: number, amount: number) {
@@ -83,5 +93,29 @@ export class PokemonActor extends StateActor {
         const card = this.game.search.getCard(card_id)!;
         card.orientation = "paralyzed";
         this.game.send(player, "'s", card, "was paralyzed!");
+    }
+
+    public sleep(player_id: number, card_id: number) {
+        const player = this.game.players.get(player_id)!;
+        const card = this.game.search.getCard(card_id)!;
+        card.orientation = "asleep";
+        this.game.send(player, "'s", card, "fell asleep!");
+    }
+
+    public hasStatus(card_id: number, status: CardStatus): boolean {
+        const card = this.game.search.getCard(card_id)!;
+        return card.status.includes(status);
+    }
+
+    public giveStatus(card_id: number, status: CardStatus) {
+        const card = this.game.search.getCard(card_id)!;
+        if (!card.status.includes(status)) {
+            card.status.push(status);
+        }
+    }
+
+    public removeStatus(card_id: number, status: CardStatus) {
+        const card = this.game.search.getCard(card_id)!;
+        card.status = card.status.filter(s => s !== status);
     }
 };

@@ -1,6 +1,6 @@
 import { EnergyType } from "../../EnergyType.js";
 import { GameEngine } from "../../engine/GameEngine.js";
-import { CardState } from "../../state/CardState.js";
+import { CardState, CardStatus } from "../../state/CardState.js";
 import { GameState } from "../../state/GameState.js";
 import { Interrupt } from "../../state/interrupts/Interrupt.js";
 import { CardDatabase } from "../CardDatabase.js";
@@ -47,9 +47,13 @@ export class AttackWorker {
                 for (const effect of this.preEffects) {
                     damage += effect(context);
                 }
+                const destinyBond = context.game.pokemon.hasStatus(context.defender.id, CardStatus.GastlyDestinyBond);
                 const knockedOut = context.game.pokemon.damage({ owner_id: context.game.players.inactive.id, card_id: context.defender.id, amount: damage, type: worker.type });
                 for (const effect of this.postEffects) {
                     effect(context, knockedOut, ...targets);
+                }
+                if (knockedOut && destinyBond) {
+                    context.game.pokemon.knockOut(context.game.players.active.id, context.attacker.id);
                 }
                 context.state.turn!.attacked = true;
             }

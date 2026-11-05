@@ -2,8 +2,10 @@ import express from "express";
 import { createServer } from "http";
 import cors from "cors";
 import "./extensions.js";
-import "./loader.js"
-import { Input } from "./Input.js";
+
+await import("./loader.js");
+const { Input } = await import("./Input.js");
+await import("./defs/DefDatabase.js");
 
 const corsConfig = {
     origin: "http://localhost:5173",
