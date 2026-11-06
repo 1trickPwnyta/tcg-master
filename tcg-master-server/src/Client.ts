@@ -1,3 +1,4 @@
+import { DefDatabase } from "./defs/DefDatabase.js";
 import { GameEngine } from "./game/engine/GameEngine.js";
 import { CardState } from "./game/state/CardState.js";
 import { InterruptSync } from "./game/state/interrupts/Interrupt.js";
@@ -22,7 +23,7 @@ export abstract class Client {
     public notify_gameOver(winner: PlayerState) { }
 
     public static tokenize(...parts: any[]): IToken[] {
-        return parts.map(p => p.token ?? (p.name ? p : null) ?? { name: p.toString() });
+        return parts.map(p => p.token ?? (p.def ? DefDatabase.get(p.def).token : null) ?? (p.name ? p : null) ?? { name: p.toString() });
     }
 
     public static getCardList(cards: CardState[]): IToken[] {

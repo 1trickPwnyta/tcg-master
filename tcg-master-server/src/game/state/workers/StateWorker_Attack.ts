@@ -1,12 +1,12 @@
-import { CardDatabase } from "../../cards/CardDatabase.js";
-import { CardWorker_Pokemon } from "../../cards/workers/CardWorker_Pokemon.js";
+import { CardDef_Pokemon } from "../../../defs/CardDef_Pokemon.js";
+import { DefDatabase } from "../../../defs/DefDatabase.js";
 import { InterruptResolution } from "../interrupts/InterruptResolution.js";
 import { ResolvesInterrupt } from "../interrupts/InterruptResolver.js";
 import { StateContext, StateWorker } from "./StateWorker.js";
 
 @ResolvesInterrupt(InterruptResolution.Attack)
 export class StateWorker_Attack extends StateWorker {
-    public override execute(context: StateContext, attack_id: string, ...args: number[]): boolean {
+    public override execute(context: StateContext, attack_name: string, ...args: number[]): boolean {
         const player = context.game.players.active;
         const card = player.active.cards[0];
         if (card.orientation === "paralyzed") {
@@ -17,12 +17,12 @@ export class StateWorker_Attack extends StateWorker {
             context.game.sendError(player, card, "can't attack due to sleep.");
             return false;
         }
-        const worker = CardDatabase.find<CardWorker_Pokemon>(card.dbid);
-        if (attack_id) {
+        const def = DefDatabase.get<CardDef_Pokemon>(card.def);
+        if (attack_name) {
             if (card.orientation === "confused") {
                 context.game.send(player, "'s", card, "is confused.");
                 if (!context.game.flipCoin(player.id)) {
-                    context.game.pokemon.damage({ owner_id: player.id, card_id: card.id, amount: 20, source: "confusion", type: worker.type });
+                    context.game.pokemon.damage({ owner_id: player.id, card_id: card.id, amount: 20, source: "confusion", type: def.type });
                     return this.failAttack(context);
                 }
             }
@@ -31,19 +31,18 @@ export class StateWorker_Attack extends StateWorker {
                     return this.failAttack(context, card, "'s attack failed.");
                 }
             }
-            const attack = worker.attacks.find(a => a.dbid === attack_id)!;
+            const attack = def.attacks.find(a => a.name === attack_name)!;
             return attack.execute({
                 game: context.game,
                 state: context.state,
                 attacker: card,
-                defender: context.game.players.inactive.active.cards[0],
-                attack: attack
+                defender: context.game.players.inactive.active.cards[0]
             }, ...args);
         } else {
             context.game.interrupts.interrupt({
                 player: player.id,
                 prompt: `Which attack will ${card.name} use?`,
-                choices: worker.attacks.map(a => ({ text: a.name, target_id: a.dbid })),
+                choices: def.attacks.map(a => ({ text: a.name, target_id: a.name })),
                 resolution: InterruptResolution.Attack
             });
             return true;

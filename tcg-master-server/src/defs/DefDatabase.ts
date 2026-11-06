@@ -31,10 +31,16 @@ async function loadDefs(directory: string, context?: "Defs" | string) {
     }
 }
 
-await loadDefs(dataDirectory);
-
 export class DefDatabase {
-    static get<T extends Def>(name: string): T | undefined {
-        return database.get(name) as T | undefined;
+    static async init() {
+        await loadDefs(dataDirectory);
+    }
+
+    static get<T extends Def>(name: string): T {
+        return database.get(name) as T;
+    }
+
+    static search<T extends Def>(query: { name: string }): T | null {
+        return database.values().find(d => d.name === query.name) as T | null;
     }
 };

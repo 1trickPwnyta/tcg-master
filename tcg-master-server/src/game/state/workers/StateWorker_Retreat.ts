@@ -1,5 +1,5 @@
-import { CardDatabase } from "../../cards/CardDatabase.js";
-import { CardWorker_Pokemon } from "../../cards/workers/CardWorker_Pokemon.js";
+import { CardDef_Pokemon } from "../../../defs/CardDef_Pokemon.js";
+import { DefDatabase } from "../../../defs/DefDatabase.js";
 import { InterruptResolution } from "../interrupts/InterruptResolution.js";
 import { ResolvesInterrupt } from "../interrupts/InterruptResolver.js";
 import { StateContext, StateWorker } from "./StateWorker.js";
@@ -22,16 +22,16 @@ export class StateWorker_Retreat extends StateWorker {
             context.game.sendError(player, card, "can't retreat due to sleep.");
             return false;
         }
-        const worker = CardDatabase.find<CardWorker_Pokemon>(card.dbid);
+        const def = DefDatabase.get<CardDef_Pokemon>(card.def);
         const energy = context.game.pokemon.getEnergy(card.id);
         const paid = [];
         let amount = 0;
-        while (energy.length && amount < worker.retreatCost) {
+        while (energy.length && amount < def.retreat) {
             const next = energy.pop()!;
-            amount += next.worker.amount;
+            amount += next.def.amount;
             paid.push(next.card.id);
         }
-        if (amount < worker.retreatCost) {
+        if (amount < def.retreat) {
             context.game.sendError(player, card, "doesn't have enough energy to retreat.");
             return false;
         } else if (replacement_id) {

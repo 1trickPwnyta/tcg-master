@@ -1,12 +1,12 @@
 import { EnergyType } from "../game/EnergyType.js";
-import { IAttackData, ICardDefData_Pokemon, IDefData } from "./IDefData.js";
-import { AttackWorker } from "../game/attacks/AttackWorker.js";
-import { pathToFileURL } from "url";
-import path from "path";
+import { ICardDefData_Pokemon, IDefData } from "./IDefData.js";
 import { CardDef } from "./CardDef.js";
 import { IToken } from "../IToken.js";
-
-const __dirname = import.meta.dirname;
+import { Attack } from "./Attack.js";
+import { PlayContext } from "../game/cards/workers/CardWorker.js";
+import { DefDatabase } from "./DefDatabase.js";
+import { EvolutionTree } from "../game/cards/EvolutionTree.js";
+import { InterruptResolution } from "../game/state/interrupts/InterruptResolution.js";
 
 export class CardDef_Pokemon extends CardDef {
     public override readonly name: string;
@@ -14,6 +14,7 @@ export class CardDef_Pokemon extends CardDef {
     public override readonly kind = "pokemon";
     public readonly type: EnergyType;
     public readonly stage: "basic" | "stage1" | "stage2";
+    public readonly evolutionTree: EvolutionTree;
     public readonly hp: number;
     public readonly weakness: EnergyType | undefined;
     public readonly resistance: EnergyType | undefined;
@@ -22,10 +23,6 @@ export class CardDef_Pokemon extends CardDef {
 
     private readonly cardData: IDefData & ICardDefData_Pokemon;
 
-    public get token(): IToken {
-        return { name: this.label, type: "pokemon" };
-    }
-
     public constructor(data: IDefData) {
         super();
         this.cardData = data as IDefData & ICardDefData_Pokemon;
@@ -33,6 +30,7 @@ export class CardDef_Pokemon extends CardDef {
         this.label = this.cardData.label;
         this.type = EnergyType[this.cardData.type];
         this.stage = this.cardData.stage;
+        this.evolutionTree = EvolutionTree[this.cardData.evolutionTree];
         this.hp = this.cardData.hp;
         this.weakness = this.cardData.weakness ? EnergyType[this.cardData.weakness] : undefined;
         this.resistance = this.cardData.resistance ? EnergyType[this.cardData.resistance] : undefined;
@@ -47,37 +45,52 @@ export class CardDef_Pokemon extends CardDef {
             this.attacks.push(attack);
         }
     }
-};
 
-export class Attack {
-    public readonly name: string;
-    public readonly cost: EnergyType[];
-    public readonly damage: number;
-    public readonly text?: string;
-    public readonly workers: AttackWorker[];
-
-    private readonly attackData: IAttackData;
-
-    public constructor(data: IAttackData) {
-        this.attackData = data;
-        this.name = this.attackData.name;
-        this.cost = this.attackData.cost.map(c => EnergyType[c]);
-        this.damage = this.attackData.damage ?? 0;
-        this.text = this.attackData.text;
-        this.workers = [];
-    }
-
-    public async init() {
-        if (this.attackData.workers) {
-            for (const workerData of this.attackData.workers) {
-                const workerClass = typeof workerData === "string" ? workerData : workerData.class;
-                const workerArgs = typeof workerData !== "string" ? workerData.args : [];
-                const fullName = path.join(__dirname, "..", "game", "attacks", `${workerClass}.ts`);
-                const module = await import(pathToFileURL(fullName).href);
-                const workerConstructor = module[workerClass];
-                const worker = new workerConstructor(workerArgs);
-                this.workers.push(worker);
+    public override play(context: PlayContext): boolean {
+        if (this.stage === "basic") {
+            if (context.game.players.active.bench.cards.length >= 5) {
+                context.game.sendError(context.player, "Your bench is full.");
+                return false;
+            } else {
+                context.game.cards.move(context.card.id, context.player.hand.id, context.player.bench.id);
+                context.game.send(context.player, "placed", context.card, "on", context.player.pronouns.possessive, "bench.");
+                return true;
+            }
+        } else {
+            const cards = [ ...context.player.active.cards, ...context.player.bench.cards ].filter(c => {
+                const def = DefDatabase.get<CardDef_Pokemon>(c.def);
+                return def.evolutionTree.evolvesDirect(this.name);
+            });
+            if (cards.length) {
+                context.game.interrupts.interrupt({
+                    player: context.player.id,
+                    prompt: `Which Pokémon will evolve into ${this.name}?`,
+                    choices: cards.map(c => ({ text: c == context.player.active.cards[0] ? `${c.name} (active)` : c.name, target_id: c.id })),
+                    resolution: InterruptResolution.Evolve,
+                    args: [ context.card.id ]
+                });
+                return true;
+            } else {
+                context.game.sendError(context.player, "None of your Pokémon can evolve into", context.card, ".");
+                return false;
             }
         }
+    }
+
+    public override getDetails(): any[] {
+        return [
+            this.name,
+            `(${this.stage})`,
+            this.type.symbol,
+            "<br />",
+            ...this.attacks.flatMap(a => [ ...a.getDetails(), ...(this.attacks.indexOf(a) !== this.attacks.length - 1 ? [ "<br />" ] : []) ]),
+            "<br />",
+            "Weakness:",
+            this.weakness?.symbol,
+            "Resistance:",
+            this.resistance ? `${this.resistance}-30` : "",
+            "Retreat:",
+            ...Array.from({ length: this.retreat }, () => EnergyType.Colorless.symbol)
+        ];
     }
 };

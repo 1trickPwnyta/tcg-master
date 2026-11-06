@@ -1,13 +1,14 @@
 import { AttackContext } from "../cards/workers/AttackWorker.js";
+import { Interrupt } from "../state/interrupts/Interrupt.js";
 
 export abstract class AttackWorker {
-    protected trigger: "coin" | "always" = "always";
-
-    public execute(context: AttackContext) {
-        if (this.trigger === "always" || context.game.flipCoin(context.game.players.active.id)) {
-            this.executeWorker(context);
-        }
+    public validateTargets(context: AttackContext, ...targets: number[]): Interrupt | null {
+        return null;
     }
 
-    protected abstract executeWorker(context: AttackContext): void;
+    public preEffect(context: AttackContext, damage: number): number {
+        return damage;
+    }
+
+    public postEffect(context: AttackContext, knockedOut: boolean, ...targets: number[]) { }
 };

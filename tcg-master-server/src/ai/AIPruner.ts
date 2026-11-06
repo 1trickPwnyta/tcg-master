@@ -1,5 +1,5 @@
-import { CardDatabase } from "../game/cards/CardDatabase.js";
-import { CardWorker_Pokemon } from "../game/cards/workers/CardWorker_Pokemon.js";
+import { CardDef_Pokemon } from "../defs/CardDef_Pokemon.js";
+import { DefDatabase } from "../defs/DefDatabase.js";
 import { GameEngine } from "../game/engine/GameEngine.js";
 import { Choice, InterruptSync } from "../game/state/interrupts/Interrupt.js";
 import { InterruptResolution } from "../game/state/interrupts/InterruptResolution.js";
@@ -35,10 +35,9 @@ export class AIPruner {
                 switch (interrupt.resolution) {
                     case InterruptResolution.AttachEnergy:
                         const target = game.search.getCard(choice.target as number)!;
-                        const worker = CardDatabase.find(target.dbid);
-                        const pokemon = worker as CardWorker_Pokemon
-                        const energy = game.pokemon.getEnergy(choice.target as number).map(e => e.worker);
-                        const unsatisfiedAttacks = pokemon.attacks.filter(a => !a.costSatisfied(energy));
+                        const def = DefDatabase.get<CardDef_Pokemon>(target.def);
+                        const energy = game.pokemon.getEnergy(choice.target as number).map(e => e.def);
+                        const unsatisfiedAttacks = def.attacks.filter(a => !a.costSatisfied(energy));
                         if (!unsatisfiedAttacks.length) {
                             choice.valid = false;
                         }
@@ -92,8 +91,8 @@ export class AIPruner {
         const dbids: { dbid: string, target: number }[] = [];
         for (const choice of choices) {
             const card = game.search.getCard(choice.target as number)!;
-            if (!dbids.some(i => i.dbid === card.dbid)) {
-                dbids.push({ dbid: card.dbid, target: card.id });
+            if (!dbids.some(i => i.dbid === card.def)) {
+                dbids.push({ dbid: card.def, target: card.id });
             }
         }
         return dbids.map(i => choices.find(c => c.target === i.target)!);

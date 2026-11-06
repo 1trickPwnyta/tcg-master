@@ -1,0 +1,12 @@
+{
+    "class": "CardDef_Trainer",
+    "name": "BaseSet.Bill",
+    "label": "Bill",
+    "text": "Draw 2 cards.",
+    "workers": [
+        {
+            "class": "TrainerWorker_Draw",
+            "args": { "amount": 2 }
+        }
+    ]
+}

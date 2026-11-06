@@ -1,5 +1,5 @@
-import { CardDatabase } from "../../cards/CardDatabase.js";
-import { CardWorker_Trainer } from "../../cards/workers/CardWorker_Trainer.js";
+import { CardDef_Trainer } from "../../../defs/CardDef_Trainer.js";
+import { DefDatabase } from "../../../defs/DefDatabase.js";
 import { InterruptResolution } from "../interrupts/InterruptResolution.js";
 import { ResolvesInterrupt } from "../interrupts/InterruptResolver.js";
 import { StateContext, StateWorker } from "./StateWorker.js";
@@ -9,9 +9,9 @@ export class StateWorker_UseTrainer extends StateWorker {
     public override execute(context: StateContext, target_id: number, card_id: number): boolean {
         const card = context.game.search.getCard(card_id);
         if (card) {
-            const worker = CardDatabase.find<CardWorker_Trainer>(card.dbid);
+            const def = DefDatabase.get<CardDef_Trainer>(card.def);
             context.game.send(context.game.players.active, "used", card, ".");
-            worker.execute({
+            def.execute({
                 game: context.game,
                 state: context.state,
                 player: context.game.players.active,

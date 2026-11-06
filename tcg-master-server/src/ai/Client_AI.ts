@@ -1,5 +1,4 @@
 import { Client } from "../Client.js";
-import { Card_Pokemon_BaseSet_Staryu } from "../game/cards/workers/BaseSet/Card_Pokemon_BaseSet_Staryu.js";
 import { GameEngine } from "../game/engine/GameEngine.js";
 import { GameState } from "../game/state/GameState.js";
 import path from "path";

@@ -6,6 +6,9 @@ import { GameWorker } from "./GameWorker.js";
 import { InterruptType } from "../state/interrupts/InterruptType.js";
 import { DefDatabase } from "../../defs/DefDatabase.js";
 import { CardDef_Pokemon } from "../../defs/CardDef_Pokemon.js";
+import { CardDef_Energy } from "../../defs/CardDef_Energy.js";
+import { CardDef } from "../../defs/CardDef.js";
+import { CardDef_Trainer } from "../../defs/CardDef_Trainer.js";
 
 export class GameWorker_Setup extends GameWorker {
     private nextCardId: number = 100;
@@ -17,10 +20,10 @@ export class GameWorker_Setup extends GameWorker {
                 const deck = [
                     //{ card: CardDatabase.find("BaseSet.Ponyta"), count: 8 },
                     //{ card: CardDatabase.find("BaseSet.Gastly"), count: 12 },
-                    //{ card: CardDatabase.find("BaseSet.PsychicEnergy"), count: 10 },
-                    //{ card: CardDatabase.find("BaseSet.FireEnergy"), count: 10 },
+                    { card: DefDatabase.get<CardDef_Energy>("BaseSet.GrassEnergy"), count: 20 },
+                    { card: DefDatabase.get<CardDef_Trainer>("BaseSet.Switch"), count: 10 },
                     //{ card: CardDatabase.find("BaseSet.Switch"), count: 0 },
-                    { card: DefDatabase.get<CardDef_Pokemon>("BaseSet.Weedle"), count: 60 }
+                    { card: DefDatabase.get<CardDef_Pokemon>("BaseSet.Weedle"), count: 30 }
                 ];
                 for (const blueprint of deck) {
                     for (let i = 0; i < blueprint.count; i++) {
@@ -101,10 +104,10 @@ export class GameWorker_Setup extends GameWorker {
         }
     }
 
-    private makeCard(def: CardDef_Pokemon, owner: PlayerState): CardState {
+    private makeCard(def: CardDef, owner: PlayerState): CardState {
         return {
             id: this.nextCardId++,
-            dbid: def.name,
+            def: def.name,
             kind: def.kind,
             token: def.token,
             name: def.label,

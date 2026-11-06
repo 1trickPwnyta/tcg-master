@@ -5,8 +5,7 @@ import fs from "fs";
 const __dirname = import.meta.dirname;
 
 const directories = [
-    path.join(__dirname, "game", "state", "workers"),
-    path.join(__dirname, "game", "cards", "workers")
+    path.join(__dirname, "game", "state", "workers")
 ];
 
 async function load(directory: string) {

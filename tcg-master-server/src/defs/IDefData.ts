@@ -1,3 +1,4 @@
+import { EvolutionTree } from "../game/cards/EvolutionTree.js";
 import { EnergyType } from "../game/EnergyType.js";
 
 export interface IDefData {
@@ -17,9 +18,22 @@ export interface IAttackData {
 export interface ICardDefData_Pokemon {
     type: keyof typeof EnergyType;
     stage: "basic" | "stage1" | "stage2";
+    evolutionTree: keyof typeof EvolutionTree;
     hp: number;
     weakness: keyof typeof EnergyType | undefined;
     resistance: keyof typeof EnergyType | undefined;
     retreat: number;
     attacks: IAttackData[];
+};
+
+export interface ICardDefData_Trainer {
+    text: string;
+    workers: (string | { class: string, args: any })[];
+};
+
+export interface ICardDefData_Energy {
+    basic: boolean;
+    type: keyof typeof EnergyType;
+    amount: number;
+    text?: string;
 };

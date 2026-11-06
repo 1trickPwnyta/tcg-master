@@ -4,7 +4,7 @@ import { LocationState } from "./LocationState.js";
 export interface CardState {
     id: number;
     token: IToken;
-    dbid: string;
+    def: string;
     kind: "pokemon" | "trainer" | "energy";
     name: string;
     owner_id: number;

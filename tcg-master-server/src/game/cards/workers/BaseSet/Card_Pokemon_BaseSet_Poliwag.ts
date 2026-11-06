@@ -21,7 +21,7 @@ export class Card_Pokemon_BaseSet_Poliwag extends CardWorker_Pokemon {
             .deals(10)
             .reads(`Does 10 damage plus 10 more damage for each ${EnergyType.Water.symbol} Energy attached to Poliwag but not used to pay for this attack's Energy cost. Extra ${EnergyType.Water.symbol} Energy after the 2nd don't count.`)
             .withPreEffect(context => {
-                const extraEnergy = context.attack.costOversatisfied(context.game.pokemon.getEnergy(context.attacker.id).map(e => e.worker));
+                const extraEnergy = context.attack.costOversatisfied(context.game.pokemon.getEnergy(context.attacker.id).map(e => e.def));
                 const extraDamage = Math.min(20, extraEnergy.filter(e => e === EnergyType.Water).length * 10);
                 return extraDamage;
             })

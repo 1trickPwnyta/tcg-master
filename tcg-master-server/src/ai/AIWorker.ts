@@ -1,9 +1,12 @@
 import { parentPort } from "worker_threads";
 import { GameEngine } from "../game/engine/GameEngine.js";
 import "../extensions.js";
-import "../loader.js"
 import { Client_AIWorker, HistoryEntry } from "./Client_AIWorker.js";
 import { AIContext, ScoredChoice } from "./Client_AI.js";
+
+await import("../loader.js");
+const { DefDatabase } = await import("../defs/DefDatabase.js");
+await DefDatabase.init();
 
 parentPort?.on("message", async (context: AIContext) => {
     const scores: ScoredChoice[] = [];

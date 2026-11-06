@@ -1,6 +1,6 @@
 import { Client } from "../../../Client.js";
-import { CardDatabase } from "../../cards/CardDatabase.js";
-import { CardWorker_Pokemon } from "../../cards/workers/CardWorker_Pokemon.js";
+import { CardDef_Pokemon } from "../../../defs/CardDef_Pokemon.js";
+import { DefDatabase } from "../../../defs/DefDatabase.js";
 import { CardState } from "../CardState.js";
 import { StateActor } from "./StateActor.js";
 
@@ -8,9 +8,9 @@ export class CardActor extends StateActor {
     public basicPokemonInHand(player_id: number): CardState[] {
         const player = this.game.players.get(player_id);
         return player.hand.cards.filter(c => {
-            const worker = CardDatabase.find(c.dbid)
-            if (worker instanceof CardWorker_Pokemon) {
-                return worker.stage === "basic";
+            const def = DefDatabase.get<CardDef_Pokemon>(c.def);
+            if (def instanceof CardDef_Pokemon) {
+                return def.stage === "basic";
             }
             return false;
         });

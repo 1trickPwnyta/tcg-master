@@ -5,7 +5,8 @@ import "./extensions.js";
 
 await import("./loader.js");
 const { Input } = await import("./Input.js");
-await import("./defs/DefDatabase.js");
+const { DefDatabase } = await import("./defs/DefDatabase.js");
+await DefDatabase.init();
 
 const corsConfig = {
     origin: "http://localhost:5173",

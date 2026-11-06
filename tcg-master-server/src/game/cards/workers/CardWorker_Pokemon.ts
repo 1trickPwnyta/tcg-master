@@ -5,7 +5,7 @@ import { CardDatabase } from "../CardDatabase.js";
 import { EvolutionTree } from "../EvolutionTree.js";
 import { AttackWorker } from "./AttackWorker.js";
 import { CardWorker, PlayContext } from "./CardWorker.js";
-
+/*
 export abstract class CardWorker_Pokemon extends CardWorker {
     public override readonly kind = "pokemon";
     public abstract readonly type: EnergyType;
@@ -33,7 +33,7 @@ export abstract class CardWorker_Pokemon extends CardWorker {
             }
         } else {
             const cards = [ ...context.player.active.cards, ...context.player.bench.cards ].filter(c => {
-                const worker = CardDatabase.find<CardWorker_Pokemon>(c.dbid);
+                const worker = CardDatabase.find<CardWorker_Pokemon>(c.def);
                 return worker.evolutionTree.evolvesDirect(this.name);
             });
             if (cards.length) {
@@ -69,3 +69,4 @@ export abstract class CardWorker_Pokemon extends CardWorker {
         ];
     }
 };
+*/

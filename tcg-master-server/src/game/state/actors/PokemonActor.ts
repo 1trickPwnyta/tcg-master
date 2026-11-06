@@ -1,6 +1,6 @@
-import { CardDatabase } from "../../cards/CardDatabase.js";
-import { CardWorker_Energy } from "../../cards/workers/CardWorker_Energy.js";
-import { CardWorker_Pokemon } from "../../cards/workers/CardWorker_Pokemon.js";
+import { CardDef_Energy } from "../../../defs/CardDef_Energy.js";
+import { CardDef_Pokemon } from "../../../defs/CardDef_Pokemon.js";
+import { DefDatabase } from "../../../defs/DefDatabase.js";
 import { EnergyType } from "../../EnergyType.js";
 import { CardState, CardStatus } from "../CardState.js";
 import { StateActor } from "./StateActor.js";
@@ -14,10 +14,10 @@ export type DamageContext = {
 };
 
 export class PokemonActor extends StateActor {
-    public getEnergy(card_id: number): { card: CardState, worker: CardWorker_Energy }[] {
+    public getEnergy(card_id: number): { card: CardState, def: CardDef_Energy }[] {
         return this.game.search.getCard(card_id)!.attachments.cards.filter(c => c.kind === "energy").map(c => ({
             card: c,
-            worker: CardDatabase.find<CardWorker_Energy>(c.dbid)
+            def: DefDatabase.get<CardDef_Energy>(c.def)
         }));
     }
 
@@ -25,12 +25,12 @@ export class PokemonActor extends StateActor {
         let amount = context.amount;
 
         const card = this.game.search.getCard(context.card_id)!;
-        const worker = CardDatabase.find<CardWorker_Pokemon>(card.dbid);
+        const def = DefDatabase.get<CardDef_Pokemon>(card.def);
         if (context.type) {
-            if (worker.weakness === context.type) {
+            if (def.weakness === context.type) {
                 amount *= 2;
             }
-            if (worker.resistance === context.type) {
+            if (def.resistance === context.type) {
                 amount -= 30;
                 amount = Math.max(0, amount);
             }
@@ -45,7 +45,7 @@ export class PokemonActor extends StateActor {
             const card = this.game.search.getCard(context.card_id)!;
             card.damage += amount;
             this.game.send(player, "'s", card, "took", { name: amount.toString(), type: "damage" }, `damage${context.source ? ` due to ${context.source}` : ""}!`);
-            if (card.damage >= CardDatabase.find<CardWorker_Pokemon>(card.dbid).hp) {
+            if (card.damage >= DefDatabase.get<CardDef_Pokemon>(card.def).hp) {
                 this.knockOut(player.id, card.id);
                 return true;
             }

@@ -1,6 +1,6 @@
 import { Client } from "../Client.js";
-import { CardDatabase } from "../game/cards/CardDatabase.js";
-import { CardWorker_Pokemon } from "../game/cards/workers/CardWorker_Pokemon.js";
+import { CardDef_Pokemon } from "../defs/CardDef_Pokemon.js";
+import { DefDatabase } from "../defs/DefDatabase.js";
 import { CardState } from "../game/state/CardState.js";
 import { LocationState } from "../game/state/LocationState.js";
 import { IToken } from "../IToken.js";
@@ -11,7 +11,7 @@ export class Command_check extends Command {
     public readonly name: string = "check";
 
     private getStatus(card: CardState): IToken[] {
-        const maxHp = CardDatabase.find<CardWorker_Pokemon>(card.dbid).hp;
+        const maxHp = DefDatabase.get<CardDef_Pokemon>(card.def).hp;
         return Client.tokenize(
             card,
             { name: `[${maxHp - card.damage} / ${maxHp} HP]`, type: "hp" },
@@ -57,9 +57,9 @@ export class Command_check extends Command {
         }
 
         const cardName = context.text;
-        const card = CardDatabase.search({ name: cardName });
-        if (card) {
-            return card.getDetails();
+        const def = DefDatabase.search({ name: cardName });
+        if (def) {
+            return def.getDetails();
         }
 
         throw new InvalidCommandArgumentsError(context.name, context.args);

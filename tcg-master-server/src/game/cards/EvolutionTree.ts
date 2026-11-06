@@ -21,7 +21,8 @@ export class EvolutionTree {
         return this.next.some(n => n.name == to);
     }
 
-    public static readonly Caterpie: EvolutionTree = new EvolutionTree("Caterpie").then("Metapod");
+    public static readonly Caterpie: EvolutionTree = new EvolutionTree("Caterpie").then("Metapod").then("Butterfree");
     public static readonly Staryu: EvolutionTree = new EvolutionTree("Staryu").then("Starmie");
     public static readonly Vulpix: EvolutionTree = new EvolutionTree("Vulpix").then("Ninetales");
+    public static readonly Weedle: EvolutionTree = new EvolutionTree("Weedle").then("Kakuna").then("Beedrill");
 }

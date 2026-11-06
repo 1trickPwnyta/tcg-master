@@ -3,7 +3,7 @@ import { InterruptResolution } from "../../state/interrupts/InterruptResolution.
 import { Interrupt } from "../../state/interrupts/Interrupt.js";
 import { AttackContext, AttackWorker } from "./AttackWorker.js";
 import { InterruptType } from "../../state/interrupts/InterruptType.js";
-
+/*
 export type EffectTrigger = "always" | "coin";
 
 export class AttackFactory {
@@ -107,7 +107,7 @@ export class AttackFactory {
                         type: InterruptType.Discard,
                         player: context.game.players.active.id,
                         prompt: `Discard which Energy card from ${context.attacker.name}?`,
-                        choices: context.game.pokemon.getEnergy(context.attacker.id).filter(e => e.worker.type == this.discardType).map(e => ({
+                        choices: context.game.pokemon.getEnergy(context.attacker.id).filter(e => e.def.type == this.discardType).map(e => ({
                             text: e.card.name, target_id: e.card.id
                         })),
                         resolution: InterruptResolution.AttackTargets,
@@ -172,3 +172,4 @@ export class AttackFactory {
         return worker;
     }
 };
+*/
