@@ -1,4 +1,4 @@
-import { CardDef_Pokemon } from "../defs/CardDef_Pokemon.js";
+import { PokemonCardDef } from "../defs/PokemonCardDef.js";
 import { DefDatabase } from "../defs/DefDatabase.js";
 import { GameEngine } from "../game/engine/GameEngine.js";
 import { Choice, InterruptSync } from "../game/state/interrupts/Interrupt.js";
@@ -35,7 +35,7 @@ export class AIPruner {
                 switch (interrupt.resolution) {
                     case InterruptResolution.AttachEnergy:
                         const target = game.search.getCard(choice.target as number)!;
-                        const def = DefDatabase.get<CardDef_Pokemon>(target.def);
+                        const def = DefDatabase.get<PokemonCardDef>(target.def);
                         const energy = game.pokemon.getEnergy(choice.target as number).map(e => e.def);
                         const unsatisfiedAttacks = def.attacks.filter(a => !a.costSatisfied(energy));
                         if (!unsatisfiedAttacks.length) {

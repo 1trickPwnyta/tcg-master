@@ -1,5 +1,5 @@
 import { Client } from "../Client.js";
-import { CardDef_Pokemon } from "../defs/CardDef_Pokemon.js";
+import { PokemonCardDef } from "../defs/PokemonCardDef.js";
 import { DefDatabase } from "../defs/DefDatabase.js";
 import { CardState } from "../game/state/CardState.js";
 import { LocationState } from "../game/state/LocationState.js";
@@ -11,7 +11,7 @@ export class Command_check extends Command {
     public readonly name: string = "check";
 
     private getStatus(card: CardState): IToken[] {
-        const maxHp = DefDatabase.get<CardDef_Pokemon>(card.def).hp;
+        const maxHp = DefDatabase.get<PokemonCardDef>(card.def).hp;
         return Client.tokenize(
             card,
             { name: `[${maxHp - card.damage} / ${maxHp} HP]`, type: "hp" },

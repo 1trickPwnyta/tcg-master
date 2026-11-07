@@ -1,8 +1,0 @@
-{
-    "class": "CardDef_Energy",
-    "name": "BaseSet.GrassEnergy",
-    "label": "Grass Energy",
-    "basic": true,
-    "type": "Grass",
-    "amount": 1
-}

@@ -3,10 +3,10 @@ import { createServer } from "http";
 import cors from "cors";
 import "./extensions.js";
 
-await import("./loader.js");
 const { Input } = await import("./Input.js");
 const { DefDatabase } = await import("./defs/DefDatabase.js");
 await DefDatabase.init();
+await import("./loader.js");
 
 const corsConfig = {
     origin: "http://localhost:5173",

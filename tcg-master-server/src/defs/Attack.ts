@@ -1,15 +1,16 @@
 import path from "path";
 import { AttackWorker } from "../game/attacks/AttackWorker.js";
-import { EnergyType } from "../game/EnergyType.js";
 import { GameEngine } from "../game/engine/GameEngine.js";
 import { CardState, CardStatus } from "../game/state/CardState.js";
 import { GameState } from "../game/state/GameState.js";
 import { IAttackData } from "./IDefData.js";
 import { pathToFileURL } from "url";
 import { Interrupt } from "../game/state/interrupts/Interrupt.js";
-import { CardDef_Pokemon } from "./CardDef_Pokemon.js";
+import { PokemonCardDef } from "./PokemonCardDef.js";
 import { DefDatabase } from "./DefDatabase.js";
-import { CardWorker_Energy } from "../game/cards/workers/CardWorker_Energy.js";
+import { EnergyTypeDef } from "./EnergyTypeDef.js";
+import { EnergyTypeDefOf } from "./defof/EnergyTypeDefOf.js";
+import { EnergyCardDef } from "./EnergyCardDef.js";
 
 const __dirname = import.meta.dirname;
 
@@ -22,7 +23,7 @@ export type AttackContext = {
 
 export class Attack {
     public readonly name: string;
-    public readonly cost: EnergyType[];
+    public readonly cost: EnergyTypeDef[];
     public readonly damage: number;
     public readonly text?: string;
     public readonly workers: AttackWorker[];
@@ -32,7 +33,7 @@ export class Attack {
     public constructor(data: IAttackData) {
         this.attackData = data;
         this.name = this.attackData.name;
-        this.cost = this.attackData.cost.map(c => EnergyType[c]);
+        this.cost = this.attackData.cost.map(c => DefDatabase.get<EnergyTypeDef>(c));
         this.damage = this.attackData.damage ?? 0;
         this.text = this.attackData.text;
         this.workers = [];
@@ -107,7 +108,7 @@ export class Attack {
         // Have a status worker
         const destinyBond = context.game.pokemon.hasStatus(context.defender.id, CardStatus.GastlyDestinyBond);
         
-        const def = DefDatabase.get<CardDef_Pokemon>(context.attacker.def);
+        const def = DefDatabase.get<PokemonCardDef>(context.attacker.def);
         const knockedOut = context.game.pokemon.damage({ owner_id: context.game.players.inactive.id, card_id: context.defender.id, amount: damage, type: def.type });
         
         this.postEffects(context, knockedOut, ...targets);
@@ -122,7 +123,7 @@ export class Attack {
         return true;
     }
 
-    private analyzeCost(energy: CardWorker_Energy[]): { unsatisfied: EnergyType[], oversatisfied: EnergyType[] } {
+    private analyzeCost(energy: EnergyCardDef[]): { unsatisfied: EnergyTypeDef[], oversatisfied: EnergyTypeDef[] } {
         const reqs = [ ...this.cost ].sort((a, b) => b.resolutionPriority - a.resolutionPriority);
         const pool = energy.flatMap(e => Array.from({ length: e.amount }, () => e.type)).sort((a, b) => a.resolutionPriority - b.resolutionPriority);
         const unsatisfied = [];
@@ -143,15 +144,15 @@ export class Attack {
         return { unsatisfied: unsatisfied, oversatisfied: pool };
     }
 
-    public costUnsatisfied(energy: CardWorker_Energy[]): EnergyType[] {
+    public costUnsatisfied(energy: EnergyCardDef[]): EnergyTypeDef[] {
         return this.analyzeCost(energy).unsatisfied;
     }
 
-    public costSatisfied(energy: CardWorker_Energy[]): boolean {
+    public costSatisfied(energy: EnergyCardDef[]): boolean {
         return this.analyzeCost(energy).unsatisfied.length === 0;
     }
 
-    public costOversatisfied(energy: CardWorker_Energy[]): EnergyType[] {
+    public costOversatisfied(energy: EnergyCardDef[]): EnergyTypeDef[] {
         return this.analyzeCost(energy).oversatisfied;
     }
 

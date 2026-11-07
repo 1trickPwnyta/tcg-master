@@ -1,11 +1,11 @@
 import { GameEngine } from "../../engine/GameEngine.js";
 import { InterruptResolution } from "./InterruptResolution.js";
 import { InterruptSync } from "./Interrupt.js";
-import { StateWorker } from "../workers/StateWorker.js";
+import { InterruptWorker } from "./workers/InterruptWorker.js";
 
-const workers = new Map<InterruptResolution, StateWorker>();
+const workers = new Map<InterruptResolution, InterruptWorker>();
 export function ResolvesInterrupt(resolution: InterruptResolution) {
-    return (worker: new () => StateWorker) => {
+    return (worker: new () => InterruptWorker) => {
         workers.set(resolution, new worker());
     };
 };

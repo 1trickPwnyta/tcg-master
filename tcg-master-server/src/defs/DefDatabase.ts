@@ -3,37 +3,55 @@ import fs from "fs";
 import { Def } from "./Def.js";
 import { IDefData } from "./IDefData.js";
 import { pathToFileURL } from "url";
+import { init as initDefOf } from "./defof/DefOf.js";
 
 const __dirname = import.meta.dirname;
 const dataDirectory = path.join(__dirname, "..", "data");
 const database = new Map<string, Def>();
 
-async function loadDefs(directory: string, context?: "Defs" | string) {
+const priority = [
+    "EnergyTypeDef",
+    "EvolutionDef"
+];
+
+async function loadDefs(directory: string, priority?: string, context?: "Defs" | string) {
     const dirName = path.basename(directory);
     if (!context && dirName === "Defs") {
         context = dirName;
+    } else if (context && dirName !== "Defs" && dirName.endsWith("Defs")) {
+        context = dirName.replace(/Defs$/, "Def");
     }
     const entries = fs.readdirSync(directory, { withFileTypes: true });
     for (const entry of entries) {
         const fullName = path.join(directory, entry.name);
         if (entry.isDirectory()) {
-            await loadDefs(fullName, context);
-        } else if (context && entry.isFile() && entry.name.endsWith(".json")) {
+            await loadDefs(fullName, priority, context);
+        } else if (context && context !== "Defs" && entry.isFile() && entry.name.endsWith(".json")) {
             const data = fs.readFileSync(fullName, "utf-8");
             const obj = JSON.parse(data) as IDefData;
-            const modulePath = path.join(__dirname, `${obj.class}.ts`);
-            const module = await import(pathToFileURL(modulePath).href);
-            const defConstructor = module[obj.class];
-            const def = new defConstructor(obj);
-            await def.init();
-            database.set(def.name, def);
+            const payload = Array.isArray(obj) ? obj : [ obj ];
+            for (const item of payload) {
+                const defClass = item.class ?? context;
+                if (!priority || priority === defClass) {
+                    const modulePath = path.join(__dirname, `${defClass}.ts`);
+                    const module = await import(pathToFileURL(modulePath).href);
+                    const defConstructor = module[defClass];
+                    const def = new defConstructor(item);
+                    await def.init();
+                    database.set(def.name, def);
+                }
+            }
         }
     }
 }
 
 export class DefDatabase {
     static async init() {
+        for (const p of priority) {
+            await loadDefs(dataDirectory, p);
+        }
         await loadDefs(dataDirectory);
+        initDefOf();
     }
 
     static get<T extends Def>(name: string): T {

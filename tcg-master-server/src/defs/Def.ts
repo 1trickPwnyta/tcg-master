@@ -1,9 +1,13 @@
-import { IToken } from "../IToken.js";
+import { IDefData } from "./IDefData.js";
 
 export abstract class Def {
-    public abstract readonly name: string;
-    public abstract readonly label: string;
-    public abstract readonly token: IToken;
+    public readonly name: string;
+    public readonly label?: string;
+
+    public constructor(data: IDefData) {
+        this.name = data.name;
+        this.label = data.label ?? data.name;
+    }
 
     public abstract init(): Promise<void>;
 

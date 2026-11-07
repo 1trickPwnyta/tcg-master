@@ -4,13 +4,13 @@ import { Interrupt, InterruptSync } from "../state/interrupts/Interrupt.js";
 import { PlayerState } from "../state/PlayerState.js";
 import { Client } from "../../Client.js";
 import { IToken } from "../../IToken.js";
-import { GameWorker_Setup } from "./GameWorker_Setup.js";
-import { GameWorker_Turn } from "./GameWorker_Turn.js";
-import { InterruptActor } from "../state/actors/InterruptActor.js";
-import { SearchActor } from "../state/actors/SearchActor.js";
-import { PlayerActor } from "../state/actors/PlayerActor.js";
-import { CardActor } from "../state/actors/CardActor.js";
-import { PokemonActor } from "../state/actors/PokemonActor.js";
+import { SetupEngine } from "./SetupEngine.js";
+import { TurnEngine } from "./TurnEngine.js";
+import { InterruptEngine } from "./InterruptEngine.js";
+import { SearchEngine } from "./SearchEngine.js";
+import { PlayerEngine } from "./PlayerEngine.js";
+import { CardEngine } from "./CardEngine.js";
+import { PokemonEngine } from "./PokemonEngine.js";
 
 export class GameEngine {
     public readonly clients: Client[];
@@ -18,18 +18,18 @@ export class GameEngine {
     public readonly simulation: boolean = false;
     private promptsGiven: number = 0;
 
-    public readonly setup: GameWorker_Setup;
-    public readonly turns: GameWorker_Turn;
+    public readonly setup: SetupEngine;
+    public readonly turns: TurnEngine;
 
-    public readonly players: PlayerActor;
-    public readonly interrupts: InterruptActor;
-    public readonly search: SearchActor;
-    public readonly cards: CardActor;
-    public readonly pokemon: PokemonActor;
+    public readonly players: PlayerEngine;
+    public readonly interrupts: InterruptEngine;
+    public readonly search: SearchEngine;
+    public readonly cards: CardEngine;
+    public readonly pokemon: PokemonEngine;
 
     public constructor(client1?: Client, client2?: Client, options: { prizes?: number } = {}, clonedState?: GameState) {
-        this.setup = new GameWorker_Setup(this);
-        this.turns = new GameWorker_Turn(this);
+        this.setup = new SetupEngine(this);
+        this.turns = new TurnEngine(this);
 
         if (client1) {
             client1.game = this;
@@ -48,7 +48,7 @@ export class GameEngine {
         client2.player_id = client2.player_id ?? clonedState?.players.find(p => p.id !== client1.player_id)?.id ?? 2;
 
         this.state = clonedState ?? {
-            players: [ PlayerActor.makePlayer(1, "Pikachu"), PlayerActor.makePlayer(2, "COM") ],
+            players: [ PlayerEngine.makePlayer(1, "Pikachu"), PlayerEngine.makePlayer(2, "COM") ],
             turn: null,
             betweenTurns: false,
             interrupt: null,
@@ -60,11 +60,11 @@ export class GameEngine {
         };
         this.simulation = clonedState !== undefined;
 
-        this.players = new PlayerActor(this);
-        this.interrupts = new InterruptActor(this);
-        this.search = new SearchActor(this);
-        this.cards = new CardActor(this);
-        this.pokemon = new PokemonActor(this);
+        this.players = new PlayerEngine(this);
+        this.interrupts = new InterruptEngine(this);
+        this.search = new SearchEngine(this);
+        this.cards = new CardEngine(this);
+        this.pokemon = new PokemonEngine(this);
 
         if (!this.simulation) {
             this.update();
