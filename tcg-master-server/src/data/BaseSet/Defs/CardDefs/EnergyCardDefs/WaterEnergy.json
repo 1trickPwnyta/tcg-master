@@ -1,0 +1,7 @@
+{
+    "name": "BaseSet.WaterEnergy",
+    "label": "Water Energy",
+    "basic": true,
+    "type": "Water",
+    "amount": 1
+}

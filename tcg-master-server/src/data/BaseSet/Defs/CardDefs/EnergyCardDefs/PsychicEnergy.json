@@ -1,0 +1,7 @@
+{
+    "name": "BaseSet.PsychicEnergy",
+    "label": "Psychic Energy",
+    "basic": true,
+    "type": "Psychic",
+    "amount": 1
+}

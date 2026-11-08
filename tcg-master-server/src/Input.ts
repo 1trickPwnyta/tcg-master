@@ -20,7 +20,8 @@ export class Input {
 
         io.on("connection", (socket: Socket) => {
             console.log(`Client connected: ${socket.id}`);
-            new GameEngine(new Client_Human(socket));
+            const engine = new GameEngine(new Client_Human(socket));
+            engine.start();
         });
     }
 };

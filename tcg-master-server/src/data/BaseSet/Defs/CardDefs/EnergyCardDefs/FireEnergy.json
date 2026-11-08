@@ -1,0 +1,7 @@
+{
+    "name": "BaseSet.FireEnergy",
+    "label": "Fire Energy",
+    "basic": true,
+    "type": "Fire",
+    "amount": 1
+}

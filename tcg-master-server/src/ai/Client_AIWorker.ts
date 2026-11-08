@@ -49,17 +49,17 @@ export class Client_AIWorker extends Client_AI {
         // For now, don't let the AI see into the other player's turn (except when it has to make a choice during the other player's turn)
         // because then they want to stall as long as possible to avoid ending their own turn because god forbid the opponent do something they don't like
         // If this interrupt isn't for you and it's not your turn, just return the evaluation score immediately
-        if (interrupt.player !== this.for_player && this.game?.getState().turn && this.game.getState().turn?.player !== this.for_player) {
-            this.callback({ score: AIEvaluator.evaluate(this.game!, this.for_player), history: this.history });
+        if (interrupt.player !== this.for_player && this.engine?.state.turn && this.engine.state.turn?.player !== this.for_player) {
+            this.callback({ score: AIEvaluator.evaluate(this.engine!, this.for_player), history: this.history });
             this.callback = null;
             return;
         }
 
         if (this.depth < MAX_DEPTH) {
-            const state = this.game!.getState();
-            const hash = this.game!.getStateHash();
+            const state = this.engine!.state;
+            const hash = this.engine!.getStateHash();
             this.interrupt_id = interrupt.id!;
-            const allChoices = AIPruner.prune(this.game!, interrupt);
+            const allChoices = AIPruner.prune(this.engine!, interrupt);
             const validChoices = allChoices.filter(c => c.valid && !this.history.some(h => h.hash === hash && h.choice === c.i));
             if (validChoices.length) {
                 const scores: ScoredChoice[] = [];
@@ -100,9 +100,9 @@ export class Client_AIWorker extends Client_AI {
                         client.player_id = player.id;
                         clients.push(client);
                     }
-                    const clone = JSON.parse(JSON.stringify(state));
-                    const game = new GameEngine(clients[0], clients[1], undefined, clone);
-                    game.interrupts.resolve(this.player_id!, choice.i);
+                    const engine = new GameEngine(clients[0], clients[1]);
+                    engine.start(state.clone(engine));
+                    engine.interrupts.resolve(this.player_id!, choice.i);
                 }
             } else {
                 this.callback({ score: null, history: this.history });
@@ -110,7 +110,7 @@ export class Client_AIWorker extends Client_AI {
                 return;
             }
         } else if (this.callback) {
-            const score = this.invalid ? null : AIEvaluator.evaluate(this.game!, this.for_player);
+            const score = this.invalid ? null : AIEvaluator.evaluate(this.engine!, this.for_player);
             this.callback({ score: score, history: this.history });
             this.callback = null;
         }
@@ -118,7 +118,7 @@ export class Client_AIWorker extends Client_AI {
 
     public override notify_gameOver(winner: PlayerState): void {
         if (winner.id === this.player_id && this.callback) {
-            this.callback({ score: AIEvaluator.evaluate(this.game!, this.for_player), history: this.history });
+            this.callback({ score: AIEvaluator.evaluate(this.engine!, this.for_player), history: this.history });
         }
         this.callback = null;
     }

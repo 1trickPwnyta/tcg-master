@@ -15,15 +15,15 @@ export class SetupEngine extends SubEngine {
 
     public update() {
         if (this.state.players.find(p => p.deck.cards.length === 0)) {
-            this.game.send("Starting game between", this.state.players[0], "and", this.state.players[1], ".");
+            this.engine.send("Starting game between", this.state.players[0], "and", this.state.players[1], ".");
             for (const player of this.state.players) {
                 const deck = [
                     //{ card: CardDatabase.find("BaseSet.Ponyta"), count: 8 },
-                    //{ card: CardDatabase.find("BaseSet.Gastly"), count: 12 },
-                    { card: DefDatabase.get<EnergyCardDef>("BaseSet.GrassEnergy"), count: 20 },
+                    { card: DefDatabase.get<PokemonCardDef>("BaseSet.Koffing"), count: 24 },
+                    { card: DefDatabase.get<EnergyCardDef>("BaseSet.PsychicEnergy"), count: 0 },
                     { card: DefDatabase.get<TrainerCardDef>("BaseSet.Switch"), count: 10 },
-                    //{ card: CardDatabase.find("BaseSet.Switch"), count: 0 },
-                    { card: DefDatabase.get<PokemonCardDef>("BaseSet.Weedle"), count: 30 }
+                    { card: DefDatabase.get<EnergyCardDef>("BaseSet.GrassEnergy"), count: 26 },
+                    //{ card: DefDatabase.get<PokemonCardDef>("BaseSet.Gastly"), count: 12 }
                 ];
                 for (const blueprint of deck) {
                     for (let i = 0; i < blueprint.count; i++) {
@@ -31,12 +31,12 @@ export class SetupEngine extends SubEngine {
                         player.deck.cards.push(card);
                     }
                 }
-                this.game.cards.shuffleDeck(player.id);
+                this.engine.cards.shuffleDeck(player.id);
                 player.mulligans = this.setupDraw(player);
             }
-            this.game.update();
+            this.engine.update();
         } else if (this.state.players.find(p => p.mulligans && !this.state.players.find(o => o.id !== p.id)!.mulliganBonusUsed)) {
-            this.game.interrupts.interrupt({
+            this.engine.interrupts.interrupt({
                 interrupts: this.state.players.map((p): Interrupt | undefined => {
                     const opponent = this.state.players.find(o => o.id !== p.id)!;
                     if (opponent.mulligans) {
@@ -54,26 +54,26 @@ export class SetupEngine extends SubEngine {
                 }).filter(i => i !== undefined)
             });
         } else if (this.state.players.find(p => !p.active.cards.length)) {
-            this.game.interrupts.interrupt({
+            this.engine.interrupts.interrupt({
                 interrupts: this.state.players.map(p => ({
                     type: InterruptType.SelectActive,
                     player: p.id,
                     prompt: "Select a basic Pokémon as your active Pokémon.",
-                    choices: this.game.cards.basicPokemonInHand(p.id).map(c => ({ text: c.name, target_id: c.id })),
+                    choices: this.engine.cards.basicPokemonInHand(p.id).map(c => ({ text: c.name, target_id: c.id })),
                     resolution: InterruptResolution.MoveCard,
                     args: [ p.hand.id, p.active.id ],
                     force: true
                 }))
             });
         } else {
-            const playersNotReady = this.state.players.filter(p => !p.setupComplete && this.game.cards.basicPokemonInHand(p.id).length && p.bench.cards.length < 5);
+            const playersNotReady = this.state.players.filter(p => !p.setupComplete && this.engine.cards.basicPokemonInHand(p.id).length && p.bench.cards.length < 5);
             if (playersNotReady.length) {
-                this.game.interrupts.interrupt({
+                this.engine.interrupts.interrupt({
                     interrupts: playersNotReady.map(p => ({
                         type: InterruptType.Bench,
                         player: p.id,
                         prompt: "Choose other basic Pokémon to put on the bench.",
-                        choices: this.game.cards.basicPokemonInHand(p.id).map(c => ({ text: c.name, target_id: c.id })),
+                        choices: this.engine.cards.basicPokemonInHand(p.id).map(c => ({ text: c.name, target_id: c.id })),
                         resolution: InterruptResolution.MoveCard,
                         cancelResolution: InterruptResolution.SkipBench,
                         args: [ p.hand.id, p.bench.id ]
@@ -85,21 +85,21 @@ export class SetupEngine extends SubEngine {
                         player.prizes.cards.push(player.deck.cards.pop()!);
                     }
                 }
-                const firstPlayer = this.game.flipCoin() ? this.state.players[0] : this.state.players[1];
-                this.game.send(firstPlayer, "will go first.");
-                this.game.send();
-                this.game.turns.begin(firstPlayer.id);
+                const firstPlayer = this.engine.flipCoin() ? this.state.players[0] : this.state.players[1];
+                this.engine.send(firstPlayer, "will go first.");
+                this.engine.send();
+                this.engine.turns.begin(firstPlayer.id);
             }
         }
     }
 
     private setupDraw(player: PlayerState, mulligans: number = 0): number {
-        this.game.cards.draw(player.id, 7);
-        if (this.game.cards.basicPokemonInHand(player.id).length) {
+        this.engine.cards.draw(player.id, 7);
+        if (this.engine.cards.basicPokemonInHand(player.id).length) {
             return mulligans;
         } else {
-            this.game.send(player, "has no basic Pokémon in", player.pronouns.possessive, "hand.", player.pronouns.subjective.capitalizeFirst(), "must take a mulligan.");
-            this.game.cards.shuffleHandIntoDeck(player.id);
+            this.engine.send(player, "has no basic Pokémon in", player.pronouns.possessive, "hand.", player.pronouns.subjective.capitalizeFirst(), "must take a mulligan.");
+            this.engine.cards.shuffleHandIntoDeck(player.id);
             return this.setupDraw(player, mulligans + 1);
         }
     }
@@ -113,7 +113,6 @@ export class SetupEngine extends SubEngine {
             name: def.label ?? def.name,
             owner_id: owner.id,
             damage: 0,
-            poison: false,
             orientation: "normal",
             attachments: { id: this.nextCardId++, cards: [] },
             status: []

@@ -11,11 +11,13 @@ import { SearchEngine } from "./SearchEngine.js";
 import { PlayerEngine } from "./PlayerEngine.js";
 import { CardEngine } from "./CardEngine.js";
 import { PokemonEngine } from "./PokemonEngine.js";
+import { SerializationReplace } from "../state/serializer.js";
 
 export class GameEngine {
     public readonly clients: Client[];
-    private state: GameState;
-    public readonly simulation: boolean = false;
+    private _state?: GameState;
+    private options: { prizes?: number };
+    private _simulation: boolean = false;
     private promptsGiven: number = 0;
 
     public readonly setup: SetupEngine;
@@ -27,52 +29,54 @@ export class GameEngine {
     public readonly cards: CardEngine;
     public readonly pokemon: PokemonEngine;
 
-    public constructor(client1?: Client, client2?: Client, options: { prizes?: number } = {}, clonedState?: GameState) {
+    public constructor(client1?: Client, client2?: Client, options: { prizes?: number } = {}) {
+        this.options = options;
         this.setup = new SetupEngine(this);
         this.turns = new TurnEngine(this);
 
         if (client1) {
-            client1.game = this;
+            client1.engine = this;
         } else {
             client1 = new Client_AI();
-            client1.game = this;
+            client1.engine = this;
         }
         if (client2) {
-            client2.game = this;
+            client2.engine = this;
         } else {
             client2 = new Client_AI();
-            client2.game = this;
+            client2.engine = this;
         }
         this.clients = [ client1, client2 ];
         client1.player_id = client1.player_id ?? 1;
-        client2.player_id = client2.player_id ?? clonedState?.players.find(p => p.id !== client1.player_id)?.id ?? 2;
-
-        this.state = clonedState ?? {
-            players: [ PlayerEngine.makePlayer(1, "Pikachu"), PlayerEngine.makePlayer(2, "COM") ],
-            turn: null,
-            betweenTurns: false,
-            interrupt: null,
-            interruptStack: [],
-            rules: {
-                prizes: options.prizes ?? 6
-            },
-            nextInterrupt_id: 1000
-        };
-        this.simulation = clonedState !== undefined;
+        client2.player_id = client2.player_id ?? 2;
 
         this.players = new PlayerEngine(this);
         this.interrupts = new InterruptEngine(this);
         this.search = new SearchEngine(this);
         this.cards = new CardEngine(this);
         this.pokemon = new PokemonEngine(this);
+    }
 
+    public start(state?: GameState) {
+        if (state) {
+            this._state = state;
+            this._simulation = true;
+        } else {
+            this._state = new GameState(this, { prizes: this.options.prizes ?? 6 });
+            this.state.players.push(PlayerEngine.makePlayer(1, "Pikachu"));
+            this.state.players.push(PlayerEngine.makePlayer(2, "COM"));
+        }
         if (!this.simulation) {
             this.update();
         }
     }
 
-    public getState(): GameState {
-        return this.state;
+    public get simulation(): boolean {
+        return this._simulation;
+    }
+
+    public get state(): GameState {
+        return this._state!;
     }
 
     public getStateHash(): number {
@@ -91,7 +95,7 @@ export class GameEngine {
             this.state.interrupt?.player,
             this.state.interrupt?.prompt,
             this.state.interrupt?.choices
-        ]);
+        ], SerializationReplace);
         let hash = 5381;
         for (let i = 0; i < str.length; i++) {
             hash = (hash * 33) ^ str.charCodeAt(i);

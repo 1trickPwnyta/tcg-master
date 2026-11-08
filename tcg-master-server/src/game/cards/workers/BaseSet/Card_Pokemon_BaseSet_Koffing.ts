@@ -23,10 +23,10 @@ export class Card_Pokemon_BaseSet_Koffing extends CardWorker_Pokemon {
             .reads("Flip a coin. If heads, the Defending Pokémon is now Poisoned; if tails, it is now Confused.")
             .withPostEffect((context: AttackContext, knockedOut: boolean) => {
                 if (!knockedOut) {
-                    if (context.game.flipCoin(context.game.players.active.id)) {
-                        context.game.pokemon.poison(context.game.players.inactive.id, context.defender.id);
+                    if (context.engine.flipCoin(context.engine.players.active.id)) {
+                        context.engine.pokemon.poison(context.engine.players.inactive.id, context.defender.id);
                     } else {
-                        context.game.pokemon.confuse(context.game.players.inactive.id, context.defender.id);
+                        context.engine.pokemon.confuse(context.engine.players.inactive.id, context.defender.id);
                     }
                 }
             })

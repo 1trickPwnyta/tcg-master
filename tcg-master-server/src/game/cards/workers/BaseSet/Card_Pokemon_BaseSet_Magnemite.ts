@@ -30,10 +30,10 @@ export class Card_Pokemon_BaseSet_Magnemite extends CardWorker_Pokemon {
             .withPostEffect((context: AttackContext) => {
                 for (const player of context.state.players) {
                     for (const card of player.bench.cards) {
-                        context.game.pokemon.damage({ amount: 10, card_id: card.id, owner_id: player.id });
+                        context.engine.pokemon.damage({ amount: 10, card_id: card.id, owner_id: player.id });
                     }
                 }
-                context.game.pokemon.damage({ amount: 40, card_id: context.attacker.id, owner_id: context.game.players.active.id });
+                context.engine.pokemon.damage({ amount: 40, card_id: context.attacker.id, owner_id: context.engine.players.active.id });
             })
             .finalize()
     ];

@@ -1,25 +1,15 @@
 import path from "path";
-import { AttackWorker } from "../game/attacks/AttackWorker.js";
-import { GameEngine } from "../game/engine/GameEngine.js";
-import { CardState, CardStatus } from "../game/state/CardState.js";
-import { GameState } from "../game/state/GameState.js";
+import { AttackContext, AttackWorker } from "../game/attacks/AttackWorker.js";
 import { IAttackData } from "./IDefData.js";
 import { pathToFileURL } from "url";
 import { Interrupt } from "../game/state/interrupts/Interrupt.js";
 import { PokemonCardDef } from "./PokemonCardDef.js";
 import { DefDatabase } from "./DefDatabase.js";
 import { EnergyTypeDef } from "./EnergyTypeDef.js";
-import { EnergyTypeDefOf } from "./defof/EnergyTypeDefOf.js";
 import { EnergyCardDef } from "./EnergyCardDef.js";
+import { StatusDef } from "./StatusDef.js";
 
 const __dirname = import.meta.dirname;
-
-export type AttackContext = {
-    game: GameEngine,
-    state: GameState,
-    attacker: CardState,
-    defender: CardState
-};
 
 export class Attack {
     public readonly name: string;
@@ -79,46 +69,54 @@ export class Attack {
     }
 
     public execute(context: AttackContext, ...targets: number[]): boolean {
-        if (!this.costSatisfied(context.game.pokemon.getEnergy(context.attacker.id).map(e => e.def))) {
-            context.game.sendError(context.game.players.active, context.attacker, "doesn't have enough energy to use", this.name, ".");
-            return false;
-        }
-
         const interrupt = this.validateTargets(context, ...targets);
         if (interrupt) {
-            context.game.interrupts.interrupt(interrupt);
+            context.engine.interrupts.interrupt(interrupt);
             return true;
         }
 
-        context.game.send(context.game.players.active, "'s", context.attacker, "used", this.name, "!");
-        let damage = this.damage;
-
-        // Have a status worker
-        if (context.defender.damagePrevention !== undefined) {
-            if (context.defender.damagePrevention < 0) {
-                damage = 0;
-            } else {
-                damage -= context.defender.damagePrevention;
-                damage = Math.max(0, damage);
+        let failToStatus = false;
+        for (const status of context.attacker.status) {
+            const def = DefDatabase.get<StatusDef>(status);
+            if (!def.worker.try_attack({
+                engine: context.engine,
+                owner_id: context.engine.players.active.id,
+                card_id: context.attacker.id
+            }, context)) {
+                failToStatus = true;
+                break;
             }
         }
 
-        damage = this.preEffects(context, damage);
+        if (!failToStatus) {
+            context.engine.send(context.engine.players.active, "'s", context.attacker, "used", this.name, "!");
+            let damage = this.damage;
 
-        // Have a status worker
-        const destinyBond = context.game.pokemon.hasStatus(context.defender.id, CardStatus.GastlyDestinyBond);
-        
-        const def = DefDatabase.get<PokemonCardDef>(context.attacker.def);
-        const knockedOut = context.game.pokemon.damage({ owner_id: context.game.players.inactive.id, card_id: context.defender.id, amount: damage, type: def.type });
-        
-        this.postEffects(context, knockedOut, ...targets);
+            // Have a status worker
+            if (context.defender.damagePrevention !== undefined) {
+                if (context.defender.damagePrevention < 0) {
+                    damage = 0;
+                } else {
+                    damage -= context.defender.damagePrevention;
+                    damage = Math.max(0, damage);
+                }
+            }
 
-        // Have a status worker
-        if (knockedOut && destinyBond) {
-            context.game.pokemon.knockOut(context.game.players.active.id, context.attacker.id);
+            damage = this.preEffects(context, damage);
+
+            const def = DefDatabase.get<PokemonCardDef>(context.attacker.def);
+            const knockedOut = context.engine.pokemon.damage({
+                owner_id: context.engine.players.inactive.id,
+                card_id: context.defender.id,
+                amount: damage,
+                attacker_id: context.attacker.id,
+                type: def.type
+            });
+            
+            this.postEffects(context, knockedOut, ...targets);
         }
 
-        context.state.turn!.attacked = true;
+        context.engine.state.turn!.attacked = true;
 
         return true;
     }

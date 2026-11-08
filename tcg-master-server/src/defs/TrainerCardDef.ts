@@ -35,19 +35,19 @@ export class TrainerCardDef extends CardDef {
     }
 
     public override play(context: PlayContext): boolean {
-        context.game.cards.move(context.card.id, context.player.hand.id, context.player.limbo.id);
+        context.engine.cards.move(context.card.id, context.player.hand.id, context.player.limbo.id);
 
         const interrupt = this.validateTargets(context);
         if (interrupt === "fail") {
             return false;
         } else if (interrupt) {
-            context.game.interrupts.interrupt(interrupt);
+            context.engine.interrupts.interrupt(interrupt);
             return true;
         }
 
-        context.game.send(context.player, "used", context.card, ".");
+        context.engine.send(context.player, "used", context.card, ".");
         this.execute(context);
-        context.game.cards.move(context.card.id, context.player.limbo.id, context.player.discard.id);
+        context.engine.cards.move(context.card.id, context.player.limbo.id, context.player.discard.id);
         
         return true;
     }

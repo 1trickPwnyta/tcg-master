@@ -21,19 +21,19 @@ export class Card_Pokemon_BaseSet_Ninetales extends CardWorker_Pokemon {
         AttackFactory.makeAttack("BaseSet.Ninetales.Lure", "Lure")
             .costs(EnergyType.Colorless, EnergyType.Colorless)
             .reads("If your opponent has any Benched Pokémon, choose 1 of them and switch it with their Active Pokémon.")
-            .targets((context: AttackContext, benched_id?: number) => benched_id === undefined && context.game.players.inactive.bench.cards.length ? {
-                    player: context.game.players.active.id,
+            .targets((context: AttackContext, benched_id?: number) => benched_id === undefined && context.engine.players.inactive.bench.cards.length ? {
+                    player: context.engine.players.active.id,
                     prompt: "Which Pokémon will be lured out?",
-                    choices: context.game.players.inactive.bench.cards.map(c => ({ text: c.name, target_id: c.id })),
+                    choices: context.engine.players.inactive.bench.cards.map(c => ({ text: c.name, target_id: c.id })),
                     resolution: InterruptResolution.AttackTargets,
                     args: [ this.dbid ]
                 } : null
             )
             .withPostEffect((context: AttackContext, _knockedOut: boolean, benched_id?: number) => {
                 if (benched_id !== undefined) {
-                    context.game.cards.move(context.game.players.inactive.active.cards[0].id, context.game.players.inactive.active.id, context.game.players.inactive.bench.id);
-                    context.game.cards.move(benched_id, context.game.players.inactive.bench.id, context.game.players.inactive.active.id);
-                    context.game.send(context.game.search.getCard(benched_id), "was lured out!");
+                    context.engine.cards.move(context.engine.players.inactive.active.cards[0].id, context.engine.players.inactive.active.id, context.engine.players.inactive.bench.id);
+                    context.engine.cards.move(benched_id, context.engine.players.inactive.bench.id, context.engine.players.inactive.active.id);
+                    context.engine.send(context.engine.search.getCard(benched_id), "was lured out!");
                 }
             })
             .finalize(),

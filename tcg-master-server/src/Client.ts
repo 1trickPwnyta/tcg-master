@@ -6,7 +6,7 @@ import { PlayerState } from "./game/state/PlayerState.js";
 import { IToken } from "./IToken.js";
 
 export abstract class Client {
-    public game: GameEngine | undefined;
+    public engine: GameEngine | undefined;
     public player_id: number | undefined;
     public abstract name: string;
 

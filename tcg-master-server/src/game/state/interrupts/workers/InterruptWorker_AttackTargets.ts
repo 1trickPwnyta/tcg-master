@@ -6,16 +6,16 @@ import { InterruptContext, InterruptWorker } from "./InterruptWorker.js";
 
 @ResolvesInterrupt(InterruptResolution.AttackTargets)
 export class InterruptWorker_AttackTargets extends InterruptWorker {
-    public override execute(context: InterruptContext, target_id: number, attack_id: string): boolean {
-        const player = context.game.players.active;
+    public override execute(context: InterruptContext, target_id: number, attackName: string, ...targets: number[]): boolean {
+        const player = context.engine.players.active;
         const card = player.active.cards[0];
-        const worker = DefDatabase.get<PokemonCardDef>(card.def);
-        const attack = worker.attacks.find(a => a.name === attack_id)!;
+        const def = DefDatabase.get<PokemonCardDef>(card.def);
+        const attack = def.attacks.find(a => a.name === attackName)!;
         return attack.execute({
-            game: context.game,
-            state: context.state,
+            engine: context.engine,
+            attack: attack,
             attacker: card,
-            defender: context.game.players.inactive.active.cards[0]
-        }, target_id);
+            defender: context.engine.players.inactive.active.cards[0]
+        }, ...targets, target_id);
     }
 };

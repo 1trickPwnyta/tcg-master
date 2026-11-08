@@ -16,7 +16,7 @@ export class Command_check extends Command {
             card,
             { name: `[${maxHp - card.damage} / ${maxHp} HP]`, type: "hp" },
             `[${card.orientation}]`,
-            ...(card.poison ? [ "[🤢]" ] : []),
+            ...(card.status.includes("Poison") ? [ "[🤢]" ] : []),
             "<br />...Energy:",
             ...Client.getCardList(card.attachments.cards.filter(c => c.kind === "energy"))
         );
@@ -38,7 +38,7 @@ export class Command_check extends Command {
 
     public execute(context: CommandContext): any[] | void {
         const area = context.args[0];
-        const state = context.game.getState();
+        const state = context.engine.state;
         const player = state.players.find(p => p.id ===context.player_id)!;
         const opponent = state.players.find(p => p.id !== context.player_id)!;
         switch (area) {

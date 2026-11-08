@@ -6,7 +6,7 @@ export class InterruptEngine extends SubEngine {
     public interrupt(interrupt: Interrupt) {
         this.assignId(interrupt);
         this.state.interrupt = interrupt;
-        this.game.sendInterrupt(interrupt);
+        this.engine.sendInterrupt(interrupt);
     }
 
     public stack(interrupt: Interrupt) {
@@ -86,16 +86,16 @@ export class InterruptEngine extends SubEngine {
         if (interrupt) {
             let resolved = true;
             if (choice !== null) {
-                resolved = InterruptResolver.resolve(this.game, interrupt, choice);
+                resolved = InterruptResolver.resolve(this.engine, interrupt, choice);
             } else if (interrupt.cancelResolution) {
-                InterruptResolver.cancel(this.game, interrupt, player_id);
+                InterruptResolver.cancel(this.engine, interrupt, player_id);
             }
             if (resolved) {
                 this.close(interrupt.id!);
             }
-            this.game.players.get(player_id).menus++;
-            this.game.getClient(player_id).wait();
-            this.game.update();
+            this.engine.players.get(player_id).menus++;
+            this.engine.getClient(player_id).wait();
+            this.engine.update();
         } else {
             throw new Error(`No interrupt found for player ${player_id}.`)
         }

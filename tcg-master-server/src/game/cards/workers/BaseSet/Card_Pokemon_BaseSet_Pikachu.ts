@@ -26,8 +26,8 @@ export class Card_Pokemon_BaseSet_Pikachu extends CardWorker_Pokemon {
             .deals(30)
             .reads("Flip a coin. If tails, Pikachu does 10 damage to itself.")
             .withPostEffect((context: AttackContext, _knockedOut: boolean) => {
-                if (!context.game.flipCoin(context.game.players.active.id)) {
-                    context.game.pokemon.damage({ owner_id: context.game.players.active.id, card_id: context.attacker.id, amount: 10 });
+                if (!context.engine.flipCoin(context.engine.players.active.id)) {
+                    context.engine.pokemon.damage({ owner_id: context.engine.players.active.id, card_id: context.attacker.id, amount: 10 });
                 }
             })
             .finalize()

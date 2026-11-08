@@ -5,4 +5,4 @@ export abstract class InterruptWorker {
     public abstract execute(context: InterruptContext, ...args: (number | string | null)[]): boolean;
 };
 
-export type InterruptContext = { game: GameEngine, state: GameState };
+export type InterruptContext = { engine: GameEngine };

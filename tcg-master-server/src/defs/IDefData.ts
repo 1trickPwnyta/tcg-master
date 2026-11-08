@@ -1,5 +1,3 @@
-import { EvolutionTree } from "../game/cards/EvolutionTree.js";
-
 export interface IDefData {
     class?: string;
     name: string;
@@ -18,8 +16,8 @@ export interface ICardDefData_Pokemon {
     type: string;
     stage: "basic" | "stage1" | "stage2";
     hp: number;
-    weakness: string | undefined;
-    resistance: string | undefined;
+    weakness?: string;
+    resistance?: string ;
     retreat: number;
     attacks: IAttackData[];
 };
@@ -44,3 +42,10 @@ export interface IDefData_EnergyType {
 export interface IDefData_Evolution {
     next: string[];
 };
+
+export interface IDefData_Status {
+    worker: string | { class: string, args: any };
+    orientation?: "paralyzed" | "asleep" | "confused" | "normal";
+    canAttack?: boolean;
+    canRetreat?: boolean;
+}

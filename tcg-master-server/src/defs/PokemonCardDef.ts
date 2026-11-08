@@ -44,12 +44,12 @@ export class PokemonCardDef extends CardDef {
 
     public override play(context: PlayContext): boolean {
         if (this.stage === "basic") {
-            if (context.game.players.active.bench.cards.length >= 5) {
-                context.game.sendError(context.player, "Your bench is full.");
+            if (context.engine.players.active.bench.cards.length >= 5) {
+                context.engine.sendError(context.player, "Your bench is full.");
                 return false;
             } else {
-                context.game.cards.move(context.card.id, context.player.hand.id, context.player.bench.id);
-                context.game.send(context.player, "placed", context.card, "on", context.player.pronouns.possessive, "bench.");
+                context.engine.cards.move(context.card.id, context.player.hand.id, context.player.bench.id);
+                context.engine.send(context.player, "placed", context.card, "on", context.player.pronouns.possessive, "bench.");
                 return true;
             }
         } else {
@@ -58,7 +58,7 @@ export class PokemonCardDef extends CardDef {
                 return def.evolution?.evolvesDirect(this.name);
             });
             if (cards.length) {
-                context.game.interrupts.interrupt({
+                context.engine.interrupts.interrupt({
                     player: context.player.id,
                     prompt: `Which Pokémon will evolve into ${this.name}?`,
                     choices: cards.map(c => ({ text: c == context.player.active.cards[0] ? `${c.name} (active)` : c.name, target_id: c.id })),
@@ -67,7 +67,7 @@ export class PokemonCardDef extends CardDef {
                 });
                 return true;
             } else {
-                context.game.sendError(context.player, "None of your Pokémon can evolve into", context.card, ".");
+                context.engine.sendError(context.player, "None of your Pokémon can evolve into", context.card, ".");
                 return false;
             }
         }

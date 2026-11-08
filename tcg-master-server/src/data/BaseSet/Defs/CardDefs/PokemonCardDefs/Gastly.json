@@ -1,0 +1,23 @@
+{
+    "name": "BaseSet.Gastly",
+    "label": "Gastly",
+    "type": "Psychic",
+    "stage": "basic",
+    "hp": 30,
+    "resistance": "Fighting",
+    "retreat": 0,
+    "attacks": [
+        {
+            "name": "Sleeping Gas",
+            "cost": [ "Psychic" ],
+            "workers": [ "AttackWorker_Sleep" ],
+            "text": "Flip a coin. If heads, the Defending Pokémon is now Asleep."
+        },
+        {
+            "name": "Destiny Bond",
+            "cost": [ "Psychic", "Colorless" ],
+            "workers": [ { "class": "AttackWorker_SacrificeEnergy", "args": { "sacrifice": [ "Psychic" ] } }, "AttackWorker_DestinyBond" ],
+            "text": "Discard 1 {Psychic} Energy card attached to Gastly in order to use this attack. If a Pokémon Knocks Out Gastly during your opponent's next turn, Knock Out that Pokémon."
+        }
+    ]
+}

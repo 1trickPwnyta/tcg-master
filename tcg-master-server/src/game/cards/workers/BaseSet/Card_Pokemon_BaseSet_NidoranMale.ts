@@ -22,7 +22,7 @@ export class Card_Pokemon_BaseSet_NidoranMale extends CardWorker_Pokemon {
             .deals(30)
             .reads("Flip a coin. If tails, this attack does nothing.")
             .withPreEffect((context: AttackContext) => {
-                if (!context.game.flipCoin(context.game.players.active.id)) {
+                if (!context.engine.flipCoin(context.engine.players.active.id)) {
                     return -30;
                 } else {
                     return 0;

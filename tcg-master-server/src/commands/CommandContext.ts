@@ -5,7 +5,7 @@ export class CommandContext {
     public name: string;
     public client: Client;
     public readonly player_id: number;
-    public readonly game: GameEngine;
+    public readonly engine: GameEngine;
     public args: string[];
 
     public constructor(client: Client, player_id: number, game: GameEngine, caller: string) {
@@ -14,7 +14,7 @@ export class CommandContext {
         this.args = tokens.slice(1);
         this.client = client;
         this.player_id = player_id;
-        this.game = game;
+        this.engine = game;
     }
 
     public get text(): string {

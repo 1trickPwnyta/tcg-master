@@ -10,6 +10,6 @@ export class TrainerWorker_Draw extends TrainerWorker {
     }
 
     public override execute(context: PlayContext): void {
-        context.game.cards.draw(context.player.id, this.amount);
+        context.engine.cards.draw(context.player.id, this.amount);
     }
 };

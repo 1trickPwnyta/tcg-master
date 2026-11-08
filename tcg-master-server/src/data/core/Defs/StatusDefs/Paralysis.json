@@ -1,0 +1,7 @@
+{
+    "name": "Paralysis",
+    "worker": "StatusWorker_Paralysis",
+    "orientation": "paralyzed",
+    "canAttack": false,
+    "canRetreat": false
+}

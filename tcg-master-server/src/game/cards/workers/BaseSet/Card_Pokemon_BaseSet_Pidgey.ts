@@ -23,13 +23,13 @@ export class Card_Pokemon_BaseSet_Pidgey extends CardWorker_Pokemon {
             .deals(10)
             .reads("If your opponent has any Benched Pokémon, they choose 1 of them and switch it with the Defending Pokémon. <em>(Do the damage before switching the Pokémon.)</em>")
             .withPostEffect((context: AttackContext, knockedOut: boolean) => {
-                if (!knockedOut && context.game.players.inactive.bench.cards.length) {
-                    context.game.interrupts.interrupt({
-                        player: context.game.players.inactive.id,
+                if (!knockedOut && context.engine.players.inactive.bench.cards.length) {
+                    context.engine.interrupts.interrupt({
+                        player: context.engine.players.inactive.id,
                         prompt: "Choose one of your benched Pokémon to switch with your active Pokémon.",
-                        choices: context.game.players.inactive.bench.cards.map(c => ({ text: c.name, target_id: c.id })),
+                        choices: context.engine.players.inactive.bench.cards.map(c => ({ text: c.name, target_id: c.id })),
                         resolution: InterruptResolution.Promote,
-                        args: [ context.game.players.inactive.id ],
+                        args: [ context.engine.players.inactive.id ],
                         force: true
                     });
                 }

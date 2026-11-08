@@ -1,0 +1,7 @@
+{
+    "name": "Sleep",
+    "worker": "StatusWorker_Sleep",
+    "orientation": "asleep",
+    "canAttack": false,
+    "canRetreat": false
+}

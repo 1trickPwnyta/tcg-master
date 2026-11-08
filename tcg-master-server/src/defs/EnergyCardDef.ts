@@ -35,16 +35,16 @@ export class EnergyCardDef extends CardDef {
     public override async init() { }
 
     public override play(context: PlayContext): boolean {
-        if (context.state.turn?.energyPlayed) {
-            context.game.sendError(context.game.players.active, "You already played an Energy card this turn.");
+        if (context.engine.state.turn?.energyPlayed) {
+            context.engine.sendError(context.engine.players.active, "You already played an Energy card this turn.");
             return false;
         }
         
-        context.game.interrupts.interrupt({
-            player: context.game.players.active.id,
+        context.engine.interrupts.interrupt({
+            player: context.engine.players.active.id,
             prompt: `Attach ${context.card.name} to which Pokémon?`,
-            choices: [ context.game.players.active.active.cards[0], ...context.game.players.active.bench.cards ].map(c => ({
-                text: c.name + (c == context.game.players.active.active.cards[0] ? " (active)" : ""),
+            choices: [ context.engine.players.active.active.cards[0], ...context.engine.players.active.bench.cards ].map(c => ({
+                text: c.name + (c == context.engine.players.active.active.cards[0] ? " (active)" : ""),
                 target_id: c.id
             })),
             resolution: InterruptResolution.AttachEnergy,

@@ -3,7 +3,6 @@
     "label": "Weedle",
     "type": "Grass",
     "stage": "basic",
-    "evolutionTree": "Weedle",
     "hp": 40,
     "weakness": "Fire",
     "retreat": 1,

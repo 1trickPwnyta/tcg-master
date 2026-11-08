@@ -3,8 +3,8 @@ import { DefDatabase } from "../defs/DefDatabase.js";
 import { GameEngine } from "../game/engine/GameEngine.js";
 
 export class AIEvaluator {
-    public static evaluate(game: GameEngine, for_player: number): number {
-        const state = game.getState();
+    public static evaluate(engine: GameEngine, for_player: number): number {
+        const state = engine.state;
 
         if (state.winner_id === for_player) {
             return Number.MAX_VALUE;
@@ -17,13 +17,13 @@ export class AIEvaluator {
         const active = player.active.cards[0];
         const activeCard = active ? DefDatabase.get<PokemonCardDef>(active.def) : null;
         const activeHp = activeCard ? activeCard.hp - active.damage : 0;
-        const activeEnergy = activeCard ? game.pokemon.getEnergy(active.id).map(e => e.def) : [];
+        const activeEnergy = activeCard ? engine.pokemon.getEnergy(active.id).map(e => e.def) : [];
         const unsatisfiedEnergyCosts = activeCard ? activeCard.attacks.flatMap(a => a.costUnsatisfied(activeEnergy)) : [];
         const activeHighestDamage = activeCard ? ([ ...activeCard.attacks.filter(a => a.costSatisfied(activeEnergy)) ].sort((a, b) => b.damage - a.damage)[0]?.damage ?? 0) : 0;
         const xactive = opponent.active.cards[0];
         const xactiveCard = xactive ? DefDatabase.get<PokemonCardDef>(xactive.def) : null;
         const xactiveHp = xactiveCard ? xactiveCard.hp - xactive.damage : 0;
-        const xactiveEnergy = xactiveCard ? game.pokemon.getEnergy(xactive.id).map(e => e.def) : [];
+        const xactiveEnergy = xactiveCard ? engine.pokemon.getEnergy(xactive.id).map(e => e.def) : [];
         const xunsatisfiedEnergyCosts = xactiveCard ? xactiveCard.attacks.flatMap(a => a.costUnsatisfied(xactiveEnergy)) : [];
         const xactiveHighestDamage = xactiveCard ? ([ ...xactiveCard.attacks.filter(a => a.costSatisfied(xactiveEnergy)) ].sort((a, b) => b.damage - a.damage)[0]?.damage ?? 0) : 0;
     

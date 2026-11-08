@@ -30,7 +30,7 @@ async function loadDefs(directory: string, priority?: string, context?: "Defs" |
             const data = fs.readFileSync(fullName, "utf-8");
             const obj = JSON.parse(data) as IDefData;
             const payload = Array.isArray(obj) ? obj : [ obj ];
-            for (const item of payload) {
+            for (const item of payload.filter(p => !database.has(p.name))) {
                 const defClass = item.class ?? context;
                 if (!priority || priority === defClass) {
                     const modulePath = path.join(__dirname, `${defClass}.ts`);

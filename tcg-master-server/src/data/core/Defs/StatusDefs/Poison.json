@@ -1,0 +1,4 @@
+{
+    "name": "Poison",
+    "worker": "StatusWorker_Poison"
+}

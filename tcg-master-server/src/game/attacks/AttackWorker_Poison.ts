@@ -10,8 +10,8 @@ export class AttackWorker_Poison extends AttackWorker {
     }
 
     public override postEffect(context: AttackContext, knockedOut: boolean): void {
-        if (!knockedOut && (this.trigger === "always" || context.game.flipCoin(context.game.players.active.id))) {
-            context.game.pokemon.poison(context.game.players.inactive.id, context.defender.id);
+        if (!knockedOut && (this.trigger === "always" || context.engine.flipCoin(context.engine.players.active.id))) {
+            context.engine.pokemon.poison(context.engine.players.inactive.id, context.defender.id);
         }
     }
 };

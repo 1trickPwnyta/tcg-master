@@ -1,0 +1,7 @@
+{
+    "name": "BaseSet.FightingEnergy",
+    "label": "Fighting Energy",
+    "basic": true,
+    "type": "Fighting",
+    "amount": 1
+}

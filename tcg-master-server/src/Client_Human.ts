@@ -17,7 +17,7 @@ export class Client_Human extends Client {
         socket.on("CMD", (command: string) => {
             console.log(`> [${this.name}] ${command}`);
             try {
-                const context = new CommandContext(this, this.player_id!, this.game!, command);
+                const context = new CommandContext(this, this.player_id!, this.engine!, command);
                 const response = Command.execute(context);
                 if (response !== undefined) {
                     console.log(`Command ${context.name} responded: ${Client.tokenize(...response).map(t => t.name).join(" ")}`);

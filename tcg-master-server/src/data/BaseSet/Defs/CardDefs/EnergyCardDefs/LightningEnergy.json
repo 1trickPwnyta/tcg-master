@@ -1,0 +1,7 @@
+{
+    "name": "BaseSet.LightningEnergy",
+    "label": "Lightning Energy",
+    "basic": true,
+    "type": "Lightning",
+    "amount": 1
+}

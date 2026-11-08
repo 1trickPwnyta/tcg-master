@@ -28,7 +28,7 @@ export class Card_Pokemon_BaseSet_Gastly extends CardWorker_Pokemon {
             .reads(`Discard 1 ${EnergyType.Psychic.symbol} Energy card attached to Gastly in order to use this attack. If a Pokémon Knocks Out Gastly during your opponent's next turn, Knock Out that Pokémon.`)
             .discards(1, EnergyType.Psychic)
             .withPostEffect((context: AttackContext) => {
-                context.game.pokemon.giveStatus(context.attacker.id, CardStatus.GastlyDestinyBond);
+                context.engine.pokemon.giveStatus(context.attacker.id, CardStatus.GastlyDestinyBond);
             })
             .finalize()
     ];

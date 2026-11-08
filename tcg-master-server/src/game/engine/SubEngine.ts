@@ -2,13 +2,13 @@ import { GameState } from "../state/GameState.js";
 import { GameEngine } from "./GameEngine.js";
 
 export abstract class SubEngine {
-    protected readonly game: GameEngine;
+    protected readonly engine: GameEngine;
     
     public constructor(game: GameEngine) {
-        this.game = game;
+        this.engine = game;
     }
 
     protected get state(): GameState {
-        return this.game.getState();
+        return this.engine.state;
     }
 };

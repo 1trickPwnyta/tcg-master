@@ -1,0 +1,5 @@
+{
+    "name": "Confusion",
+    "worker": "StatusWorker_Confusion",
+    "orientation": "confused"
+}

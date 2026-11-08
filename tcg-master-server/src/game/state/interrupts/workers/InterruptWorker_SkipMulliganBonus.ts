@@ -5,7 +5,7 @@ import { InterruptContext, InterruptWorker } from "./InterruptWorker.js";
 @ResolvesInterrupt(InterruptResolution.SkipMulliganBonus)
 export class InterruptWorker_SkipMulliganBonus extends InterruptWorker {
     public override execute(context: InterruptContext, player_id: number): boolean {
-        context.game.players.get(player_id).mulliganBonusUsed = true;
+        context.engine.players.get(player_id).mulliganBonusUsed = true;
         return true;
     }
 };

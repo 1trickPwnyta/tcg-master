@@ -3,6 +3,8 @@ import { Interrupt } from "../state/interrupts/Interrupt.js";
 import { Turn } from "../state/Turn.js";
 import { SubEngine } from "./SubEngine.js";
 import { CardStatus } from "../state/CardState.js";
+import { DefDatabase } from "../../defs/DefDatabase.js";
+import { StatusDef } from "../../defs/StatusDef.js";
 
 export class TurnEngine extends SubEngine {
     private get turn(): Turn {
@@ -17,40 +19,34 @@ export class TurnEngine extends SubEngine {
             attacked: false
         };
         this.state.betweenTurns = false;
-        this.game.send();
-        this.game.send("Beginning of", this.game.players.active, "'s turn.");
-        this.game.cards.draw(player_id);
-        this.game.update();
+        this.engine.send();
+        this.engine.send("Beginning of", this.engine.players.active, "'s turn.");
+        this.engine.cards.draw(player_id);
+        this.engine.update();
     }
 
     public end() {
-        this.game.send("End of", this.game.players.active, "'s turn.");
-        this.game.send();
+        this.engine.send("End of", this.engine.players.active, "'s turn.");
+        this.engine.send();
         for (const player of this.state.players) {
             const active = player.active.cards[0];
-            if (active?.poison) {
-                this.game.pokemon.damage({ owner_id: player.id, card_id: active.id, amount: 10, source: "poison" });
-            }
-            if (active?.orientation === "asleep") {
-                this.game.send(player, "'s", active, "is asleep.");
-                if (this.game.flipCoin(player.id)) {
-                    active.orientation = "normal";
-                    this.game.send(player, "'s", active, "woke up!");
-                }
-            }
             if (this.state.turn?.player === player.id) {
-                if (active?.orientation === "paralyzed") {
-                    active.orientation = "normal";
-                    this.game.send(player, "'s", active, "was cured of paralysis!");
-                }
                 active.accuracyChecks = undefined;
             } else {
                 active.damagePrevention = undefined;
                 active.damageThreshold = undefined;
-                this.game.pokemon.removeStatus(active.id, CardStatus.GastlyDestinyBond);
+            }
+
+            for (const status of active.status) {
+                const def = DefDatabase.get<StatusDef>(status);
+                def.worker.notify_endOfTurn({
+                    engine: this.engine,
+                    owner_id: player.id,
+                    card_id: active.id
+                }, this.state.turn!.player);
             }
         }
-        for (const client of this.game.clients) {
+        for (const client of this.engine.clients) {
             client.notify_endOfTurn();
         }
         this.state.betweenTurns = true;
@@ -59,18 +55,18 @@ export class TurnEngine extends SubEngine {
     public update() {
         const playerWithNoPokemon = this.state.players.find(p => !p.active.cards.length && !p.bench.cards.length);
         if (playerWithNoPokemon) {
-            this.game.end(this.state.players.find(p => p.id !== playerWithNoPokemon.id)!.id);
+            this.engine.end(this.state.players.find(p => p.id !== playerWithNoPokemon.id)!.id);
             return;
         }
 
         const interrupt = this.checkActivePokemon();
         if (interrupt) {
-            this.game.interrupts.interrupt(interrupt);
+            this.engine.interrupts.interrupt(interrupt);
             return;
         }
 
         if (!this.turn.attacked) {
-            this.game.interrupts.interrupt({
+            this.engine.interrupts.interrupt({
                 player: this.turn.player,
                 prompt: "Your turn.",
                 choices: [
@@ -95,7 +91,7 @@ export class TurnEngine extends SubEngine {
             });
         } else {
             this.end();
-            this.game.update();
+            this.engine.update();
         }
     }
 

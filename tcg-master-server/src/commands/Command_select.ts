@@ -5,14 +5,14 @@ export class Command_select extends Command {
     public name: string = "select";
 
     public execute(context: CommandContext): any[] | void {
-        const interrupt = context.game.interrupts.get(context.player_id);
+        const interrupt = context.engine.interrupts.get(context.player_id);
         if (interrupt) {
             const num = parseInt(context.text);
             if (!isNaN(num) && num > 0 && num <= interrupt.choices.length) {
-                context.game.interrupts.resolve(context.player_id, num - 1);
+                context.engine.interrupts.resolve(context.player_id, num - 1);
                 return;
             } else if (context.text === "`") {
-                context.game.interrupts.resolve(context.player_id, null);
+                context.engine.interrupts.resolve(context.player_id, null);
                 return;
             }
 

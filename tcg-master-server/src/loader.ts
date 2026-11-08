@@ -6,6 +6,7 @@ const __dirname = import.meta.dirname;
 
 const directories = [
     path.join(__dirname, "defs", "defof"),
+    path.join(__dirname, "game", "state"),
     path.join(__dirname, "game", "state", "interrupts", "workers")
 ];
 
@@ -14,9 +15,14 @@ async function load(directory: string) {
     for (const entry of entries) {
         const fullName = path.join(directory, entry.name);
         if (entry.isDirectory()) {
-            load(fullName);
+            //load(fullName);
         } else if (entry.isFile() && entry.name.endsWith(".ts")) {
-            await import(pathToFileURL(fullName).href);
+            const module = await import(pathToFileURL(fullName).href);
+            for (const key of Object.keys(module)) {
+                if (typeof module[key] === "function" && module[key].prototype) {
+                    Object.getOwnPropertyNames(module[key].prototype)
+                }
+            }
         }
     }
 }

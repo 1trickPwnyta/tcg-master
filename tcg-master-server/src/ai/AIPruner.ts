@@ -7,8 +7,8 @@ import { InterruptType } from "../game/state/interrupts/InterruptType.js";
 import { AIChoice } from "./Client_AI.js";
 
 export class AIPruner {
-    public static prune(game: GameEngine, interrupt: InterruptSync): AIChoice[] {
-        const player = game.players.get(interrupt.player);
+    public static prune(engine: GameEngine, interrupt: InterruptSync): AIChoice[] {
+        const player = engine.players.get(interrupt.player);
         let rawChoices: AIChoice[] = [ ...interrupt.choices ].map((c, i) => ({
             i: i,
             target: c.target_id as number,
@@ -21,22 +21,22 @@ export class AIPruner {
             InterruptType.Discard,
             InterruptType.SelectActive
         ].includes(interrupt.type)) {
-            rawChoices = this.pruneDuplicates(game, rawChoices);
+            rawChoices = this.pruneDuplicates(engine, rawChoices);
         }
 
         if (interrupt.resolution !== undefined && [
             InterruptResolution.PlayCard
         ].includes(interrupt.resolution)) {
-            rawChoices = this.pruneDuplicates(game, rawChoices);
+            rawChoices = this.pruneDuplicates(engine, rawChoices);
         }
 
         let choices: AIChoice[] = rawChoices.map(choice => {
             if (interrupt.resolution !== undefined) {
                 switch (interrupt.resolution) {
                     case InterruptResolution.AttachEnergy:
-                        const target = game.search.getCard(choice.target as number)!;
+                        const target = engine.search.getCard(choice.target as number)!;
                         const def = DefDatabase.get<PokemonCardDef>(target.def);
-                        const energy = game.pokemon.getEnergy(choice.target as number).map(e => e.def);
+                        const energy = engine.pokemon.getEnergy(choice.target as number).map(e => e.def);
                         const unsatisfiedAttacks = def.attacks.filter(a => !a.costSatisfied(energy));
                         if (!unsatisfiedAttacks.length) {
                             choice.valid = false;
@@ -87,10 +87,10 @@ export class AIPruner {
         return choices;
     }
 
-    private static pruneDuplicates(game: GameEngine, choices: AIChoice[]): AIChoice[] {
+    private static pruneDuplicates(engine: GameEngine, choices: AIChoice[]): AIChoice[] {
         const dbids: { dbid: string, target: number }[] = [];
         for (const choice of choices) {
-            const card = game.search.getCard(choice.target as number)!;
+            const card = engine.search.getCard(choice.target as number)!;
             if (!dbids.some(i => i.dbid === card.def)) {
                 dbids.push({ dbid: card.def, target: card.id });
             }

@@ -7,7 +7,7 @@ import { TrainerWorker } from "./TrainerWorker.js";
 export class TrainerWorker_Switch extends TrainerWorker {
     public override validateTargets(context: PlayContext, target: number): Interrupt | "fail" | null {
         if (!context.player.bench.cards.length) {
-            context.game.sendError(context.player, "There are no Pokémon on your bench to switch with.");
+            context.engine.sendError(context.player, "There are no Pokémon on your bench to switch with.");
             return "fail";
         }
 
@@ -27,8 +27,8 @@ export class TrainerWorker_Switch extends TrainerWorker {
     }
 
     public override execute(context: PlayContext, target: number): void {
-        context.game.send(context.player, "switched", context.player.active.cards[0], "with", context.game.search.getCard(target), ".");
-        context.game.cards.move(context.player.active.cards[0].id, context.player.active.id, context.player.bench.id);
-        context.game.cards.move(target, context.player.bench.id, context.player.active.id);
+        context.engine.send(context.player, "switched", context.player.active.cards[0], "with", context.engine.search.getCard(target), ".");
+        context.engine.cards.move(context.player.active.cards[0].id, context.player.active.id, context.player.bench.id);
+        context.engine.cards.move(target, context.player.bench.id, context.player.active.id);
     }
 };

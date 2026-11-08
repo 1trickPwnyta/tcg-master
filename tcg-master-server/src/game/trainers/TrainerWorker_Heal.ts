@@ -13,7 +13,7 @@ export class TrainerWorker_Heal extends TrainerWorker {
 
     public override validateTargets(context: PlayContext, target: number): Interrupt | "fail" | null {
         if (![ ...context.player.active.cards, ...context.player.bench.cards ].some(c => c.damage)) {
-            context.game.sendError(context.player, "None of your Pokémon can be healed right now.");
+            context.engine.sendError(context.player, "None of your Pokémon can be healed right now.");
             return "fail";
         }
 
@@ -32,6 +32,6 @@ export class TrainerWorker_Heal extends TrainerWorker {
     }
 
     public override execute(context: PlayContext, target: number): void {
-        context.game.pokemon.heal(context.player.id, target, this.amount);
+        context.engine.pokemon.heal(context.player.id, target, this.amount);
     }
 };
