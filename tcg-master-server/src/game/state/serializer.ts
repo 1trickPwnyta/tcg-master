@@ -24,6 +24,8 @@ export function Serialize() {
         const key = context.name as string;
         if (!context.metadata![SERIALIZER_KEY]) {
             context.metadata![SERIALIZER_KEY] = [];
+        } else if (!Object.prototype.hasOwnProperty.call(context.metadata, SERIALIZER_KEY)) {
+            context.metadata![SERIALIZER_KEY] = [ ...(context.metadata![SERIALIZER_KEY] as string[]) ];
         }
         const metadata = context.metadata![SERIALIZER_KEY] as string[];
         metadata.push(key);

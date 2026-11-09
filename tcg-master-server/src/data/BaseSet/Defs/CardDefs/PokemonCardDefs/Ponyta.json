@@ -1,0 +1,21 @@
+{
+    "name": "BaseSet.Ponyta",
+    "label": "Ponyta",
+    "type": "Fire",
+    "stage": "basic",
+    "hp": 40,
+    "weakness": "Water",
+    "retreat": 1,
+    "attacks": [
+        {
+            "name": "Smash Kick",
+            "cost": [ "Colorless", "Colorless" ],
+            "damage": 20
+        },
+        {
+            "name": "Flame Tail",
+            "cost": [ "Fire", "Fire" ],
+            "damage": 30
+        }
+    ]
+}

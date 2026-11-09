@@ -3,8 +3,6 @@ import { CardDef } from "./CardDef.js";
 import path from "path";
 import { pathToFileURL } from "url";
 import { TrainerWorker } from "../game/trainers/TrainerWorker.js";
-import { PlayContext } from "../game/cards/workers/CardWorker.js";
-import { Interrupt } from "../game/state/interrupts/Interrupt.js";
 
 const __dirname = import.meta.dirname;
 
@@ -31,41 +29,6 @@ export class TrainerCardDef extends CardDef {
             const workerConstructor = module[workerClass];
             const worker = new workerConstructor(workerArgs);
             this.workers.push(worker);
-        }
-    }
-
-    public override play(context: PlayContext): boolean {
-        context.engine.cards.move(context.card.id, context.player.hand.id, context.player.limbo.id);
-
-        const interrupt = this.validateTargets(context);
-        if (interrupt === "fail") {
-            return false;
-        } else if (interrupt) {
-            context.engine.interrupts.interrupt(interrupt);
-            return true;
-        }
-
-        context.engine.send(context.player, "used", context.card, ".");
-        this.execute(context);
-        context.engine.cards.move(context.card.id, context.player.limbo.id, context.player.discard.id);
-        
-        return true;
-    }
-
-    private validateTargets(context: PlayContext, ...targets: number[]): Interrupt | "fail" | null {
-        for (const worker of this.workers) {
-            const interrupt = worker.validateTargets(context, ...targets);
-            if (interrupt) {
-                return interrupt;
-            }
-        }
-
-        return null;
-    }
-
-    public execute(context: PlayContext, ...targets: number[]) {
-        for (const worker of this.workers) {
-            worker.execute(context, ...targets);
         }
     }
 

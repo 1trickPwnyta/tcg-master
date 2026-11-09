@@ -1,58 +1,55 @@
-import { PokemonCardDef } from "../../../../defs/PokemonCardDef.js";
-import { DefDatabase } from "../../../../defs/DefDatabase.js";
 import { InterruptResolution } from "../InterruptResolution.js";
 import { ResolvesInterrupt } from "../InterruptResolver.js";
 import { InterruptContext, InterruptWorker } from "./InterruptWorker.js";
-import { StatusDef } from "../../../../defs/StatusDef.js";
 
 @ResolvesInterrupt(InterruptResolution.Retreat)
 export class InterruptWorker_Retreat extends InterruptWorker {
     public override execute(context: InterruptContext, replacement_id: number): boolean {
-        const player = context.engine.players.active;
-        if (!player.bench.cards.length) {
+        const player = context.engine.game.activePlayer;
+        if (!player.bench.count) {
             context.engine.sendError(player, "There are no Pokémon on your bench to switch with.");
             return false;
         }
 
-        const card = player.active.cards[0];
-        const cantRetreatReason = context.engine.pokemon.cantRetreat(card.id);
+        const card = player.activePokemon!;
+        const cantRetreatReason = card.cantRetreatReason();
         if (cantRetreatReason) {
             context.engine.sendError(player, card, "can't retreat due to", cantRetreatReason, ".");
             return false;
         }
-        const def = DefDatabase.get<PokemonCardDef>(card.def);
-        const energy = context.engine.pokemon.getEnergy(card.id);
+        const energy = [ ...card.energy ];
         const paid = [];
         let amount = 0;
-        while (energy.length && amount < def.retreat) {
+        while (energy.length && amount < card.def.retreat) {
             const next = energy.pop()!;
             amount += next.def.amount;
-            paid.push(next.card.id);
+            paid.push(next.id);
         }
-        if (amount < def.retreat) {
+        if (amount < card.def.retreat) {
             context.engine.sendError(player, card, "doesn't have enough energy to retreat.");
             return false;
         } else if (replacement_id) {
             while (paid.length) {
-                context.engine.cards.move(paid.pop()!, card.attachments.id, player.discard.id);
+                const card = context.engine.search.getCard(paid.pop()!)!;
+                player.discard.add(card);
             }
             let failToStatus = false;
             for (const status of card.status) {
-                const def = DefDatabase.get<StatusDef>(status);
-                if (!def.worker.try_retreat({
+                if (!status.def.worker.try_retreat({
                     engine: context.engine,
-                    owner_id: player.id,
-                    card_id: card.id
+                    owner: player,
+                    card: card
                 })) {
                     failToStatus = true;
                     break;
                 }
             }
             if (!failToStatus) {
-                context.engine.cards.move(player.active.cards[0].id, player.active.id, player.bench.id);
-                context.engine.cards.move(replacement_id, player.bench.id, player.active.id);
+                const replacement = context.engine.search.getCard(replacement_id)!;
+                player.bench.add(player.activePokemon!);
+                player.active.add(replacement);
                 context.engine.send(player, "'s", card, "retreated to the bench.");
-                context.engine.send(player, "sent out", player.active.cards[0], "!");
+                context.engine.send(player, "sent out", player.activePokemon, "!");
             }
             return true;
         } else {

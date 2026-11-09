@@ -1,0 +1,10 @@
+[
+    {
+        "name": "Caterpie",
+        "next": [ "Metapod" ]
+    },
+    {
+        "name": "Metapod",
+        "next": [ "Butterfree" ]
+    }
+]

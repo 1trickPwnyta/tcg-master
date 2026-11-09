@@ -1,7 +1,7 @@
 import { InterruptSync } from "../game/state/interrupts/Interrupt.js";
 import { Client_AI, ScoredChoice } from "./Client_AI.js";
 import { GameEngine } from "../game/engine/GameEngine.js";
-import { PlayerState } from "../game/state/PlayerState.js";
+import { Player } from "../game/state/Player.js";
 import { AIEvaluator } from "./AIEvaluator.js";
 import { AIPruner } from "./AIPruner.js";
 
@@ -49,15 +49,15 @@ export class Client_AIWorker extends Client_AI {
         // For now, don't let the AI see into the other player's turn (except when it has to make a choice during the other player's turn)
         // because then they want to stall as long as possible to avoid ending their own turn because god forbid the opponent do something they don't like
         // If this interrupt isn't for you and it's not your turn, just return the evaluation score immediately
-        if (interrupt.player !== this.for_player && this.engine?.state.turn && this.engine.state.turn?.player !== this.for_player) {
+        if (interrupt.player !== this.for_player && this.engine?.game.turn && this.engine.game.turn?.player !== this.for_player) {
             this.callback({ score: AIEvaluator.evaluate(this.engine!, this.for_player), history: this.history });
             this.callback = null;
             return;
         }
 
         if (this.depth < MAX_DEPTH) {
-            const state = this.engine!.state;
-            const hash = this.engine!.getStateHash();
+            const state = this.engine!.game;
+            const hash = this.engine!.game.hash();
             this.interrupt_id = interrupt.id!;
             const allChoices = AIPruner.prune(this.engine!, interrupt);
             const validChoices = allChoices.filter(c => c.valid && !this.history.some(h => h.hash === hash && h.choice === c.i));
@@ -116,7 +116,7 @@ export class Client_AIWorker extends Client_AI {
         }
     }
 
-    public override notify_gameOver(winner: PlayerState): void {
+    public override notify_gameOver(winner: Player): void {
         if (winner.id === this.player_id && this.callback) {
             this.callback({ score: AIEvaluator.evaluate(this.engine!, this.for_player), history: this.history });
         }

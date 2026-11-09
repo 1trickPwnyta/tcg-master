@@ -1,14 +1,14 @@
 import { PokemonCardDef } from "../defs/PokemonCardDef.js";
-import { DefDatabase } from "../defs/DefDatabase.js";
 import { GameEngine } from "../game/engine/GameEngine.js";
 import { Choice, InterruptSync } from "../game/state/interrupts/Interrupt.js";
 import { InterruptResolution } from "../game/state/interrupts/InterruptResolution.js";
 import { InterruptType } from "../game/state/interrupts/InterruptType.js";
+import { PokemonCard } from "../game/state/PokemonCard.js";
 import { AIChoice } from "./Client_AI.js";
 
 export class AIPruner {
     public static prune(engine: GameEngine, interrupt: InterruptSync): AIChoice[] {
-        const player = engine.players.get(interrupt.player);
+        const player = engine.game.getPlayer(interrupt.player);
         let rawChoices: AIChoice[] = [ ...interrupt.choices ].map((c, i) => ({
             i: i,
             target: c.target_id as number,
@@ -34,10 +34,9 @@ export class AIPruner {
             if (interrupt.resolution !== undefined) {
                 switch (interrupt.resolution) {
                     case InterruptResolution.AttachEnergy:
-                        const target = engine.search.getCard(choice.target as number)!;
-                        const def = DefDatabase.get<PokemonCardDef>(target.def);
-                        const energy = engine.pokemon.getEnergy(choice.target as number).map(e => e.def);
-                        const unsatisfiedAttacks = def.attacks.filter(a => !a.costSatisfied(energy));
+                        const target = engine.search.getCard(choice.target as number) as PokemonCard;
+                        const def = target.def as PokemonCardDef;
+                        const unsatisfiedAttacks = def.attacks.filter(a => !a.costSatisfied(target.energy));
                         if (!unsatisfiedAttacks.length) {
                             choice.valid = false;
                         }
@@ -59,7 +58,7 @@ export class AIPruner {
             if (interrupt.type !== undefined) {
                 switch (interrupt.type) {
                     case InterruptType.Bench:
-                        if (player.bench.cards.length === 0) {
+                        if (player.bench.count === 0) {
                             valid = false;
                         }
                         break;
@@ -91,8 +90,8 @@ export class AIPruner {
         const dbids: { dbid: string, target: number }[] = [];
         for (const choice of choices) {
             const card = engine.search.getCard(choice.target as number)!;
-            if (!dbids.some(i => i.dbid === card.def)) {
-                dbids.push({ dbid: card.def, target: card.id });
+            if (!dbids.some(i => i.dbid === card.def.name)) {
+                dbids.push({ dbid: card.def.name, target: card.id });
             }
         }
         return dbids.map(i => choices.find(c => c.target === i.target)!);

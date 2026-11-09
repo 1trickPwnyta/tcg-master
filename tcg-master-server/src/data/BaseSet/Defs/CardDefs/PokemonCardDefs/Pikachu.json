@@ -1,0 +1,23 @@
+{
+    "name": "BaseSet.Pikachu",
+    "label": "Pikachu",
+    "type": "Lightning",
+    "stage": "basic",
+    "hp": 40,
+    "weakness": "Fighting",
+    "retreat": 1,
+    "attacks": [
+        {
+            "name": "Gnaw",
+            "cost": [ "Colorless" ],
+            "damage": 10
+        },
+        {
+            "name": "Thunder Jolt",
+            "cost": [ "Lightning", "Colorless" ],
+            "damage": 30,
+            "workers": [ { "class": "AttackWorker_SelfDamage", "args": { "amount": 10, "trigger": "coin" } }],
+            "text": "Flip a coin. If tails, Pikachu does 10 damage to itself."
+        }
+    ]
+}

@@ -17,10 +17,10 @@ export class AttackWorker_SacrificeEnergy extends AttackWorker {
         if (energy_id.length < this.sacrifice.length) {
             return {
                 type: InterruptType.Discard,
-                player: context.engine.players.active.id,
+                player: context.engine.game.activePlayer.id,
                 prompt: `Discard which Energy card from ${context.attacker.name}?`,
-                choices: context.engine.pokemon.getEnergy(context.attacker.id).filter(e => e.def.type == this.sacrifice[energy_id.length]).map(e => ({
-                    text: e.card.name, target_id: e.card.id
+                choices: context.attacker.energy.filter(e => e.def.type == this.sacrifice[energy_id.length]).map(e => ({
+                    text: e.name, target_id: e.id
                 })),
                 resolution: InterruptResolution.AttackTargets,
                 args: [ context.attack.name, ...energy_id ]
@@ -32,7 +32,8 @@ export class AttackWorker_SacrificeEnergy extends AttackWorker {
 
     public override postEffect(context: AttackContext, knockedOut: boolean, ...energy_id: number[]) {
         for (const energy of energy_id) {
-            context.engine.cards.move(energy, context.attacker.attachments.id, context.engine.players.get(context.attacker.owner_id)!.discard.id);
+            const card = context.engine.search.getCard(energy)!;
+            context.engine.game.activePlayer.discard.add(card);
         }
     }
 };

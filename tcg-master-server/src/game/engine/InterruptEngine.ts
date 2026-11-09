@@ -93,9 +93,9 @@ export class InterruptEngine extends SubEngine {
             if (resolved) {
                 this.close(interrupt.id!);
             }
-            this.engine.players.get(player_id).menus++;
+            this.engine.game.getPlayer(player_id).menus++;
             this.engine.getClient(player_id).wait();
-            this.engine.update();
+            this.engine.game.update();
         } else {
             throw new Error(`No interrupt found for player ${player_id}.`)
         }

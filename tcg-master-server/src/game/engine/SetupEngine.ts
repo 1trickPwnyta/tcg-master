@@ -1,40 +1,36 @@
 import { InterruptResolution } from "../state/interrupts/InterruptResolution.js";
-import { CardState } from "../state/CardState.js";
 import { Interrupt } from "../state/interrupts/Interrupt.js";
-import { PlayerState } from "../state/PlayerState.js";
+import { Player } from "../state/Player.js";
 import { SubEngine } from "./SubEngine.js";
 import { InterruptType } from "../state/interrupts/InterruptType.js";
 import { DefDatabase } from "../../defs/DefDatabase.js";
 import { PokemonCardDef } from "../../defs/PokemonCardDef.js";
 import { EnergyCardDef } from "../../defs/EnergyCardDef.js";
-import { CardDef } from "../../defs/CardDef.js";
 import { TrainerCardDef } from "../../defs/TrainerCardDef.js";
+import { CardFactory } from "../CardFactory.js";
 
 export class SetupEngine extends SubEngine {
-    private nextCardId: number = 100;
-
     public update() {
-        if (this.state.players.find(p => p.deck.cards.length === 0)) {
+        if (this.state.players.find(p => p.deck.count === 0)) {
             this.engine.send("Starting game between", this.state.players[0], "and", this.state.players[1], ".");
             for (const player of this.state.players) {
                 const deck = [
-                    //{ card: CardDatabase.find("BaseSet.Ponyta"), count: 8 },
-                    { card: DefDatabase.get<PokemonCardDef>("BaseSet.Koffing"), count: 24 },
-                    { card: DefDatabase.get<EnergyCardDef>("BaseSet.PsychicEnergy"), count: 0 },
-                    { card: DefDatabase.get<TrainerCardDef>("BaseSet.Switch"), count: 10 },
-                    { card: DefDatabase.get<EnergyCardDef>("BaseSet.GrassEnergy"), count: 26 },
-                    //{ card: DefDatabase.get<PokemonCardDef>("BaseSet.Gastly"), count: 12 }
+                    { def: DefDatabase.get<PokemonCardDef>("BaseSet.Tangela"), count: 14 },
+                    { def: DefDatabase.get<EnergyCardDef>("BaseSet.GrassEnergy"), count: 26 },
+                    { def: DefDatabase.get<TrainerCardDef>("BaseSet.Switch"), count: 10 },
+                    { def: DefDatabase.get<EnergyCardDef>("BaseSet.LightningEnergy"), count: 0 },
+                    { def: DefDatabase.get<PokemonCardDef>("BaseSet.Starmie"), count: 10 }
                 ];
                 for (const blueprint of deck) {
                     for (let i = 0; i < blueprint.count; i++) {
-                        const card = this.makeCard(blueprint.card!, player);
-                        player.deck.cards.push(card);
+                        const card = CardFactory.make(this.engine, blueprint.def, player);
+                        player.deck.add(card);
                     }
                 }
-                this.engine.cards.shuffleDeck(player.id);
+                player.deck.shuffle();
                 player.mulligans = this.setupDraw(player);
             }
-            this.engine.update();
+            this.engine.game.update();
         } else if (this.state.players.find(p => p.mulligans && !this.state.players.find(o => o.id !== p.id)!.mulliganBonusUsed)) {
             this.engine.interrupts.interrupt({
                 interrupts: this.state.players.map((p): Interrupt | undefined => {
@@ -53,27 +49,27 @@ export class SetupEngine extends SubEngine {
                     }
                 }).filter(i => i !== undefined)
             });
-        } else if (this.state.players.find(p => !p.active.cards.length)) {
+        } else if (this.state.players.find(p => !p.activePokemon)) {
             this.engine.interrupts.interrupt({
                 interrupts: this.state.players.map(p => ({
                     type: InterruptType.SelectActive,
                     player: p.id,
                     prompt: "Select a basic Pokémon as your active Pokémon.",
-                    choices: this.engine.cards.basicPokemonInHand(p.id).map(c => ({ text: c.name, target_id: c.id })),
+                    choices: p.hand.basicPokemon.map(c => ({ text: c.name, target_id: c.id })),
                     resolution: InterruptResolution.MoveCard,
                     args: [ p.hand.id, p.active.id ],
                     force: true
                 }))
             });
         } else {
-            const playersNotReady = this.state.players.filter(p => !p.setupComplete && this.engine.cards.basicPokemonInHand(p.id).length && p.bench.cards.length < 5);
+            const playersNotReady = this.state.players.filter(p => !p.setupComplete && p.hand.basicPokemon.length && !p.bench.full);
             if (playersNotReady.length) {
                 this.engine.interrupts.interrupt({
                     interrupts: playersNotReady.map(p => ({
                         type: InterruptType.Bench,
                         player: p.id,
                         prompt: "Choose other basic Pokémon to put on the bench.",
-                        choices: this.engine.cards.basicPokemonInHand(p.id).map(c => ({ text: c.name, target_id: c.id })),
+                        choices: p.hand.basicPokemon.map(c => ({ text: c.name, target_id: c.id })),
                         resolution: InterruptResolution.MoveCard,
                         cancelResolution: InterruptResolution.SkipBench,
                         args: [ p.hand.id, p.bench.id ]
@@ -85,7 +81,7 @@ export class SetupEngine extends SubEngine {
                         player.prizes.cards.push(player.deck.cards.pop()!);
                     }
                 }
-                const firstPlayer = this.engine.flipCoin() ? this.state.players[0] : this.state.players[1];
+                const firstPlayer = this.engine.game.flipCoin() ? this.state.players[0] : this.state.players[1];
                 this.engine.send(firstPlayer, "will go first.");
                 this.engine.send();
                 this.engine.turns.begin(firstPlayer.id);
@@ -93,29 +89,14 @@ export class SetupEngine extends SubEngine {
         }
     }
 
-    private setupDraw(player: PlayerState, mulligans: number = 0): number {
-        this.engine.cards.draw(player.id, 7);
-        if (this.engine.cards.basicPokemonInHand(player.id).length) {
+    private setupDraw(player: Player, mulligans: number = 0): number {
+        player.draw(7);
+        if (player.hand.basicPokemon.length) {
             return mulligans;
         } else {
             this.engine.send(player, "has no basic Pokémon in", player.pronouns.possessive, "hand.", player.pronouns.subjective.capitalizeFirst(), "must take a mulligan.");
-            this.engine.cards.shuffleHandIntoDeck(player.id);
+            player.hand.shuffleIntoDeck();
             return this.setupDraw(player, mulligans + 1);
         }
-    }
-
-    private makeCard(def: CardDef, owner: PlayerState): CardState {
-        return {
-            id: this.nextCardId++,
-            def: def.name,
-            kind: def.kind,
-            token: def.token,
-            name: def.label ?? def.name,
-            owner_id: owner.id,
-            damage: 0,
-            orientation: "normal",
-            attachments: { id: this.nextCardId++, cards: [] },
-            status: []
-        };
     }
 };

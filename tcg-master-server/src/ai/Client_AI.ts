@@ -60,7 +60,7 @@ export class Client_AI extends Client {
         const worker = new Worker(path.join(import.meta.dirname, "AIWorker.js"));
         worker.on("message", (scores: ScoredChoice[]) => {
             worker.terminate();
-            const hash = this.engine!.getStateHash();
+            const hash = this.engine!.game.hash();
             const scoresUnused = scores.filter(s => s.score !== null && !(this.movesUsed.get(hash) ?? []).includes(s.choice.i)).sort((a, b) => b.score! - a.score!);
             const choice = scoresUnused[0]?.choice ?? scores[0].choice;
             if (!this.movesUsed.has(hash)) {
@@ -82,7 +82,7 @@ export class Client_AI extends Client {
             interrupt: interrupt,
             interrupt_id: this.interrupt_id,
             player_id: this.player_id!,
-            state: JSON.stringify(this.engine!.state, SerializationReplace)
+            state: JSON.stringify(this.engine!.game, SerializationReplace)
         });
     }
 

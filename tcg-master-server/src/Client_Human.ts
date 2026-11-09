@@ -2,7 +2,7 @@ import { Socket } from "socket.io";
 import { Client } from "./Client.js";
 import { CommandContext } from "./commands/CommandContext.js";
 import { Command, CommandNotFoundError } from "./commands/Command.js";
-import { PlayerState } from "./game/state/PlayerState.js";
+import { Player } from "./game/state/Player.js";
 import { InterruptSync } from "./game/state/interrupts/Interrupt.js";
 
 export class Client_Human extends Client {
@@ -61,7 +61,7 @@ export class Client_Human extends Client {
         this.socket.emit("WAIT");
     }
 
-    public override notify_gameOver(_winner: PlayerState): void {
+    public override notify_gameOver(_winner: Player): void {
         this.socket.emit("END");
     }
 };

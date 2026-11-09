@@ -5,7 +5,7 @@ import { InterruptContext, InterruptWorker } from "./InterruptWorker.js";
 @ResolvesInterrupt(InterruptResolution.SkipBench)
 export class InterruptWorker_SkipBench extends InterruptWorker {
     public override execute(context: InterruptContext, player_id: number): boolean {
-        context.engine.state.players.find(p => p.id === player_id)!.setupComplete = true;
+        context.engine.game.players.find(p => p.id === player_id)!.setupComplete = true;
         return true;
     }
 };

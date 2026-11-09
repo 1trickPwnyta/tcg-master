@@ -1,0 +1,25 @@
+{
+    "name": "BaseSet.Tangela",
+    "label": "Tangela",
+    "type": "Grass",
+    "stage": "basic",
+    "hp": 50,
+    "weakness": "Fire",
+    "retreat": 2,
+    "attacks": [
+        {
+            "name": "Bind",
+            "cost": [ "Grass", "Colorless" ],
+            "damage": 20,
+            "workers": [ "AttackWorker_Paralyze" ],
+            "text": "Flip a coin. If heads, the Defending Pokémon is now Paralyzed."
+        },
+        {
+            "name": "Poisonpowder",
+            "cost": [ "Grass", "Grass", "Grass" ],
+            "damage": 20,
+            "workers": [ { "class": "AttackWorker_Poison", "args": { "trigger": "always" } } ],
+            "text": "The Defending Pokémon is now Poisoned."
+        }
+    ]
+}

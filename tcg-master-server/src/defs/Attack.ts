@@ -3,11 +3,9 @@ import { AttackContext, AttackWorker } from "../game/attacks/AttackWorker.js";
 import { IAttackData } from "./IDefData.js";
 import { pathToFileURL } from "url";
 import { Interrupt } from "../game/state/interrupts/Interrupt.js";
-import { PokemonCardDef } from "./PokemonCardDef.js";
 import { DefDatabase } from "./DefDatabase.js";
 import { EnergyTypeDef } from "./EnergyTypeDef.js";
-import { EnergyCardDef } from "./EnergyCardDef.js";
-import { StatusDef } from "./StatusDef.js";
+import { EnergyCard } from "../game/state/EnergyCard.js";
 
 const __dirname = import.meta.dirname;
 
@@ -57,6 +55,9 @@ export class Attack {
     private preEffects(context: AttackContext, damage: number): number {
         for (const worker of this.workers) {
             damage = worker.preEffect(context, damage);
+            if (damage < 0) {
+                return damage;
+            }
         }
 
         return damage;
@@ -77,11 +78,10 @@ export class Attack {
 
         let failToStatus = false;
         for (const status of context.attacker.status) {
-            const def = DefDatabase.get<StatusDef>(status);
-            if (!def.worker.try_attack({
+            if (!status.def.worker.try_attack({
                 engine: context.engine,
-                owner_id: context.engine.players.active.id,
-                card_id: context.attacker.id
+                owner: context.engine.game.activePlayer,
+                card: context.attacker
             }, context)) {
                 failToStatus = true;
                 break;
@@ -89,7 +89,7 @@ export class Attack {
         }
 
         if (!failToStatus) {
-            context.engine.send(context.engine.players.active, "'s", context.attacker, "used", this.name, "!");
+            context.engine.send(context.engine.game.activePlayer, "'s", context.attacker, "used", this.name, "!");
             let damage = this.damage;
 
             // Have a status worker
@@ -102,28 +102,38 @@ export class Attack {
                 }
             }
 
-            damage = this.preEffects(context, damage);
-
-            const def = DefDatabase.get<PokemonCardDef>(context.attacker.def);
-            const knockedOut = context.engine.pokemon.damage({
-                owner_id: context.engine.players.inactive.id,
-                card_id: context.defender.id,
-                amount: damage,
-                attacker_id: context.attacker.id,
-                type: def.type
-            });
-            
-            this.postEffects(context, knockedOut, ...targets);
+            for (const status of context.attacker.status) {
+                damage = status.def.worker.modify_damage_dealt({
+                    engine: context.engine,
+                    owner: context.attacker.owner,
+                    card: context.attacker
+                }, damage, status.args);
+                if (damage < 0) {
+                    break;
+                }
+            }
+            if (damage >= 0) {
+                damage = this.preEffects(context, damage);
+                if (damage >= 0) {
+                    const knockedOut = context.defender.dealDamage({
+                        amount: damage,
+                        attacker: context.attacker,
+                        type: context.attacker.def.type
+                    });
+                    
+                    this.postEffects(context, knockedOut, ...targets);
+                }
+            }
         }
 
-        context.engine.state.turn!.attacked = true;
+        context.engine.game.turn!.attacked = true;
 
         return true;
     }
 
-    private analyzeCost(energy: EnergyCardDef[]): { unsatisfied: EnergyTypeDef[], oversatisfied: EnergyTypeDef[] } {
+    private analyzeCost(energy: EnergyCard[]): { unsatisfied: EnergyTypeDef[], oversatisfied: EnergyTypeDef[] } {
         const reqs = [ ...this.cost ].sort((a, b) => b.resolutionPriority - a.resolutionPriority);
-        const pool = energy.flatMap(e => Array.from({ length: e.amount }, () => e.type)).sort((a, b) => a.resolutionPriority - b.resolutionPriority);
+        const pool = energy.flatMap(e => Array.from({ length: e.def.amount }, () => e.def.type)).sort((a, b) => a.resolutionPriority - b.resolutionPriority);
         const unsatisfied = [];
         for (let i = 0; i < reqs.length; i++) {
             let satisfied = false;
@@ -142,15 +152,15 @@ export class Attack {
         return { unsatisfied: unsatisfied, oversatisfied: pool };
     }
 
-    public costUnsatisfied(energy: EnergyCardDef[]): EnergyTypeDef[] {
+    public costUnsatisfied(energy: EnergyCard[]): EnergyTypeDef[] {
         return this.analyzeCost(energy).unsatisfied;
     }
 
-    public costSatisfied(energy: EnergyCardDef[]): boolean {
+    public costSatisfied(energy: EnergyCard[]): boolean {
         return this.analyzeCost(energy).unsatisfied.length === 0;
     }
 
-    public costOversatisfied(energy: EnergyCardDef[]): EnergyTypeDef[] {
+    public costOversatisfied(energy: EnergyCard[]): EnergyTypeDef[] {
         return this.analyzeCost(energy).oversatisfied;
     }
 

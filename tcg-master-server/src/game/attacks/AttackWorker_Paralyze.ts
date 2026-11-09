@@ -9,8 +9,8 @@ export class AttackWorker_Paralyze extends AttackWorker {
     }
 
     public override postEffect(context: AttackContext, knockedOut: boolean): void {
-        if (!knockedOut && (this.trigger === "always" || context.engine.flipCoin(context.engine.players.active.id))) {
-            context.engine.pokemon.paralyze(context.engine.players.inactive.id, context.defender.id);
+        if (!knockedOut && (this.trigger === "always" || context.engine.game.flipCoin(context.engine.game.activePlayer))) {
+            context.defender.paralyze();
         }
     }
 };

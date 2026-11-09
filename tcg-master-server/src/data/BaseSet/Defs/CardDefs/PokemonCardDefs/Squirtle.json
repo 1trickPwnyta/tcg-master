@@ -1,0 +1,32 @@
+{
+    "name": "BaseSet.Squirtle",
+    "label": "Squirtle",
+    "type": "Water",
+    "stage": "basic",
+    "hp": 40,
+    "weakness": "Lightning",
+    "retreat": 1,
+    "attacks": [
+        {
+            "name": "Bubble",
+            "cost": [ "Water" ],
+            "damage": 10,
+            "workers": [ "AttackWorker_Paralyze" ],
+            "text": "Flip a coin. If heads, the Defending Pokémon is now Paralyzed."
+        },
+        {
+            "name": "Withdraw",
+            "cost": [ "Water", "Colorless" ],
+            "workers": [
+                {
+                    "class": "AttackWorker_PreventDamage",
+                    "args": {
+                        "trigger": "coin",
+                        "amount": "all"
+                    }
+                }
+            ],
+            "text": "Flip a coin. If heads, prevent all damage done to Squirtle during your opponent's next turn. <em>(Any other effects of attacks still happen.)</em>"
+        }
+    ]
+}

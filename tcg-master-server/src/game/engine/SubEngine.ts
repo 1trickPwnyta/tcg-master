@@ -1,4 +1,4 @@
-import { GameState } from "../state/GameState.js";
+import { Game } from "../state/Game.js";
 import { GameEngine } from "./GameEngine.js";
 
 export abstract class SubEngine {
@@ -8,7 +8,7 @@ export abstract class SubEngine {
         this.engine = game;
     }
 
-    protected get state(): GameState {
-        return this.engine.state;
+    protected get state(): Game {
+        return this.engine.game;
     }
 };

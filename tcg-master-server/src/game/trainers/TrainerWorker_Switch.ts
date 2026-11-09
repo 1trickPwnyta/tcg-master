@@ -5,30 +5,27 @@ import { InterruptType } from "../state/interrupts/InterruptType.js";
 import { TrainerWorker } from "./TrainerWorker.js";
 
 export class TrainerWorker_Switch extends TrainerWorker {
-    public override validateTargets(context: PlayContext, target: number): Interrupt | "fail" | null {
-        if (!context.player.bench.cards.length) {
+    public override selectTargets(context: PlayContext): Interrupt | "fail" | null {
+        if (!context.player.bench.count) {
             context.engine.sendError(context.player, "There are no Pokémon on your bench to switch with.");
             return "fail";
         }
 
-        if (!target) {
-            return {
-                type: InterruptType.Switch,
-                player: context.player.id,
-                prompt: `Switch ${context.player.active.cards[0].name} with which benched Pokémon?`,
-                choices: context.player.bench.cards.map(c => ({ text: c.name, target_id: c.id })),
-                resolution: InterruptResolution.UseTrainer,
-                cancelResolution: InterruptResolution.CancelTrainer,
-                args: [ context.card.id ]
-            };
-        }
-
-        return null;
+        return {
+            type: InterruptType.Switch,
+            player: context.player.id,
+            prompt: `Switch ${context.player.activePokemon!.name} with which benched Pokémon?`,
+            choices: context.player.bench.cards.map(c => ({ text: c.name, target_id: c.id })),
+            resolution: InterruptResolution.UseTrainer,
+            cancelResolution: InterruptResolution.CancelTrainer,
+            args: [ context.card.id ]
+        };
     }
 
     public override execute(context: PlayContext, target: number): void {
-        context.engine.send(context.player, "switched", context.player.active.cards[0], "with", context.engine.search.getCard(target), ".");
-        context.engine.cards.move(context.player.active.cards[0].id, context.player.active.id, context.player.bench.id);
-        context.engine.cards.move(target, context.player.bench.id, context.player.active.id);
+        const card = context.engine.search.getCard(target)!;
+        context.engine.send(context.player, "switched", context.player.activePokemon, "with", context.engine.search.getCard(target), ".");
+        context.player.bench.add(context.player.activePokemon!);
+        context.player.active.add(card);
     }
 };

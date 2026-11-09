@@ -5,12 +5,13 @@ import { InterruptContext, InterruptWorker } from "./InterruptWorker.js";
 @ResolvesInterrupt(InterruptResolution.Promote)
 export class InterruptWorker_Promote extends InterruptWorker {
     public override execute(context: InterruptContext, card_id: number, player_id: number): boolean {
-        const player = context.engine.players.get(player_id);
-        if (player.active.cards.length) {
-            context.engine.cards.move(player.active.cards[0].id, player.active.id, player.bench.id);
+        const player = context.engine.game.getPlayer(player_id);
+        const card = context.engine.search.getCard(card_id)!;
+        if (player.activePokemon) {
+            player.bench.add(player.activePokemon);
         }
-        context.engine.cards.move(card_id, player.bench.id, player.active.id);
-        context.engine.send(player, "sent out", player.active.cards[0], "!");
+        player.active.add(card);
+        context.engine.send(player, "sent out", player.activePokemon, "!");
         return true;
     }
 };

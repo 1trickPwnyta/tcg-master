@@ -1,0 +1,30 @@
+{
+    "name": "BaseSet.Onix",
+    "label": "Onix",
+    "type": "Fighting",
+    "stage": "basic",
+    "hp": 90,
+    "weakness": "Grass",
+    "retreat": 3,
+    "attacks": [
+        {
+            "name": "Rock Throw",
+            "cost": [ "Fighting" ],
+            "damage": 10
+        },
+        {
+            "name": "Harden",
+            "cost": [ "Fighting", "Fighting" ],
+            "workers": [
+                {
+                    "class": "AttackWorker_PreventDamage",
+                    "args": {
+                        "buffer": 30,
+                        "trigger": "always"
+                    }
+                }
+            ],
+            "text": "During your opponent's next turn, whenever 30 or less damage is done to Onix <em>(after applying Weakness and Resistance)</em>, prevent that damage. <em>(Any other effects of attacks still happen.)</em>"
+        }
+    ]
+}

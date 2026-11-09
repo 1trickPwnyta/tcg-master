@@ -1,0 +1,27 @@
+{
+    "name": "BaseSet.Starmie",
+    "label": "Starmie",
+    "type": "Water",
+    "stage": "stage1",
+    "hp": 60,
+    "weakness": "Lightning",
+    "retreat": 1,
+    "attacks": [
+        {
+            "name": "Recover",
+            "cost": [ "Water", "Water" ],
+            "workers": [
+                { "class": "AttackWorker_SacrificeEnergy", "args": { "sacrifice": [ "Water" ] } },
+                { "class": "AttackWorker_Heal", "args": { "amount": "all" } }
+            ],
+            "text": "Discard 1 {Water} Energy card attached to Starmie in order to use this attack. Remove all damage counters from Starmie."
+        },
+        {
+            "name": "Star Freeze",
+            "cost": [ "Water", "Colorless", "Colorless" ],
+            "damage": 20,
+            "workers": [ "AttackWorker_Paralyze" ],
+            "text": "Flip a coin. If heads, the Defending Pokémon is now Paralyzed."
+        }
+    ]
+}

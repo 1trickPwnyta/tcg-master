@@ -1,5 +1,3 @@
-import { CardDef } from "../../../../defs/CardDef.js";
-import { DefDatabase } from "../../../../defs/DefDatabase.js";
 import { InterruptResolution } from "../InterruptResolution.js";
 import { ResolvesInterrupt } from "../InterruptResolver.js";
 import { InterruptContext, InterruptWorker } from "./InterruptWorker.js";
@@ -9,10 +7,9 @@ export class InterruptWorker_PlayCard extends InterruptWorker {
     public override execute(context: InterruptContext, card_id: number | null): boolean {
         if (card_id) {
             const card = context.engine.search.getCard(card_id)!;
-            const def = DefDatabase.get<CardDef>(card.def);
-            return def.play({ engine: context.engine, player: context.engine.players.active, card: card });
+            return card.play();
         } else {
-            const player = context.engine.players.active;
+            const player = context.engine.game.activePlayer;
             context.engine.interrupts.interrupt({
                 player: player.id,
                 prompt: "Select a card to play from your hand.",

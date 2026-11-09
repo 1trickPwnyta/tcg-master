@@ -33,8 +33,8 @@ parentPort?.on("message", async (context: AIContext) => {
         const engine = new GameEngine(clients[0], clients[1]);
         engine.start(state.clone(engine));
         engine.interrupts.resolve(context.player_id, choice.i);
-        if (engine.state.winner_id) {
-            clientCallback({ score: engine.state.winner_id === context.player_id ? Number.MAX_VALUE : Number.MIN_VALUE, history: [] });
+        if (engine.game.winner_id) {
+            clientCallback({ score: engine.game.winner_id === context.player_id ? Number.MAX_VALUE : Number.MIN_VALUE, history: [] });
         }
     }
 });

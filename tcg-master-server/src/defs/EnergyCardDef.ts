@@ -1,8 +1,6 @@
 import { ICardDefData_Energy, IDefData } from "./IDefData.js";
 import { CardDef } from "./CardDef.js";
 import { IToken } from "../IToken.js";
-import { PlayContext } from "../game/cards/workers/CardWorker.js";
-import { InterruptResolution } from "../game/state/interrupts/InterruptResolution.js";
 import { EnergyTypeDef } from "./EnergyTypeDef.js";
 import { DefDatabase } from "./DefDatabase.js";
 
@@ -33,26 +31,6 @@ export class EnergyCardDef extends CardDef {
     }
 
     public override async init() { }
-
-    public override play(context: PlayContext): boolean {
-        if (context.engine.state.turn?.energyPlayed) {
-            context.engine.sendError(context.engine.players.active, "You already played an Energy card this turn.");
-            return false;
-        }
-        
-        context.engine.interrupts.interrupt({
-            player: context.engine.players.active.id,
-            prompt: `Attach ${context.card.name} to which Pokémon?`,
-            choices: [ context.engine.players.active.active.cards[0], ...context.engine.players.active.bench.cards ].map(c => ({
-                text: c.name + (c == context.engine.players.active.active.cards[0] ? " (active)" : ""),
-                target_id: c.id
-            })),
-            resolution: InterruptResolution.AttachEnergy,
-            args: [ context.card.id ]
-        });
-        
-        return true;
-    }
 
     public override getDetails(): any[] {
         return [

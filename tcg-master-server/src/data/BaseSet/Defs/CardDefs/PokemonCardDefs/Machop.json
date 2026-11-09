@@ -1,0 +1,16 @@
+{
+    "name": "BaseSet.Machop",
+    "label": "Machop",
+    "type": "Fighting",
+    "stage": "basic",
+    "hp": 50,
+    "weakness": "Psychic",
+    "retreat": 1,
+    "attacks": [
+        {
+            "name": "Low Kick",
+            "cost": [ "Fighting" ],
+            "damage": 20
+        }
+    ]
+}

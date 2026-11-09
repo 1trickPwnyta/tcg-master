@@ -2,9 +2,6 @@ import { InterruptResolution } from "../state/interrupts/InterruptResolution.js"
 import { Interrupt } from "../state/interrupts/Interrupt.js";
 import { Turn } from "../state/Turn.js";
 import { SubEngine } from "./SubEngine.js";
-import { CardStatus } from "../state/CardState.js";
-import { DefDatabase } from "../../defs/DefDatabase.js";
-import { StatusDef } from "../../defs/StatusDef.js";
 
 export class TurnEngine extends SubEngine {
     private get turn(): Turn {
@@ -12,24 +9,25 @@ export class TurnEngine extends SubEngine {
     }
 
     public begin(player_id: number) {
+        const player = this.engine.game.getPlayer(player_id);
         this.state.turn = {
             number: (this.state.turn?.number ?? 0) + 1,
-            player: player_id,
+            player: player.id,
             energyPlayed: false,
             attacked: false
         };
         this.state.betweenTurns = false;
         this.engine.send();
-        this.engine.send("Beginning of", this.engine.players.active, "'s turn.");
-        this.engine.cards.draw(player_id);
-        this.engine.update();
+        this.engine.send("Beginning of", this.engine.game.activePlayer, "'s turn.");
+        player.draw();
+        this.engine.game.update();
     }
 
     public end() {
-        this.engine.send("End of", this.engine.players.active, "'s turn.");
+        this.engine.send("End of", this.engine.game.activePlayer, "'s turn.");
         this.engine.send();
         for (const player of this.state.players) {
-            const active = player.active.cards[0];
+            const active = player.activePokemon!;
             if (this.state.turn?.player === player.id) {
                 active.accuracyChecks = undefined;
             } else {
@@ -38,11 +36,10 @@ export class TurnEngine extends SubEngine {
             }
 
             for (const status of active.status) {
-                const def = DefDatabase.get<StatusDef>(status);
-                def.worker.notify_endOfTurn({
+                status.def.worker.notify_endOfTurn({
                     engine: this.engine,
-                    owner_id: player.id,
-                    card_id: active.id
+                    owner: player,
+                    card: active
                 }, this.state.turn!.player);
             }
         }
@@ -53,7 +50,7 @@ export class TurnEngine extends SubEngine {
     }
 
     public update() {
-        const playerWithNoPokemon = this.state.players.find(p => !p.active.cards.length && !p.bench.cards.length);
+        const playerWithNoPokemon = this.state.players.find(p => !p.activePokemon && !p.bench.count);
         if (playerWithNoPokemon) {
             this.engine.end(this.state.players.find(p => p.id !== playerWithNoPokemon.id)!.id);
             return;
@@ -91,12 +88,12 @@ export class TurnEngine extends SubEngine {
             });
         } else {
             this.end();
-            this.engine.update();
+            this.engine.game.update();
         }
     }
 
     public checkActivePokemon(): Interrupt | null {
-        const playersWithNoActive = this.state.players.filter(p => !p.active.cards.length && p.bench.cards.length);
+        const playersWithNoActive = this.state.players.filter(p => !p.activePokemon && p.bench.count);
         if (playersWithNoActive.length) {
             return {
                 interrupts: playersWithNoActive.map(p => ({

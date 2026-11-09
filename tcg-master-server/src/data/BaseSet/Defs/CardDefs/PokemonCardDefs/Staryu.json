@@ -1,0 +1,16 @@
+{
+    "name": "BaseSet.Staryu",
+    "label": "Staryu",
+    "type": "Water",
+    "stage": "basic",
+    "hp": 40,
+    "weakness": "Lightning",
+    "retreat": 1,
+    "attacks": [
+        {
+            "name": "Slap",
+            "cost": [ "Water" ],
+            "damage": 20
+        }
+    ]
+}

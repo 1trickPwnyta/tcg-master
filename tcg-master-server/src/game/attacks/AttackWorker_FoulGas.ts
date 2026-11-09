@@ -3,10 +3,10 @@ import { AttackContext, AttackWorker } from "./AttackWorker.js";
 export class AttackWorker_FoulGas extends AttackWorker {
     public override postEffect(context: AttackContext, knockedOut: boolean) {
         if(!knockedOut) {
-            if (context.engine.flipCoin(context.engine.players.active.id)) {
-                context.engine.pokemon.poison(context.engine.players.inactive.id, context.defender.id);
+            if (context.engine.game.flipCoin(context.engine.game.activePlayer)) {
+                context.defender.poison();
             } else {
-                context.engine.pokemon.confuse(context.engine.players.inactive.id, context.defender.id);
+                context.defender.confuse();
             }
         }
     }

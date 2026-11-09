@@ -1,12 +1,13 @@
 import { StatusDef } from "../../defs/StatusDef.js";
 import { AttackContext } from "../attacks/AttackWorker.js";
 import { GameEngine } from "../engine/GameEngine.js";
-import { GameState } from "../state/GameState.js";
+import { Player } from "../state/Player.js";
+import { DamageContext, PokemonCard } from "../state/PokemonCard.js";
 
 export type StatusContext = {
     engine: GameEngine;
-    owner_id: number;
-    card_id: number;
+    owner: Player;
+    card: PokemonCard;
 };
 
 export abstract class StatusWorker {
@@ -16,16 +17,7 @@ export abstract class StatusWorker {
         this.def = def;
     }
 
-    public give(context: StatusContext) {
-        const card = context.engine.search.getCard(context.card_id)!;
-        card.status.push(this.def.name);
-        if (this.def.orientation) {
-            card.orientation = this.def.orientation;
-        }
-        this.notify_given(context);
-    }
-
-    protected notify_given(context: StatusContext) { }
+    public notify_given(context: StatusContext) { }
 
     public try_attack(context: StatusContext, attackContext: AttackContext): boolean {
         return true;
@@ -35,17 +27,19 @@ export abstract class StatusWorker {
         return true;
     }
 
-    public notify_knockedOut(context: StatusContext, attacker_id?: number) { }
+    public modify_damage_dealt(context: StatusContext, amount: number, args: any): number {
+        return amount;
+    }
+
+    public modify_damage_taken(context: StatusContext, amount: number, args: any): number {
+        return amount;
+    }
+
+    public notify_knockedOut(context: StatusContext, attacker?: PokemonCard) { }
 
     public notify_endOfTurn(context: StatusContext, turn_id: number) { }
 
     protected remove(context: StatusContext) {
-        const card = context.engine.search.getCard(context.card_id);
-        if (card) {
-            card.status = card.status.filter(s => s !== this.def.label);
-            if (this.def.orientation) {
-                card.orientation = "normal";
-            }
-        }
+        context.card.removeStatus(this.def);
     }
 };

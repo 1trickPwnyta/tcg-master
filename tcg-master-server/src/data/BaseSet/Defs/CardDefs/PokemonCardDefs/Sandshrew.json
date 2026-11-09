@@ -1,0 +1,19 @@
+{
+    "name": "BaseSet.Sandshrew",
+    "label": "Sandshrew",
+    "type": "Fighting",
+    "stage": "basic",
+    "hp": 40,
+    "weakness": "Grass",
+    "resistance": "Lightning",
+    "retreat": 1,
+    "attacks": [
+        {
+            "name": "Sand-attack",
+            "cost": [ "Fighting" ],
+            "damage": 10,
+            "workers": [ "AttackWorker_Smokescreen" ],
+            "text": "If the Defending Pokémon tries to attack during your opponent's next turn, your opponent flips a coin. If tails, this attack does nothing."
+        }
+    ]
+}

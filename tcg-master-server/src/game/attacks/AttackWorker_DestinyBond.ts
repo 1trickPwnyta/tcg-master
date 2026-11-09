@@ -4,6 +4,6 @@ import { AttackContext, AttackWorker } from "./AttackWorker.js";
 
 export class AttackWorker_DestinyBond extends AttackWorker {
     public override postEffect(context: AttackContext) {
-        context.engine.pokemon.giveStatus(context.engine.players.active.id, context.attacker.id, DefDatabase.get<StatusDef>("DestinyBond"));
+        context.attacker.giveStatus(DefDatabase.get<StatusDef>("DestinyBond"));
     }
 };

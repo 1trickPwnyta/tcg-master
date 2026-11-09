@@ -7,7 +7,7 @@ export class Command_debug extends Command {
 
     public execute(context: CommandContext): any[] | void {
         const subcommand = context.args[0];
-        const state = context.engine.state;
+        const state = context.engine.game;
         const player = state.players.find(p => p.id === context.player_id)!;
         const opponent = state.players.find(p => p.id !== context.player_id)!;
         switch (subcommand) {
