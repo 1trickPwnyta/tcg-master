@@ -8,6 +8,7 @@ import { PokemonCardDef } from "../../defs/PokemonCardDef.js";
 import { EnergyCardDef } from "../../defs/EnergyCardDef.js";
 import { TrainerCardDef } from "../../defs/TrainerCardDef.js";
 import { CardFactory } from "../CardFactory.js";
+import { Choice } from "../state/Choice.js";
 
 export class SetupEngine extends SubEngine {
     public update() {
@@ -15,11 +16,11 @@ export class SetupEngine extends SubEngine {
             this.engine.send("Starting game between", this.state.players[0], "and", this.state.players[1], ".");
             for (const player of this.state.players) {
                 const deck = [
-                    { def: DefDatabase.get<PokemonCardDef>("BaseSet.Tangela"), count: 14 },
-                    { def: DefDatabase.get<EnergyCardDef>("BaseSet.GrassEnergy"), count: 26 },
-                    { def: DefDatabase.get<TrainerCardDef>("BaseSet.Switch"), count: 10 },
+                    { def: DefDatabase.get<PokemonCardDef>("BaseSet.Farfetchd"), count: 14 },
+                    { def: DefDatabase.get<EnergyCardDef>("BaseSet.PsychicEnergy"), count: 26 },
+                    { def: DefDatabase.get<TrainerCardDef>("BaseSet.Potion"), count: 10 },
                     { def: DefDatabase.get<EnergyCardDef>("BaseSet.LightningEnergy"), count: 0 },
-                    { def: DefDatabase.get<PokemonCardDef>("BaseSet.Starmie"), count: 10 }
+                    { def: DefDatabase.get<PokemonCardDef>("BaseSet.Haunter"), count: 10 }
                 ];
                 for (const blueprint of deck) {
                     for (let i = 0; i < blueprint.count; i++) {
@@ -39,7 +40,7 @@ export class SetupEngine extends SubEngine {
                         return {
                             player: p.id,
                             prompt: "Will you draw additional cards?",
-                            choices: Array.from({ length: opponent.mulligans }, (_, i) => ({ text: (i + 1).toString(), target_id: i + 1 })),
+                            choices: Array.from({ length: opponent.mulligans }, (_, i) => new Choice({ text: (i + 1).toString(), id: i + 1 })),
                             resolution: InterruptResolution.UseMulliganBonus,
                             cancelResolution: InterruptResolution.SkipMulliganBonus,
                             args: [ p.id ]
@@ -55,7 +56,7 @@ export class SetupEngine extends SubEngine {
                     type: InterruptType.SelectActive,
                     player: p.id,
                     prompt: "Select a basic Pokémon as your active Pokémon.",
-                    choices: p.hand.basicPokemon.map(c => ({ text: c.name, target_id: c.id })),
+                    choices: p.hand.basicPokemon.map(c => new Choice(c)),
                     resolution: InterruptResolution.MoveCard,
                     args: [ p.hand.id, p.active.id ],
                     force: true
@@ -69,7 +70,7 @@ export class SetupEngine extends SubEngine {
                         type: InterruptType.Bench,
                         player: p.id,
                         prompt: "Choose other basic Pokémon to put on the bench.",
-                        choices: p.hand.basicPokemon.map(c => ({ text: c.name, target_id: c.id })),
+                        choices: p.hand.basicPokemon.map(c => new Choice(c)),
                         resolution: InterruptResolution.MoveCard,
                         cancelResolution: InterruptResolution.SkipBench,
                         args: [ p.hand.id, p.bench.id ]

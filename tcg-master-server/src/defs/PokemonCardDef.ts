@@ -1,6 +1,6 @@
 import { ICardDefData_Pokemon, IDefData } from "./IDefData.js";
 import { CardDef } from "./CardDef.js";
-import { Attack } from "./Attack.js";
+import { Attack } from "../game/attacks/Attack.js";
 import { DefDatabase } from "./DefDatabase.js";
 import { EnergyTypeDef } from "./EnergyTypeDef.js";
 import { EnergyTypeDefOf } from "./defof/EnergyTypeDefOf.js";
@@ -22,8 +22,8 @@ export class PokemonCardDef extends CardDef {
         return DefDatabase.get<EvolutionDef>(this.label);
     }
 
-    public constructor(data: IDefData) {
-        super(data);
+    public constructor(defClass: string, data: IDefData) {
+        super(defClass, data);
         this.cardData = data as IDefData & ICardDefData_Pokemon;
         this.type = DefDatabase.get<EnergyTypeDef>(this.cardData.type);
         this.stage = this.cardData.stage;

@@ -1,0 +1,4 @@
+{
+    "name": "ModifiedResistance",
+    "worker": "StatusWorker_ModifiedResistance"
+}

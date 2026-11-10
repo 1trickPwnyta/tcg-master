@@ -1,0 +1,23 @@
+{
+    "name": "BaseSet.Raticate",
+    "label": "Raticate",
+    "type": "Colorless",
+    "stage": "stage1",
+    "hp": 60,
+    "weakness": "Fighting",
+    "resistance": "Psychic",
+    "retreat": 1,
+    "attacks": [
+        {
+            "name": "Bite",
+            "cost": [ "Colorless" ],
+            "damage": 20
+        },
+        {
+            "name": "Super Fang",
+            "cost": [ "Colorless", "Colorless", "Colorless" ],
+            "workers": [ "AttackWorker_SuperFang" ],
+            "text": "Does damage to the Defending Pokémon equal to half the Defending Pokémon's remaining HP (rounded up to the nearest 10)."
+        }
+    ]
+}

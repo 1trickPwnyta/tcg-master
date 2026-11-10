@@ -1,0 +1,18 @@
+{
+    "name": "BaseSet.Bulbasaur",
+    "label": "Bulbasaur",
+    "type": "Grass",
+    "stage": "basic",
+    "hp": 40,
+    "weakness": "Fire",
+    "retreat": 1,
+    "attacks": [
+        {
+            "name": "Leech Seed",
+            "cost": [ "Grass", "Grass" ],
+            "damage": 20,
+            "workers": [ { "class": "AttackWorker_Absorb", "args": { "amount": 10 } } ],
+            "text": "If this attack damages the Defending Pokémon <em>(after applying Weakness and Resistance)</em>, remove 1 damage counter from Bulbasaur, if it has any."
+        }
+    ]
+}

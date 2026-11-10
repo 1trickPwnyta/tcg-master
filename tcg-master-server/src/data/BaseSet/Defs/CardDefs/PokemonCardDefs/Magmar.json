@@ -1,0 +1,23 @@
+{
+    "name": "BaseSet.Magmar",
+    "label": "Magmar",
+    "type": "Fire",
+    "stage": "basic",
+    "hp": 50,
+    "weakness": "Water",
+    "retreat": 2,
+    "attacks": [
+        {
+            "name": "Fire Punch",
+            "cost": [ "Fire", "Fire" ],
+            "damage": 30
+        },
+        {
+            "name": "Flamethrower",
+            "cost": [ "Fire", "Fire", "Colorless" ],
+            "damage": 50,
+            "workers": [ { "class": "AttackWorker_SacrificeEnergy", "args": { "sacrifice": [ "Fire" ] } } ],
+            "text": "Discard 1 {Fire} Energy card attached to Magmar in order to use this attack."
+        }
+    ]
+}

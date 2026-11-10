@@ -13,8 +13,12 @@ export class EnergyTypeDef extends Def {
         return { name: this.symbol };
     }
 
-    public constructor(data: IDefData) {
-        super(data);
+    public override get targetName(): string {
+        return this.symbol;
+    }
+
+    public constructor(defClass: string, data: IDefData) {
+        super(defClass, data);
         this.cardData = data as IDefData & IDefData_EnergyType;
         this.symbol = this.cardData.symbol;
         this.resolutionPriority = this.cardData.resolutionPriority ?? 0;

@@ -1,0 +1,10 @@
+[
+    {
+        "name": "Nidoran ♂",
+        "next": [ "Nidorino" ]
+    },
+    {
+        "name": "Nidorino",
+        "next": [ "Nidoking" ]
+    }
+]

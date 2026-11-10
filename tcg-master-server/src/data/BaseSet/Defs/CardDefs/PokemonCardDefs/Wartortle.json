@@ -1,0 +1,22 @@
+{
+    "name": "BaseSet.Wartortle",
+    "label": "Wartortle",
+    "type": "Water",
+    "stage": "stage1",
+    "hp": 70,
+    "weakness": "Lightning",
+    "retreat": 1,
+    "attacks": [
+        {
+            "name": "Withdraw",
+            "cost": [ "Water", "Colorless" ],
+            "workers": [ { "class": "AttackWorker_PreventDamage", "args": { "trigger": "coin", "amount": "all" } } ],
+            "text": "Flip a coin. If heads, prevent all damage done to Wartortle during your opponent's next turn. <em>(Any other effects of attacks still happen.)</em>"
+        },
+        {
+            "name": "Bite",
+            "cost": [ "Water", "Colorless", "Colorless" ],
+            "damage": 40
+        }
+    ]
+}

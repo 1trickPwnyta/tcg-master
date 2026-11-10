@@ -1,0 +1,22 @@
+{
+    "name": "BaseSet.Nidorino",
+    "label": "Nidorino",
+    "type": "Grass",
+    "stage": "stage1",
+    "hp": 60,
+    "weakness": "Psychic",
+    "retreat": 1,
+    "attacks": [
+        {
+            "name": "Double Kick",
+            "cost": [ "Grass", "Colorless", "Colorless" ],
+            "workers": [ { "class": "AttackWorker_CoinDamage", "args": { "amount": 30, "coins": 2 } } ],
+            "text": "Flip 2 coins. This attack does 30 damage times the number of heads."
+        },
+        {
+            "name": "Horn Drill",
+            "cost": [ "Grass", "Grass", "Colorless", "Colorless" ],
+            "damage": 50
+        }
+    ]
+}

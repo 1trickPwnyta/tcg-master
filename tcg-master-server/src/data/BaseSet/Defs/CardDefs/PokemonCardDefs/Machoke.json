@@ -1,0 +1,25 @@
+{
+    "name": "BaseSet.Machoke",
+    "label": "Machoke",
+    "type": "Fighting",
+    "stage": "stage1",
+    "hp": 80,
+    "weakness": "Psychic",
+    "retreat": 3,
+    "attacks": [
+        {
+            "name": "Karate Chop",
+            "cost": [ "Fighting", "Fighting", "Colorless" ],
+            "damage": 50,
+            "workers": [ "AttackWorker_KarateChop" ],
+            "text": "Does 50 damage minus 10 damage for each damage counter on Machoke."
+        },
+        {
+            "name": "Submission",
+            "cost": [ "Fighting", "Fighting", "Colorless", "Colorless" ],
+            "damage": 60,
+            "workers": [ { "class": "AttackWorker_SelfDamage", "args": { "amount": 20, "trigger": "always" } } ],
+            "text": "Machoke does 20 damage to itself."
+        }
+    ]
+}

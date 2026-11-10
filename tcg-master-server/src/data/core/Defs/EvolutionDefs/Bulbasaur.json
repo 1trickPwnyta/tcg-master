@@ -1,0 +1,10 @@
+[
+    {
+        "name": "Bulbasaur",
+        "next": [ "Ivysaur" ]
+    },
+    {
+        "name": "Ivysaur",
+        "next": [ "Venusaur" ]
+    }
+]

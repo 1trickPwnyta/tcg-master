@@ -1,0 +1,23 @@
+{
+    "name": "BaseSet.Charmander",
+    "label": "Charmander",
+    "type": "Fire",
+    "stage": "basic",
+    "hp": 50,
+    "weakness": "Water",
+    "retreat": 1,
+    "attacks": [
+        {
+            "name": "Scratch",
+            "cost": [ "Colorless" ],
+            "damage": 10
+        },
+        {
+            "name": "Ember",
+            "cost": [ "Fire", "Colorless" ],
+            "damage": 30,
+            "workers": [ { "class": "AttackWorker_SacrificeEnergy", "args": { "sacrifice": [ "Fire" ] } } ],
+            "text": "Discard 1 {Fire} Energy card attached to Charmander in order to use this attack."
+        }
+    ]
+}

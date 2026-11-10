@@ -1,0 +1,6 @@
+{
+    "name": "BaseSet.EnergyRemoval",
+    "label": "Energy Removal",
+    "text": "Choose 1 Energy card attached to 1 of your opponent's Pokémon and discard it.",
+    "workers": [ "TrainerWorker_EnergyRemoval" ]
+}

@@ -1,0 +1,16 @@
+{
+    "name": "BaseSet.Growlithe",
+    "label": "Growlithe",
+    "type": "Fire",
+    "stage": "basic",
+    "hp": 60,
+    "weakness": "Water",
+    "retreat": 1,
+    "attacks": [
+        {
+            "name": "Flare",
+            "cost": [ "Fire", "Colorless" ],
+            "damage": 20
+        }
+    ]
+}

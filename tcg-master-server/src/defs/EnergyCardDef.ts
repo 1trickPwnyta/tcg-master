@@ -21,8 +21,8 @@ export class EnergyCardDef extends CardDef {
         return { name: `${symbol}${this.basic ? "Energy" : this.name}`, type: "energy" };
     }
 
-    public constructor(data: IDefData) {
-        super(data);
+    public constructor(defClass: string, data: IDefData) {
+        super(defClass, data);
         this.cardData = data as IDefData & ICardDefData_Energy;
         this.basic = this.cardData.basic;
         this.type = DefDatabase.get<EnergyTypeDef>(this.cardData.type);

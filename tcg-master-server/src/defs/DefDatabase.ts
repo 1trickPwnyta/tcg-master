@@ -36,7 +36,7 @@ async function loadDefs(directory: string, priority?: string, context?: "Defs" |
                     const modulePath = path.join(__dirname, `${defClass}.ts`);
                     const module = await import(pathToFileURL(modulePath).href);
                     const defConstructor = module[defClass];
-                    const def = new defConstructor(item);
+                    const def = new defConstructor(defClass, item);
                     await def.init();
                     database.set(def.name, def);
                 }
@@ -58,7 +58,7 @@ export class DefDatabase {
         return database.get(name) as T;
     }
 
-    static search<T extends Def>(query: { name: string }): T | null {
-        return database.values().find(d => d.name === query.name) as T | null;
+    static getAll<T extends Def>(defClass: string): T[] {
+        return [ ...database.values().filter(v => v.defClass === defClass).map(v => v as T) ];
     }
 };

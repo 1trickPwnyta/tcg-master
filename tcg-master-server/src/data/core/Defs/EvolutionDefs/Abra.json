@@ -1,0 +1,10 @@
+[
+    {
+        "name": "Abra",
+        "next": [ "Kadabra" ]
+    },
+    {
+        "name": "Kadabra",
+        "next": [ "Alakazam" ]
+    }
+]

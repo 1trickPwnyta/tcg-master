@@ -1,0 +1,18 @@
+{
+    "name": "BaseSet.Doduo",
+    "label": "Doduo",
+    "type": "Colorless",
+    "stage": "basic",
+    "hp": 50,
+    "weakness": "Lightning",
+    "resistance": "Fighting",
+    "retreat": 0,
+    "attacks": [
+        {
+            "name": "Fury Attack",
+            "cost": [ "Colorless" ],
+            "workers": [ { "class": "AttackWorker_CoinDamage", "args": { "amount": 10, "coins": 2 } } ],
+            "text": "Flip 2 coins. This attack does 10 damage times the number of heads."
+        }
+    ]
+}

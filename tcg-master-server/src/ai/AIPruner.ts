@@ -1,6 +1,7 @@
 import { PokemonCardDef } from "../defs/PokemonCardDef.js";
 import { GameEngine } from "../game/engine/GameEngine.js";
-import { Choice, InterruptSync } from "../game/state/interrupts/Interrupt.js";
+import { Choice } from "../game/state/Choice.js";
+import { InterruptSync } from "../game/state/interrupts/Interrupt.js";
 import { InterruptResolution } from "../game/state/interrupts/InterruptResolution.js";
 import { InterruptType } from "../game/state/interrupts/InterruptType.js";
 import { PokemonCard } from "../game/state/PokemonCard.js";
@@ -11,7 +12,7 @@ export class AIPruner {
         const player = engine.game.getPlayer(interrupt.player);
         let rawChoices: AIChoice[] = [ ...interrupt.choices ].map((c, i) => ({
             i: i,
-            target: c.target_id as number,
+            target: c.id as number,
             key: AIPruner.getKey(interrupt.player, interrupt.prompt, interrupt.choices, c),
             valid: true
         }));
@@ -98,6 +99,6 @@ export class AIPruner {
     }
 
     private static getKey(player_id: number, prompt: string, choices: Choice[], choice?: Choice): string {
-        return player_id + prompt + choices.map(c => c.text + c.target_id).join("") + choice?.text + choice?.target_id;
+        return player_id + prompt + choices.map(c => c.label + c.id).join("") + choice?.label + choice?.id;
     }
 };

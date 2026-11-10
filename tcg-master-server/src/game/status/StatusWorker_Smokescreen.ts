@@ -1,7 +1,7 @@
 import { StatusContext, StatusWorker } from "./StatusWorker.js";
 
 export class StatusWorker_Smokescreen extends StatusWorker {
-    public override modify_damage_dealt(context: StatusContext, amount: number): number {
+    public override modifyDamageDealt(context: StatusContext, amount: number): number {
         if (!context.engine.game.flipCoin(context.card.owner)) {
             context.engine.send("The attack did nothing.");
             return -1;

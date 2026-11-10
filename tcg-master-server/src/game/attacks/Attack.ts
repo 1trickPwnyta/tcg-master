@@ -1,15 +1,16 @@
 import path from "path";
-import { AttackContext, AttackWorker } from "../game/attacks/AttackWorker.js";
-import { IAttackData } from "./IDefData.js";
+import { AttackContext, AttackWorker } from "./AttackWorker.js";
+import { IAttackData } from "../../defs/IDefData.js";
 import { pathToFileURL } from "url";
-import { Interrupt } from "../game/state/interrupts/Interrupt.js";
-import { DefDatabase } from "./DefDatabase.js";
-import { EnergyTypeDef } from "./EnergyTypeDef.js";
-import { EnergyCard } from "../game/state/EnergyCard.js";
+import { Interrupt } from "../state/interrupts/Interrupt.js";
+import { DefDatabase } from "../../defs/DefDatabase.js";
+import { EnergyTypeDef } from "../../defs/EnergyTypeDef.js";
+import { EnergyCard } from "../state/EnergyCard.js";
+import { ITargetable } from "../state/Choice.js";
 
 const __dirname = import.meta.dirname;
 
-export class Attack {
+export class Attack implements ITargetable {
     public readonly name: string;
     public readonly cost: EnergyTypeDef[];
     public readonly damage: number;
@@ -17,6 +18,14 @@ export class Attack {
     public readonly workers: AttackWorker[];
 
     private readonly attackData: IAttackData;
+
+    public get id(): string {
+        return this.name;
+    }
+
+    public get targetName(): string {
+        return `${this.name} [${this.cost.map(c => c.symbol).join("")}]`;
+    }
 
     public constructor(data: IAttackData) {
         this.attackData = data;
@@ -32,7 +41,7 @@ export class Attack {
             for (const workerData of this.attackData.workers) {
                 const workerClass = typeof workerData === "string" ? workerData : workerData.class;
                 const workerArgs = typeof workerData !== "string" ? workerData.args : [];
-                const fullName = path.join(__dirname, "..", "game", "attacks", `${workerClass}.ts`);
+                const fullName = path.join(__dirname, `${workerClass}.ts`);
                 const module = await import(pathToFileURL(fullName).href);
                 const workerConstructor = module[workerClass];
                 const worker = new workerConstructor(workerArgs);
@@ -41,7 +50,17 @@ export class Attack {
         }
     }
 
-    private validateTargets(context: AttackContext, ...targets: number[]): Interrupt | null {
+    public canUse(context: AttackContext): boolean {
+        for (const worker of this.workers) {
+            if (!worker.canUse(context)) {
+                return false;
+            }
+        }
+        
+        return true;
+    }
+
+    private validateTargets(context: AttackContext, ...targets: (number | string)[]): Interrupt | null {
         for (const worker of this.workers) {
             const interrupt = worker.validateTargets(context, ...targets);
             if (interrupt) {
@@ -63,13 +82,13 @@ export class Attack {
         return damage;
     }
 
-    private postEffects(context: AttackContext, knockedOut: boolean, ...targets: number[]) {
+    private postEffects(context: AttackContext, knockedOut: boolean, ...targets: (number | string)[]) {
         for (const worker of this.workers) {
             worker.postEffect(context, knockedOut, ...targets);
         }
     }
 
-    public execute(context: AttackContext, ...targets: number[]): boolean {
+    public execute(context: AttackContext, ...targets: (number | string)[]): boolean {
         const interrupt = this.validateTargets(context, ...targets);
         if (interrupt) {
             context.engine.interrupts.interrupt(interrupt);
@@ -92,18 +111,8 @@ export class Attack {
             context.engine.send(context.engine.game.activePlayer, "'s", context.attacker, "used", this.name, "!");
             let damage = this.damage;
 
-            // Have a status worker
-            if (context.defender.damagePrevention !== undefined) {
-                if (context.defender.damagePrevention < 0) {
-                    damage = 0;
-                } else {
-                    damage -= context.defender.damagePrevention;
-                    damage = Math.max(0, damage);
-                }
-            }
-
             for (const status of context.attacker.status) {
-                damage = status.def.worker.modify_damage_dealt({
+                damage = status.def.worker.modifyDamageDealt({
                     engine: context.engine,
                     owner: context.attacker.owner,
                     card: context.attacker
@@ -115,6 +124,7 @@ export class Attack {
             if (damage >= 0) {
                 damage = this.preEffects(context, damage);
                 if (damage >= 0) {
+                    context.damage = damage;
                     const knockedOut = context.defender.dealDamage({
                         amount: damage,
                         attacker: context.attacker,

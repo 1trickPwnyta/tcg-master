@@ -1,5 +1,6 @@
 import { EnergyCardDef } from "../../defs/EnergyCardDef.js";
 import { Card } from "./Card.js";
+import { Choice } from "./Choice.js";
 import { InterruptResolution } from "./interrupts/InterruptResolution.js";
 import { Serializable } from "./serializer.js";
 
@@ -18,10 +19,7 @@ export class EnergyCard extends Card {
         this.engine.interrupts.interrupt({
             player: this.owner.id,
             prompt: `Attach ${this.name} to which Pokémon?`,
-            choices: this.owner.pokemonInPlay.map(c => ({
-                text: c.name + (c == this.owner.activePokemon ? " (active)" : ""),
-                target_id: c.id
-            })),
+            choices: this.owner.pokemonInPlay.map(c => new Choice(c)),
             resolution: InterruptResolution.AttachEnergy,
             args: [ this.id ]
         });

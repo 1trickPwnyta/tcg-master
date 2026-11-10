@@ -13,8 +13,8 @@ export class TrainerCardDef extends CardDef {
 
     private readonly cardData: IDefData & ICardDefData_Trainer;
 
-    public constructor(data: IDefData) {
-        super(data);
+    public constructor(defClass: string, data: IDefData) {
+        super(defClass, data);
         this.cardData = data as IDefData & ICardDefData_Trainer;
         this.text = this.cardData.text;
         this.workers = [];

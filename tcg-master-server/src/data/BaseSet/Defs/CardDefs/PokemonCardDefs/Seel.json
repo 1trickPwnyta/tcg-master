@@ -1,0 +1,16 @@
+{
+    "name": "BaseSet.Seel",
+    "label": "Seel",
+    "type": "Water",
+    "stage": "basic",
+    "hp": 60,
+    "weakness": "Lightning",
+    "retreat": 1,
+    "attacks": [
+        {
+            "name": "Headbutt",
+            "cost": [ "Water" ],
+            "damage": 10
+        }
+    ]
+}

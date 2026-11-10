@@ -1,0 +1,5 @@
+{
+    "name": "LeekSlap",
+    "worker": "StatusWorker_LeekSlap",
+    "permanent": true
+}

@@ -1,3 +1,4 @@
+import { Choice } from "../../Choice.js";
 import { InterruptResolution } from "../InterruptResolution.js";
 import { ResolvesInterrupt } from "../InterruptResolver.js";
 import { InterruptContext, InterruptWorker } from "./InterruptWorker.js";
@@ -13,7 +14,7 @@ export class InterruptWorker_PlayCard extends InterruptWorker {
             context.engine.interrupts.interrupt({
                 player: player.id,
                 prompt: "Select a card to play from your hand.",
-                choices: player.hand.cards.map(c => ({ text: c.name, target_id: c.id })),
+                choices: player.hand.cards.map(c => new Choice(c)),
                 resolution: InterruptResolution.PlayCard
             });
             return true;

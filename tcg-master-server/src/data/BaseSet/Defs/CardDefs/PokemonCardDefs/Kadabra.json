@@ -1,0 +1,25 @@
+{
+    "name": "BaseSet.Kadabra",
+    "label": "Kadabra",
+    "type": "Psychic",
+    "stage": "stage1",
+    "hp": 60,
+    "weakness": "Psychic",
+    "retreat": 3,
+    "attacks": [
+        {
+            "name": "Recover",
+            "cost": [ "Psychic", "Psychic" ],
+            "workers": [
+                { "class": "AttackWorker_SacrificeEnergy", "args": { "sacrifice": [ "Psychic" ] } },
+                { "class": "AttackWorker_Heal", "args": { "amount": "all" } }
+            ],
+            "text": "Discard 1 {Psychic} Energy card attached to Kadabra in order to use this attack. Remove all damage counters from Kadabra."
+        },
+        {
+            "name": "Super Psy",
+            "cost": [ "Psychic", "Psychic", "Colorless" ],
+            "damage": 50
+        }
+    ]
+}

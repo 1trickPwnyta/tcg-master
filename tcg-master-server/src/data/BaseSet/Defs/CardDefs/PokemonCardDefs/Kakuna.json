@@ -1,0 +1,24 @@
+{
+    "name": "BaseSet.Kakuna",
+    "label": "Kakuna",
+    "type": "Grass",
+    "stage": "stage1",
+    "hp": 80,
+    "weakness": "Fire",
+    "retreat": 2,
+    "attacks": [
+        {
+            "name": "Stiffen",
+            "cost": [ "Colorless", "Colorless" ],
+            "workers": [ { "class": "AttackWorker_PreventDamage", "args": { "amount": "all", "trigger": "coin" } } ],
+            "text": "Flip a coin. If heads, prevent all damage done to Kakuna during your opponent's next turn. <em>(Any other effects of attacks still happen.)</em>"
+        },
+        {
+            "name": "Poisonpowder",
+            "cost": [ "Grass", "Grass" ],
+            "damage": 20,
+            "workers": [ "AttackWorker_Poison" ],
+            "text": "Flip a coin. If heads, the Defending Pokémon is now Poisoned."
+        }
+    ]
+}

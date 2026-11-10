@@ -1,0 +1,22 @@
+{
+    "name": "BaseSet.Magikarp",
+    "label": "Magikarp",
+    "type": "Water",
+    "stage": "basic",
+    "hp": 30,
+    "weakness": "Lightning",
+    "retreat": 1,
+    "attacks": [
+        {
+            "name": "Tackle",
+            "cost": [ "Colorless" ],
+            "damage": 10
+        },
+        {
+            "name": "Flail",
+            "cost": [ "Water" ],
+            "workers": [ "AttackWorker_Flail" ],
+            "text": "Does 10 damage times the number of damage counters on Magikarp."
+        }
+    ]
+}

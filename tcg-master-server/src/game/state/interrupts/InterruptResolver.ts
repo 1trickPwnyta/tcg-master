@@ -15,7 +15,7 @@ export class InterruptResolver {
         const key = interrupt.choices[choice].resolution ?? interrupt.resolution!;
         const worker = workers.get(key);
         if (worker) {
-            const target = interrupt.choices[choice].target_id;
+            const target = interrupt.choices[choice].id;
             return worker.execute({ engine: engine }, target ?? null, ...(interrupt.choices[choice].args ?? interrupt.args ?? []));
         } else {
             throw new Error(`No worker for ${key}.`);

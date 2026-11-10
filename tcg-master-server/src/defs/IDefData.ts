@@ -48,4 +48,5 @@ export interface IDefData_Status {
     orientation?: "paralyzed" | "asleep" | "confused" | "normal";
     canAttack?: boolean;
     canRetreat?: boolean;
+    permanent?: boolean;
 }

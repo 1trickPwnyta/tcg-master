@@ -3,7 +3,7 @@ import { StatusDef } from "../../defs/StatusDef.js";
 import { StatusContext, StatusWorker } from "./StatusWorker.js";
 
 export class StatusWorker_Confusion extends StatusWorker {
-    protected override notify_given(context: StatusContext): void {
+    public override notify_given(context: StatusContext): void {
         context.engine.send(...context.card.fullTokens, "got confused!");
     }
 

@@ -1,0 +1,24 @@
+{
+    "name": "BaseSet.Haunter",
+    "label": "Haunter",
+    "type": "Psychic",
+    "stage": "stage1",
+    "hp": 60,
+    "resistance": "Fighting",
+    "retreat": 1,
+    "attacks": [
+        {
+            "name": "Hypnosis",
+            "cost": [ "Psychic" ],
+            "workers": [ { "class": "AttackWorker_Sleep", "args": { "trigger": "always" } } ],
+            "text": "The Defending Pokémon is now Asleep."
+        },
+        {
+            "name": "Dream Eater",
+            "cost": [ "Psychic", "Psychic" ],
+            "damage": 50,
+            "workers": [ "AttackWorker_DreamEater" ],
+            "text": "You can't use this attack unless the Defending Pokémon is Asleep."
+        }
+    ]
+}

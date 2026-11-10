@@ -5,6 +5,7 @@ import { PokemonCardDef } from "../../defs/PokemonCardDef.js";
 import { StatusDef } from "../../defs/StatusDef.js";
 import { GameEngine } from "../engine/GameEngine.js";
 import { Card } from "./Card.js";
+import { Choice } from "./Choice.js";
 import { EnergyCard } from "./EnergyCard.js";
 import { InterruptResolution } from "./interrupts/InterruptResolution.js";
 import { Location } from "./Location.js";
@@ -30,19 +31,18 @@ export class PokemonCard extends Card {
     public readonly attachments: Location;
 
     @Serialize()
-    public damagePrevention?: number;
-
-    @Serialize()
-    public damageThreshold?: number;
-
-    @Serialize()
-    public accuracyChecks?: number;
-
-    @Serialize()
     public readonly statuses: { def: string, args: any }[] = [];
 
     public get fullTokens(): any[] {
         return [ this.owner, "'s", this ];
+    }
+
+    public override get targetName(): string {
+        return [
+            super.targetName,
+            this.owner.activePokemon == this ? "(active)" : "",
+            this.energy.length ? `[${this.energy.map(e => e.def.type.symbol).join("")}]` : ""
+        ].filter(s => s.length).join(" ");
     }
 
     public get def(): PokemonCardDef {
@@ -55,6 +55,30 @@ export class PokemonCard extends Card {
 
     public get status(): { def: StatusDef, args: any }[] {
         return this.statuses.map(s => ({ def: DefDatabase.get<StatusDef>(s.def), args: s.args }));
+    }
+
+    public get weakness(): EnergyTypeDef | undefined {
+        let weakness = this.def.weakness;
+        for (const status of this.status) {
+            weakness = status.def.worker.getModifiedWeakness({
+                engine: this.engine,
+                owner: this.owner,
+                card: this
+            }, status.args);
+        }
+        return weakness;
+    }
+
+    public get resistance(): EnergyTypeDef | undefined {
+        let resistance = this.def.resistance;
+        for (const status of this.status) {
+            resistance = status.def.worker.getModifiedResistance({
+                engine: this.engine,
+                owner: this.owner,
+                card: this
+            }, status.args);
+        }
+        return resistance;
     }
 
     public constructor(id: number, engine: GameEngine, def: PokemonCardDef, owner: Player) {
@@ -78,7 +102,7 @@ export class PokemonCard extends Card {
                 this.engine.interrupts.interrupt({
                     player: this.owner.id,
                     prompt: `Which Pokémon will evolve into ${this.name}?`,
-                    choices: cards.map(c => ({ text: c == this.owner.activePokemon ? `${c.name} (active)` : c.name, target_id: c.id })),
+                    choices: cards.map(c => new Choice(c)),
                     resolution: InterruptResolution.Evolve,
                     args: [ this.id ]
                 });
@@ -114,21 +138,17 @@ export class PokemonCard extends Card {
         let amount = context.amount;
 
         if (context.type) {
-            if (this.def.weakness === context.type) {
+            if (this.weakness === context.type) {
                 amount *= 2;
             }
-            if (this.def.resistance === context.type) {
+            if (this.resistance === context.type) {
                 amount -= 30;
                 amount = Math.max(0, amount);
             }
         }
 
-        if (this.damageThreshold && this.damageThreshold > amount) {
-            amount = 0;
-        }
-
         for (const status of this.status) {
-            amount = status.def.worker.modify_damage_taken({
+            amount = status.def.worker.modifyDamageTaken({
                 engine: this.engine,
                 owner: this.owner,
                 card: this
@@ -166,8 +186,14 @@ export class PokemonCard extends Card {
 
     public heal(amount: number) {
         amount = Math.min(amount, this.damage);
-        this.damage -= amount;
-        this.engine.send(...this.fullTokens, "was healed for ", { name: amount.toString(), type: "heal" }, "HP.");
+        if (amount) {
+            this.damage -= amount;
+            this.engine.send(...this.fullTokens, "was healed for ", { name: amount.toString(), type: "heal" }, "HP.");
+        }
+    }
+
+    public hasStatus(def: StatusDef): boolean {
+        return this.statuses.some(s => s.def === def.name);
     }
 
     public giveStatus(def: StatusDef, args?: any) {
@@ -177,7 +203,7 @@ export class PokemonCard extends Card {
             engine: this.engine,
             owner: this.owner,
             card: this
-        });
+        }, args);
     }
 
     public removeStatus(def: StatusDef) {
@@ -189,7 +215,10 @@ export class PokemonCard extends Card {
     }
 
     public clearStatus() {
-        this.statuses.length = 0;
+        const removable = this.statuses.filter(s => !DefDatabase.get<StatusDef>(s.def).permanent);
+        for (const status of removable) {
+            this.statuses.splice(this.statuses.indexOf(status), 1);
+        }
     }
 
     public poison() {

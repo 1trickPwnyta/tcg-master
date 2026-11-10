@@ -1,7 +1,7 @@
 import { StatusContext, StatusWorker } from "./StatusWorker.js";
 
 export class StatusWorker_Poison extends StatusWorker {
-    protected override notify_given(context: StatusContext): void {
+    public override notify_given(context: StatusContext): void {
         context.engine.send(...context.card.fullTokens, "was poisoned!");
     }
 

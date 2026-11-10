@@ -2,6 +2,7 @@ import { InterruptResolution } from "../state/interrupts/InterruptResolution.js"
 import { Interrupt } from "../state/interrupts/Interrupt.js";
 import { Turn } from "../state/Turn.js";
 import { SubEngine } from "./SubEngine.js";
+import { Choice } from "../state/Choice.js";
 
 export class TurnEngine extends SubEngine {
     private get turn(): Turn {
@@ -28,13 +29,6 @@ export class TurnEngine extends SubEngine {
         this.engine.send();
         for (const player of this.state.players) {
             const active = player.activePokemon!;
-            if (this.state.turn?.player === player.id) {
-                active.accuracyChecks = undefined;
-            } else {
-                active.damagePrevention = undefined;
-                active.damageThreshold = undefined;
-            }
-
             for (const status of active.status) {
                 status.def.worker.notify_endOfTurn({
                     engine: this.engine,
@@ -67,22 +61,10 @@ export class TurnEngine extends SubEngine {
                 player: this.turn.player,
                 prompt: "Your turn.",
                 choices: [
-                    {
-                        text: "play a card",
-                        resolution: InterruptResolution.PlayCard
-                    },
-                    {
-                        text: "attack",
-                        resolution: InterruptResolution.Attack
-                    },
-                    {
-                        text: "retreat",
-                        resolution: InterruptResolution.Retreat
-                    },
-                    {
-                        text: "end turn",
-                        resolution: InterruptResolution.EndTurn
-                    }
+                    new Choice({ text: "play a card" }, InterruptResolution.PlayCard),
+                    new Choice({ text: "attack" }, InterruptResolution.Attack),
+                    new Choice({ text: "retreat" }, InterruptResolution.Retreat),
+                    new Choice({ text: "end turn" }, InterruptResolution.EndTurn)
                 ],
                 force: true
             });
@@ -99,7 +81,7 @@ export class TurnEngine extends SubEngine {
                 interrupts: playersWithNoActive.map(p => ({
                     player: p.id,
                     prompt: "Select a Pokémon from your bench to be your active Pokémon.",
-                    choices: p.bench.cards.map(c => ({ text: c.name, target_id: c.id })),
+                    choices: p.bench.cards.map(c => new Choice(c)),
                     resolution: InterruptResolution.Promote,
                     force: true,
                     args: [ p.id ]

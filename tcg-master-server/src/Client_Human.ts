@@ -47,10 +47,11 @@ export class Client_Human extends Client {
     }
 
     public override prompt(interrupt: InterruptSync) {
-        const userChoices = interrupt.choices!.map((c, i) => `[${i + 1}] ${c.text}`);
+        const userChoices = interrupt.choices!.map((c, i) => `[${i + 1}] ${c.label}`);
         if (!interrupt.force) {
             userChoices.push("[`] (cancel)");
         }
+        
         this.socket.emit("ASK", {
             text: interrupt.prompt,
             choices: userChoices

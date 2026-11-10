@@ -6,8 +6,8 @@ export class EvolutionDef extends Def {
 
     private readonly cardData: IDefData & IDefData_Evolution;
 
-    public constructor(data: IDefData) {
-        super(data);
+    public constructor(defClass: string, data: IDefData) {
+        super(defClass, data);
         this.cardData = data as IDefData & IDefData_Evolution;
         this.next = this.cardData.next;
     }

@@ -2,13 +2,14 @@ import { CardDef } from "../../defs/CardDef.js";
 import { DefDatabase } from "../../defs/DefDatabase.js";
 import { IToken } from "../../IToken.js";
 import { GameEngine } from "../engine/GameEngine.js";
+import { ITargetable } from "./Choice.js";
 import { Location } from "./Location.js";
 import { Player } from "./Player.js";
 import { Serializable, Serialize } from "./serializer.js";
 import { State } from "./State.js";
 
 @Serializable()
-export abstract class Card extends State {
+export abstract class Card extends State implements ITargetable {
     @Serialize()
     public readonly def_name: string;
 
@@ -28,6 +29,10 @@ export abstract class Card extends State {
 
     public get name(): string {
         return this.def.label;
+    }
+
+    public get targetName(): string {
+        return this.name;
     }
 
     public get def(): CardDef {
@@ -62,5 +67,5 @@ export abstract class Card extends State {
         this.owner_id = owner.id;
     }
 
-    public abstract play(): boolean;
+    public abstract play(...targets: number[]): boolean;
 };

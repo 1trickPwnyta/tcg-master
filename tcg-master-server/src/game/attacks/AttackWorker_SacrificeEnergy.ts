@@ -1,5 +1,6 @@
 import { DefDatabase } from "../../defs/DefDatabase.js";
 import { EnergyTypeDef } from "../../defs/EnergyTypeDef.js";
+import { Choice } from "../state/Choice.js";
 import { Interrupt } from "../state/interrupts/Interrupt.js";
 import { InterruptResolution } from "../state/interrupts/InterruptResolution.js";
 import { InterruptType } from "../state/interrupts/InterruptType.js";
@@ -19,9 +20,7 @@ export class AttackWorker_SacrificeEnergy extends AttackWorker {
                 type: InterruptType.Discard,
                 player: context.engine.game.activePlayer.id,
                 prompt: `Discard which Energy card from ${context.attacker.name}?`,
-                choices: context.attacker.energy.filter(e => e.def.type == this.sacrifice[energy_id.length]).map(e => ({
-                    text: e.name, target_id: e.id
-                })),
+                choices: context.attacker.energy.filter(e => e.def.type == this.sacrifice[energy_id.length]).map(e => new Choice(e)),
                 resolution: InterruptResolution.AttackTargets,
                 args: [ context.attack.name, ...energy_id ]
             };

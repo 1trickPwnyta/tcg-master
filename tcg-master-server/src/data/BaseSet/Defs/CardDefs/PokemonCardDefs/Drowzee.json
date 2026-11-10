@@ -1,0 +1,23 @@
+{
+    "name": "BaseSet.Drowzee",
+    "label": "Drowzee",
+    "type": "Psychic",
+    "stage": "basic",
+    "hp": 50,
+    "weakness": "Psychic",
+    "retreat": 1,
+    "attacks": [
+        {
+            "name": "Pound",
+            "cost": [ "Colorless" ],
+            "damage": 10
+        },
+        {
+            "name": "Confuse Ray",
+            "cost": [ "Psychic", "Psychic" ],
+            "damage": 10,
+            "workers": [ "AttackWorker_Confuse" ],
+            "text": "Flip a coin. If heads, the Defending Pokémon is now Confused."
+        }
+    ]
+}

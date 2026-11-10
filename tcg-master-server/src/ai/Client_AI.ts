@@ -54,7 +54,7 @@ export class Client_AI extends Client {
             return;
         }
 
-        console.log(`${interrupt.prompt} [ ${interrupt.choices!.map(c => c.text).join(", ")}${!interrupt.force ? ", (cancel)" : ""} ]`);
+        console.log(`${interrupt.prompt} [ ${interrupt.choices!.map(c => c.label).join(", ")}${!interrupt.force ? ", (cancel)" : ""} ]`);
         this.interrupt_id = this.engine!.interrupts.get(this.player_id!)!.id!;
 
         const worker = new Worker(path.join(import.meta.dirname, "AIWorker.js"));
@@ -86,7 +86,7 @@ export class Client_AI extends Client {
         });
     }
 
-    public witness(player: Player, card: Card) {
+    /*public witness(player: Player, card: Card) {
         if (player !== this.player) {
             this.witnessedCards.set(Object.getPrototypeOf(card), this.witnessedCards.get(Object.getPrototypeOf(card)) ?? 0 + 1);
         }
@@ -113,5 +113,5 @@ export class Client_AI extends Client {
             cards.push(new Card_Pokemon_BaseSet_Staryu(game, game.players[this.player.opponent.id]));
         }
         return cards;
-    }
+    }*/
 };

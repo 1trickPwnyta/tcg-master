@@ -94,7 +94,7 @@ export class Client_AIWorker extends Client_AI {
                             hash: hash,
                             prompt: interrupt.prompt,
                             choice: choice.i,
-                            text: choice.i !== null ? interrupt.choices[choice.i].text : null,
+                            text: choice.i !== null ? interrupt.choices[choice.i].label : null,
                             depth: this.depth
                         } ]);
                         client.player_id = player.id;

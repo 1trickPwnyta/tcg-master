@@ -1,3 +1,4 @@
+import { Choice } from "../../Choice.js";
 import { InterruptResolution } from "../InterruptResolution.js";
 import { ResolvesInterrupt } from "../InterruptResolver.js";
 import { InterruptContext, InterruptWorker } from "./InterruptWorker.js";
@@ -56,7 +57,7 @@ export class InterruptWorker_Retreat extends InterruptWorker {
             context.engine.interrupts.interrupt({
                 player: player.id,
                 prompt: `Which Pokémon on your bench will replace ${card.name}?`,
-                choices: player.bench.cards.map(c => ({ text: c.name, target_id: c.id })),
+                choices: player.bench.cards.map(c => new Choice(c)),
                 resolution: InterruptResolution.Retreat
             });
             return true;

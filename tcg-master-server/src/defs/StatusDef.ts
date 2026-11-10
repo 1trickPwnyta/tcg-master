@@ -12,17 +12,19 @@ export class StatusDef extends Def {
     public readonly orientation?: "normal" | "confused" | "paralyzed" | "asleep";
     public readonly canAttack: boolean;
     public readonly canRetreat: boolean;
+    public readonly permanent: boolean;
 
     public get worker(): StatusWorker {
         return this._worker!;
     }
 
-    public constructor(data: IDefData) {
-        super(data);
+    public constructor(defClass: string, data: IDefData) {
+        super(defClass, data);
         this.cardData = data as IDefData & IDefData_Status;
         this.orientation = this.cardData.orientation;
         this.canAttack = this.cardData.canAttack ?? true;
         this.canRetreat = this.cardData.canRetreat ?? true;
+        this.permanent = this.cardData.permanent ?? false;
     }
 
     public override async init() {

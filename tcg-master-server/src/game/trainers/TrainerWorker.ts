@@ -1,10 +1,10 @@
-import { PlayContext } from "../cards/workers/CardWorker.js";
 import { Interrupt } from "../state/interrupts/Interrupt.js";
+import { TrainerContext } from "../state/TrainerCard.js";
 
 export abstract class TrainerWorker {
-    public selectTargets(context: PlayContext): Interrupt | "fail" | null {
+    public validateTargets(context: TrainerContext, ...targets: number[]): Interrupt | "fail" | null {
         return null;
     }
 
-    public abstract execute(context: PlayContext, ...targets: number[]): void;
+    public abstract execute(context: TrainerContext, ...targets: number[]): void;
 };

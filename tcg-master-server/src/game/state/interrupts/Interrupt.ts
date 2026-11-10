@@ -1,3 +1,4 @@
+import { Choice } from "../Choice.js";
 import { InterruptResolution } from "./InterruptResolution.js";
 import { InterruptType } from "./InterruptType.js";
 
@@ -23,5 +24,4 @@ export interface InterruptAsync {
     force?: boolean;
 };
 
-export type Choice = { text: string, target_id?: number | string, resolution?: InterruptResolution, args?: number[] };
 export type Interrupt = InterruptSync | InterruptAsync;

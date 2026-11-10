@@ -1,3 +1,4 @@
+import { Choice } from "../../Choice.js";
 import { InterruptResolution } from "../InterruptResolution.js";
 import { ResolvesInterrupt } from "../InterruptResolver.js";
 import { InterruptContext, InterruptWorker } from "./InterruptWorker.js";
@@ -15,25 +16,35 @@ export class InterruptWorker_Attack extends InterruptWorker {
         if (attack_name) {
             const attack = card.def.attacks.find(a => a.name === attack_name)!;
             if (!attack.costSatisfied(card.energy)) {
-                context.engine.sendError(context.engine.game.activePlayer, card, "doesn't have enough energy to use", attack.name, ".");
+                context.engine.sendError(player, card, "doesn't have enough energy to use", attack.name, ".");
                 return false;
             }
-            for (let i = 0; i < (card.accuracyChecks ?? 0); i++) {
-                if (!context.engine.game.flipCoin(player)) {
-                    return this.failAttack(context, card, "'s attack failed.");
-                }
-            }
-            return attack.execute({
+            const attackContext = {
                 engine: context.engine,
                 attack: attack,
                 attacker: card,
                 defender: context.engine.game.defendingPokemon!
-            }, ...args);
+            };
+            if (!attack.canUse(attackContext)) {
+                context.engine.sendError(player, card, "can't use", attack, "right now.");
+                return false;
+            }
+            for (const status of card.status) {
+                if (!status.def.worker.canUseAttack({
+                    engine: context.engine,
+                    owner: player,
+                    card: card
+                }, attack_name, status.args)) {
+                    context.engine.sendError(player, attack_name, "is disabled.");
+                    return false;
+                }
+            }
+            return attack.execute(attackContext, ...args);
         } else {
             context.engine.interrupts.interrupt({
                 player: player.id,
                 prompt: `Which attack will ${card.name} use?`,
-                choices: card.def.attacks.map(a => ({ text: a.name, target_id: a.name })),
+                choices: card.def.attacks.map(a => new Choice(a)),
                 resolution: InterruptResolution.Attack
             });
             return true;

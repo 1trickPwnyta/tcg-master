@@ -1,0 +1,6 @@
+{
+    "name": "BaseSet.GustOfWind",
+    "label": "Gust of Wind",
+    "text": "Choose 1 of your opponent's Benched Pokémon and switch it with their Active Pokémon.",
+    "workers": [ "TrainerWorker_GustOfWind" ]
+}

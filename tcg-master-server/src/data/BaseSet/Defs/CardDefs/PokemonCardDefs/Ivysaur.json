@@ -1,0 +1,23 @@
+{
+    "name": "BaseSet.Ivysaur",
+    "label": "Ivysaur",
+    "type": "Grass",
+    "stage": "stage1",
+    "hp": 60,
+    "weakness": "Fire",
+    "retreat": 1,
+    "attacks": [
+        {
+            "name": "Vine Whip",
+            "cost": [ "Grass", "Colorless", "Colorless" ],
+            "damage": 30
+        },
+        {
+            "name": "Poisonpowder",
+            "cost": [ "Grass", "Grass", "Grass" ],
+            "damage": 20,
+            "workers": [ { "class": "AttackWorker_Poison", "args": { "trigger": "always" } } ],
+            "text": "The Defending Pokémon is now Poisoned."
+        }
+    ]
+}

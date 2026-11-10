@@ -2,7 +2,7 @@ export enum InterruptResolution {
      PlayCard
     ,MoveCard
     ,AttachEnergy
-    ,UseTrainer
+    ,TrainerTargets
     ,CancelTrainer
     ,Evolve
     ,Attack

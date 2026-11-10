@@ -1,8 +1,15 @@
 import { TrainerCardDef } from "../../defs/TrainerCardDef.js";
-import { PlayContext } from "../cards/workers/CardWorker.js";
+import { GameEngine } from "../engine/GameEngine.js";
 import { Card } from "./Card.js";
 import { Interrupt } from "./interrupts/Interrupt.js";
+import { Player } from "./Player.js";
 import { Serializable } from "./serializer.js";
+
+export type TrainerContext = {
+    engine: GameEngine,
+    player: Player,
+    card: TrainerCard
+};
 
 @Serializable()
 export class TrainerCard extends Card {
@@ -10,7 +17,7 @@ export class TrainerCard extends Card {
         return super.def as TrainerCardDef;
     }
 
-    public override play(): boolean {
+    public override play(...targets: number[]): boolean {
         this.owner.limbo.add(this);
 
         const context = {
@@ -19,7 +26,7 @@ export class TrainerCard extends Card {
             card: this
         };
 
-        const interrupt = this.selectTargets(context);
+        const interrupt = this.validateTargets(context, ...targets);
         if (interrupt === "fail") {
             return false;
         } else if (interrupt) {
@@ -28,15 +35,15 @@ export class TrainerCard extends Card {
         }
 
         this.engine.send(this.owner, "used", this, ".");
-        this.execute(context);
+        this.execute(context, ...targets);
         this.owner.discard.add(this);
         
         return true;
     }
 
-    private selectTargets(context: PlayContext): Interrupt | "fail" | null {
+    private validateTargets(context: TrainerContext, ...targets: number[]): Interrupt | "fail" | null {
         for (const worker of this.def.workers) {
-            const interrupt = worker.selectTargets(context);
+            const interrupt = worker.validateTargets(context, ...targets);
             if (interrupt) {
                 return interrupt;
             }
@@ -45,7 +52,7 @@ export class TrainerCard extends Card {
         return null;
     }
 
-    public execute(context: PlayContext, ...targets: number[]) {
+    private execute(context: TrainerContext, ...targets: number[]) {
         for (const worker of this.def.workers) {
             worker.execute(context, ...targets);
         }
