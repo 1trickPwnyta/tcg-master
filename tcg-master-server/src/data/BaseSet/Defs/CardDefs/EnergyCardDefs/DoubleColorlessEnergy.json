@@ -1,0 +1,7 @@
+{
+    "name": "BaseSet.DoubleColorlessEnergy",
+    "label": "Double Colorless Energy",
+    "basic": false,
+    "type": "Colorless",
+    "amount": 2
+}

@@ -1,0 +1,11 @@
+{
+    "name": "BaseSet.SuperPotion",
+    "label": "Super Potion",
+    "text": "Discard 1 Energy card attached to 1 of your Pokémon. Remove 4 damage counters from that Pokémon. If that Pokémon has fewer damage counters than that, remove all of them.",
+    "workers": [
+        {
+            "class": "TrainerWorker_Heal",
+            "args": { "amount": 40, "discard_energy": 1 }
+        }
+    ]
+}

@@ -1,0 +1,10 @@
+[
+    {
+        "name": "Charmander",
+        "next": [ "Charmeleon" ]
+    },
+    {
+        "name": "Charmeleon",
+        "next": [ "Charizard" ]
+    }
+]

@@ -68,4 +68,8 @@ export abstract class Card extends State implements ITargetable {
     }
 
     public abstract play(...targets: number[]): boolean;
+
+    public discard() {
+        this.owner.discard.add(this);
+    }
 };

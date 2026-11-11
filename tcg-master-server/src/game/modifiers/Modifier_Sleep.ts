@@ -1,11 +1,13 @@
-import { StatusContext, StatusWorker } from "./StatusWorker.js";
+import { ModifierContext } from "./Modifier.js";
+import { ModifierStatus } from "./ModifierStatus.js";
 
-export class StatusWorker_Sleep extends StatusWorker {
-    public override notify_given(context: StatusContext): void {
+
+export class Modifier_Sleep extends ModifierStatus {
+    public override notify_given(context: ModifierContext): void {
         context.engine.send(...context.card.fullTokens, "fell asleep!");
     }
 
-    public override notify_endOfTurn(context: StatusContext): void {
+    public override notify_endOfTurn(context: ModifierContext): void {
         context.engine.send(...context.card.fullTokens, "is asleep.");
         if (context.engine.game.flipCoin(context.owner)) {
             context.engine.send(...context.card.fullTokens, "woke up!");

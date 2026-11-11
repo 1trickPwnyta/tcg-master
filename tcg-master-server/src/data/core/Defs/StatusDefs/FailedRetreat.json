@@ -1,6 +1,6 @@
 {
     "name": "FailedRetreat",
     "label": "a failed retreat attempt",
-    "worker": "StatusWorker_FailedRetreat",
+    "modifier": "Modifier_FailedRetreat",
     "canRetreat": false
 }

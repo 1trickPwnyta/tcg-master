@@ -1,4 +1,4 @@
 {
     "name": "DestinyBond",
-    "worker": "StatusWorker_DestinyBond"
+    "modifier": "Modifier_DestinyBond"
 }

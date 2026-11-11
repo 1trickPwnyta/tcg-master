@@ -96,8 +96,8 @@ export class Attack implements ITargetable {
         }
 
         let failToStatus = false;
-        for (const status of context.attacker.status) {
-            if (!status.def.worker.try_attack({
+        for (const status of context.attacker.modifiers) {
+            if (!status.modifier.try_attack({
                 engine: context.engine,
                 owner: context.engine.game.activePlayer,
                 card: context.attacker
@@ -111,8 +111,8 @@ export class Attack implements ITargetable {
             context.engine.send(context.engine.game.activePlayer, "'s", context.attacker, "used", this.name, "!");
             let damage = this.damage;
 
-            for (const status of context.attacker.status) {
-                damage = status.def.worker.modifyDamageDealt({
+            for (const status of context.attacker.modifiers) {
+                damage = status.modifier.modifyDamageDealt({
                     engine: context.engine,
                     owner: context.attacker.owner,
                     card: context.attacker

@@ -29,8 +29,8 @@ export class InterruptWorker_Attack extends InterruptWorker {
                 context.engine.sendError(player, card, "can't use", attack, "right now.");
                 return false;
             }
-            for (const status of card.status) {
-                if (!status.def.worker.canUseAttack({
+            for (const status of card.modifiers) {
+                if (!status.modifier.canUseAttack({
                     engine: context.engine,
                     owner: player,
                     card: card

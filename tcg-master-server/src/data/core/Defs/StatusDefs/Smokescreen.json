@@ -1,4 +1,4 @@
 {
     "name": "Smokescreen",
-    "worker": "StatusWorker_Smokescreen"
+    "modifier": "Modifier_Smokescreen"
 }

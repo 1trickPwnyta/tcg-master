@@ -1,6 +1,6 @@
 {
     "name": "Sleep",
-    "worker": "StatusWorker_Sleep",
+    "modifier": "Modifier_Sleep",
     "orientation": "asleep",
     "canAttack": false,
     "canRetreat": false

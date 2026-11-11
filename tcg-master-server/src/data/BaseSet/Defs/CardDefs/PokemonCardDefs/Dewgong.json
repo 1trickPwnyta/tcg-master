@@ -1,0 +1,23 @@
+{
+    "name": "BaseSet.Dewgong",
+    "label": "Dewgong",
+    "type": "Water",
+    "stage": "stage1",
+    "hp": 80,
+    "weakness": "Lightning",
+    "retreat": 3,
+    "attacks": [
+        {
+            "name": "Aurora Beam",
+            "cost": [ "Water", "Water", "Colorless" ],
+            "damage": 50
+        },
+        {
+            "name": "Ice Beam",
+            "cost": [ "Water", "Water", "Colorless", "Colorless" ],
+            "damage": 30,
+            "workers": [ "AttackWorker_Paralyze" ],
+            "text": "Flip a coin. If heads, the Defending Pokémon is now Paralyzed."
+        }
+    ]
+}

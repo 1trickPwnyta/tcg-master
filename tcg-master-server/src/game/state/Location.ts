@@ -33,21 +33,26 @@ export class Location extends State {
     }
 
     public add(card: Card) {
-        if (card instanceof PokemonCard) {
-            if (this !== this.owner.active) {
-                card.clearStatus();
-            }
-            if (this !== this.owner.active && this.id !== this.owner.bench.id) {
-                card.damage = 0;
-                for (const attachment of card.attachments.cards) {
-                    this.owner.discard.add(attachment);
+        if (card.location != this) {
+            if (card instanceof PokemonCard) {
+                if (this !== this.owner.active) {
+                    card.clearStatus();
+                }
+                if (this !== this.owner.active && this.id !== this.owner.bench.id) {
+                    card.damage = 0;
+                    while (card.attachments.count) {
+                        card.attachments.cards[0].discard();
+                    }
                 }
             }
+            if (card.location) {
+                card.location.cards.splice(card.location.cards.indexOf(card), 1);
+                card.location.notify_removed(card);
+            }
+            this.cards.push(card);
+            card.location = this;
         }
-        if (card.location) {
-            card.location.cards.splice(card.location.cards.indexOf(card), 1);
-        }
-        this.cards.push(card);
-        card.location = this;
     }
+
+    public notify_removed(card: Card) { }
 };

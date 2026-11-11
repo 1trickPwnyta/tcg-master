@@ -1,6 +1,6 @@
 {
     "name": "Paralysis",
-    "worker": "StatusWorker_Paralysis",
+    "modifier": "Modifier_Paralysis",
     "orientation": "paralyzed",
     "canAttack": false,
     "canRetreat": false

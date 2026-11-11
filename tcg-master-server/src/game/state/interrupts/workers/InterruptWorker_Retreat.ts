@@ -32,11 +32,11 @@ export class InterruptWorker_Retreat extends InterruptWorker {
         } else if (replacement_id) {
             while (paid.length) {
                 const card = context.engine.search.getCard(paid.pop()!)!;
-                player.discard.add(card);
+                card.discard();
             }
             let failToStatus = false;
-            for (const status of card.status) {
-                if (!status.def.worker.try_retreat({
+            for (const status of card.modifiers) {
+                if (!status.modifier.try_retreat({
                     engine: context.engine,
                     owner: player,
                     card: card

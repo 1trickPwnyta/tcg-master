@@ -7,6 +7,7 @@ import { PokemonCard } from "../game/state/PokemonCard.js";
 import { Bench } from "../game/state/Bench.js";
 import { CardDef } from "../defs/CardDef.js";
 import { StatusDefOf } from "../defs/defof/StatusDefOf.js";
+import { ModifierStatus } from "../game/modifiers/ModifierStatus.js";
 
 export class Command_check extends Command {
     public readonly name: string = "check";
@@ -17,7 +18,7 @@ export class Command_check extends Command {
             card,
             { name: `[${maxHp - card.damage} / ${maxHp} HP]`, type: "hp" },
             `[${card.orientation}]`,
-            ...(card.status.some(s => s.def == StatusDefOf.Poison) ? [ "[🤢]" ] : []),
+            ...(card.modifiers.some(s => s instanceof ModifierStatus && s.def == StatusDefOf.Poison) ? [ "[🤢]" ] : []),
             "<br />...Energy:",
             ...Client.getCardList(card.attachments.cards.filter(c => c.def.kind === "energy"))
         );

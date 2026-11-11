@@ -1,0 +1,15 @@
+{
+    "name": "BaseSet.ProfessorOak",
+    "label": "Professor Oak",
+    "text": "Discard your hand, then draw 7 cards.",
+    "workers": [
+        {
+            "class": "TrainerWorker_Discard",
+            "args": { "amount": "all" }
+        },
+        {
+            "class": "TrainerWorker_Draw",
+            "args": { "amount": 7 }
+        }
+    ]
+}

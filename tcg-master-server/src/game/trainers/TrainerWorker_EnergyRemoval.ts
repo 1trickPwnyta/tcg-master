@@ -37,7 +37,7 @@ export class TrainerWorker_EnergyRemoval extends TrainerWorker {
     public override execute(context: TrainerContext, target_pokemon: number, target_energy: number) {
         const card = context.engine.search.getCard(target_energy)!;
         const pokemon = context.engine.search.getCard(target_pokemon) as PokemonCard;
-        card.owner.discard.add(card);
+        card.discard();
         context.engine.send(card, "was discarded from", ...pokemon.fullTokens, ".");
     }
 };

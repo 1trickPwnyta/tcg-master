@@ -1,5 +1,5 @@
 {
     "name": "LeekSlap",
-    "worker": "StatusWorker_LeekSlap",
+    "modifier": "Modifier_LeekSlap",
     "permanent": true
 }

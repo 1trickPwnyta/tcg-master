@@ -1,0 +1,9 @@
+{
+    "name": "BaseSet.Maintenance",
+    "label": "Maintenance",
+    "text": "Shuffle 2 of the other cards from your hand into your deck in order to draw a card.",
+    "workers": [
+        { "class": "TrainerWorker_ShuffleFromHand", "args": { "amount": 2, "required": true } },
+        { "class": "TrainerWorker_Draw", "args": { "amount": 1 } }
+    ]
+}

@@ -3,9 +3,9 @@ import { IToken } from "../../IToken.js";
 import { GameEngine } from "../engine/GameEngine.js";
 import { Active } from "./Active.js";
 import { Bench } from "./Bench.js";
-import { Card } from "./Card.js";
 import { Deck } from "./Deck.js";
 import { Hand } from "./Hand.js";
+import { Limbo } from "./Limbo.js";
 import { Location } from "./Location.js";
 import { PokemonCard } from "./PokemonCard.js";
 import { Serializable, Serialize } from "./serializer.js";
@@ -29,7 +29,7 @@ export class Player extends State {
     public readonly bench: Bench;
 
     @Serialize()
-    public readonly limbo: Location;
+    public readonly limbo: Limbo;
 
     @Serialize()
     public readonly hand: Hand;
@@ -84,7 +84,7 @@ export class Player extends State {
         };
         this.active = new Active(id * 10 + 0, this.engine, this);
         this.bench = new Bench(id * 10 + 1, this.engine, this);
-        this.limbo = new Location(id * 10 + 6, this.engine, this);
+        this.limbo = new Limbo(id * 10 + 6, this.engine, this);
         this.hand = new Hand(id * 10 + 2, this.engine, this);
         this.discard = new Location(id * 10 + 3, this.engine, this);
         this.prizes = new Location(id * 10 + 4, this.engine, this);
@@ -92,10 +92,14 @@ export class Player extends State {
     }
 
     public draw(amount: number = 1) {
+        const original = this.deck.count;
         amount = Math.min(amount, this.deck.count);
         const cardsDrawn = [];
         for (let i = 0; i < amount; i++) {
             const card = this.deck.cards.pop()!;
+            if (!card) {
+                debugger;
+            }
             this.hand.add(card);
             cardsDrawn.push(card);
         }

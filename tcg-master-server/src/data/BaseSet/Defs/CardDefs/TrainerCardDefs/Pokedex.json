@@ -1,0 +1,7 @@
+{
+    "name": "BaseSet.Pokedex",
+    "label": "Pokédex",
+    "text": "Look at up to 5 cards from the top of your deck and rearrange them as you like.",
+    "workers": [ "TrainerWorker_Pokedex" ],
+    "preannounce": true
+}

@@ -1,4 +1,4 @@
 {
     "name": "Poison",
-    "worker": "StatusWorker_Poison"
+    "modifier": "Modifier_Poison"
 }

@@ -1,5 +1,5 @@
 {
     "name": "Confusion",
-    "worker": "StatusWorker_Confusion",
+    "modifier": "Modifier_Confusion",
     "orientation": "confused"
 }

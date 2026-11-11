@@ -4,6 +4,7 @@ import { EnergyTypeDef } from "../../defs/EnergyTypeDef.js";
 import { PokemonCardDef } from "../../defs/PokemonCardDef.js";
 import { StatusDef } from "../../defs/StatusDef.js";
 import { GameEngine } from "../engine/GameEngine.js";
+import { Modifier } from "../modifiers/Modifier.js";
 import { Card } from "./Card.js";
 import { Choice } from "./Choice.js";
 import { EnergyCard } from "./EnergyCard.js";
@@ -11,6 +12,7 @@ import { InterruptResolution } from "./interrupts/InterruptResolution.js";
 import { Location } from "./Location.js";
 import { Player } from "./Player.js";
 import { Serializable, Serialize } from "./serializer.js";
+import { TrainerCard } from "./TrainerCard.js";
 
 export type DamageContext = {
     amount: number;
@@ -41,7 +43,7 @@ export class PokemonCard extends Card {
         return [
             super.targetName,
             this.owner.activePokemon == this ? "(active)" : "",
-            this.energy.length ? `[${this.energy.map(e => e.def.type.symbol).join("")}]` : ""
+            this.energy.length ? `[${this.energy.flatMap(e => Array.from({ length: e.def.amount }, () => e.def.type.symbol)).join("")}]` : ""
         ].filter(s => s.length).join(" ");
     }
 
@@ -53,14 +55,19 @@ export class PokemonCard extends Card {
         return this.attachments.cards.filter(c => c.def.kind === "energy").map(c => c as EnergyCard);
     }
 
-    public get status(): { def: StatusDef, args: any }[] {
-        return this.statuses.map(s => ({ def: DefDatabase.get<StatusDef>(s.def), args: s.args }));
+    public get modifiers(): { modifier: Modifier, args: any }[] {
+        return [
+            ...this.statuses.map(s => ({ modifier: DefDatabase.get<StatusDef>(s.def).modifier, args: s.args })),
+            ...this.attachments.cards.filter(a => a instanceof TrainerCard && a.def.modifiers.length).flatMap(a => (a as TrainerCard).def.modifiers).map(m => ({
+                modifier: m, args: {}
+            }))
+        ];
     }
 
     public get weakness(): EnergyTypeDef | undefined {
         let weakness = this.def.weakness;
-        for (const status of this.status) {
-            weakness = status.def.worker.getModifiedWeakness({
+        for (const status of this.modifiers) {
+            weakness = status.modifier.getModifiedWeakness({
                 engine: this.engine,
                 owner: this.owner,
                 card: this
@@ -71,8 +78,8 @@ export class PokemonCard extends Card {
 
     public get resistance(): EnergyTypeDef | undefined {
         let resistance = this.def.resistance;
-        for (const status of this.status) {
-            resistance = status.def.worker.getModifiedResistance({
+        for (const status of this.modifiers) {
+            resistance = status.modifier.getModifiedResistance({
                 engine: this.engine,
                 owner: this.owner,
                 card: this
@@ -115,9 +122,9 @@ export class PokemonCard extends Card {
     }
 
     public cantAttackReason(): string | null {
-        for (const status of this.status) {
-            if (!status.def.canAttack) {
-                return status.def.label;
+        for (const status of this.modifiers) {
+            if (!status.modifier.canAttack) {
+                return status.modifier.label;
             }
         }
 
@@ -125,9 +132,9 @@ export class PokemonCard extends Card {
     }
 
     public cantRetreatReason(): string | null {
-        for (const status of this.status) {
-            if (!status.def.canRetreat) {
-                return status.def.label;
+        for (const status of this.modifiers) {
+            if (!status.modifier.canRetreat) {
+                return status.modifier.label;
             }
         }
 
@@ -147,8 +154,8 @@ export class PokemonCard extends Card {
             }
         }
 
-        for (const status of this.status) {
-            amount = status.def.worker.modifyDamageTaken({
+        for (const status of this.modifiers) {
+            amount = status.modifier.modifyDamageTaken({
                 engine: this.engine,
                 owner: this.owner,
                 card: this
@@ -169,14 +176,14 @@ export class PokemonCard extends Card {
 
     public knockOut(attacker?: PokemonCard) {
         this.engine.send(...this.fullTokens, "was knocked out!");
-        for (const status of this.status) {
-            status.def.worker.notify_knockedOut({
+        for (const status of this.modifiers) {
+            status.modifier.notify_knockedOut({
                 engine: this.engine,
                 owner: this.owner,
                 card: this
             }, attacker);
         }
-        this.owner.discard.add(this);
+        this.discard();
         this.owner.opponent.takePrize();
         const interrupt = this.engine.turns.checkActivePokemon();
         if (interrupt) {
@@ -199,7 +206,7 @@ export class PokemonCard extends Card {
     public giveStatus(def: StatusDef, args?: any) {
         this.statuses.push({ def: def.name, args: args });
         this.orientation = def.orientation ?? this.orientation;
-        def.worker.notify_given({
+        def.modifier.notify_given({
             engine: this.engine,
             owner: this.owner,
             card: this

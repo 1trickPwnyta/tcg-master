@@ -1,4 +1,4 @@
 {
     "name": "ModifiedWeakness",
-    "worker": "StatusWorker_ModifiedWeakness"
+    "modifier": "Modifier_ModifiedWeakness"
 }

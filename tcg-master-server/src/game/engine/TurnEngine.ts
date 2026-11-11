@@ -3,6 +3,7 @@ import { Interrupt } from "../state/interrupts/Interrupt.js";
 import { Turn } from "../state/Turn.js";
 import { SubEngine } from "./SubEngine.js";
 import { Choice } from "../state/Choice.js";
+import { TrainerCard } from "../state/TrainerCard.js";
 
 export class TurnEngine extends SubEngine {
     private get turn(): Turn {
@@ -28,13 +29,14 @@ export class TurnEngine extends SubEngine {
         this.engine.send("End of", this.engine.game.activePlayer, "'s turn.");
         this.engine.send();
         for (const player of this.state.players) {
-            const active = player.activePokemon!;
-            for (const status of active.status) {
-                status.def.worker.notify_endOfTurn({
-                    engine: this.engine,
-                    owner: player,
-                    card: active
-                }, this.state.turn!.player);
+            for (const pokemon of player.pokemonInPlay) {
+                for (const status of pokemon.modifiers) {
+                    status.modifier.notify_endOfTurn({
+                        engine: this.engine,
+                        owner: player,
+                        card: pokemon
+                    }, this.state.turn!.player);
+                }
             }
         }
         for (const client of this.engine.clients) {

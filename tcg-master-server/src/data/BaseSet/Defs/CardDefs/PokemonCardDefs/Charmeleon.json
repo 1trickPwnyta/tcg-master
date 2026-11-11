@@ -1,0 +1,23 @@
+{
+    "name": "BaseSet.Charmeleon",
+    "label": "Charmeleon",
+    "type": "Fire",
+    "stage": "stage1",
+    "hp": 80,
+    "weakness": "Water",
+    "retreat": 1,
+    "attacks": [
+        {
+            "name": "Slash",
+            "cost": [ "Colorless", "Colorless", "Colorless" ],
+            "damage": 30
+        },
+        {
+            "name": "Flamethrower",
+            "cost": [ "Fire", "Fire", "Colorless" ],
+            "damage": 50,
+            "workers": [ { "class": "AttackWorker_SacrificeEnergy", "args": { "sacrifice": [ "Fire" ] } } ],
+            "text": "Discard 1 {Fire} Energy card attached to Charmeleon in order to use this attack."
+        }
+    ]
+}

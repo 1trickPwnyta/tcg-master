@@ -1,0 +1,25 @@
+{
+    "name": "BaseSet.Arcanine",
+    "label": "Arcanine",
+    "type": "Fire",
+    "stage": "stage1",
+    "hp": 100,
+    "weakness": "Water",
+    "retreat": 3,
+    "attacks": [
+        {
+            "name": "Flamethrower",
+            "cost": [ "Fire", "Fire", "Colorless" ],
+            "damage": 50,
+            "workers": [ { "class": "AttackWorker_SacrificeEnergy", "args": { "sacrifice": [ "Fire" ] } } ],
+            "text": "Discard 1 {Fire} Energy card attached to Arcanine in order to use this attack."
+        },
+        {
+            "name": "Take Down",
+            "cost": [ "Fire", "Fire", "Colorless", "Colorless" ],
+            "damage": 80,
+            "workers": [ { "class": "AttackWorker_SelfDamage", "args": { "amount": 30, "trigger": "always" } } ],
+            "text": "Arcanine does 30 damage to itself."
+        }
+    ]
+}

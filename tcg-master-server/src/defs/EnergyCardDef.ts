@@ -18,7 +18,7 @@ export class EnergyCardDef extends CardDef {
         for (let i = 0; i < this.amount; i++) {
             symbol += this.type.symbol;
         }
-        return { name: `${symbol}${this.basic ? "Energy" : this.name}`, type: "energy" };
+        return { name: `${symbol}${this.basic ? "Energy" : this.label}`, type: "energy" };
     }
 
     public constructor(defClass: string, data: IDefData) {

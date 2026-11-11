@@ -1,4 +1,4 @@
 {
     "name": "Disablement",
-    "worker": "StatusWorker_Disablement"
+    "modifier": "Modifier_Disablement"
 }

@@ -25,6 +25,8 @@ export interface ICardDefData_Pokemon {
 export interface ICardDefData_Trainer {
     text: string;
     workers: (string | { class: string, args: any })[];
+    modifiers?: (string | { class: string, args: any })[];
+    preannounce?: boolean;
 };
 
 export interface ICardDefData_Energy {
@@ -44,7 +46,7 @@ export interface IDefData_Evolution {
 };
 
 export interface IDefData_Status {
-    worker: string | { class: string, args: any };
+    modifier: string | { class: string, args: any };
     orientation?: "paralyzed" | "asleep" | "confused" | "normal";
     canAttack?: boolean;
     canRetreat?: boolean;

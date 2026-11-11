@@ -1,13 +1,14 @@
 import { DefDatabase } from "../../defs/DefDatabase.js";
 import { StatusDef } from "../../defs/StatusDef.js";
-import { StatusContext, StatusWorker } from "./StatusWorker.js";
+import { ModifierContext } from "./Modifier.js";
+import { ModifierStatus } from "./ModifierStatus.js";
 
-export class StatusWorker_Confusion extends StatusWorker {
-    public override notify_given(context: StatusContext): void {
+export class Modifier_Confusion extends ModifierStatus {
+    public override notify_given(context: ModifierContext): void {
         context.engine.send(...context.card.fullTokens, "got confused!");
     }
 
-    public override try_attack(context: StatusContext): boolean {
+    public override try_attack(context: ModifierContext): boolean {
         context.engine.send(...context.card.fullTokens, "is confused.");
         if (context.engine.game.flipCoin(context.owner)) {
             return true;
@@ -22,7 +23,7 @@ export class StatusWorker_Confusion extends StatusWorker {
         }
     }
 
-    public override try_retreat(context: StatusContext): boolean {
+    public override try_retreat(context: ModifierContext): boolean {
         context.engine.send(...context.card.fullTokens, "is confused.");
         if (context.engine.game.flipCoin(context.owner)) {
             return true;

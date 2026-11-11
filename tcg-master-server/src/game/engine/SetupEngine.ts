@@ -18,9 +18,9 @@ export class SetupEngine extends SubEngine {
                 const deck = [
                     { def: DefDatabase.get<PokemonCardDef>("BaseSet.Farfetchd"), count: 14 },
                     { def: DefDatabase.get<EnergyCardDef>("BaseSet.PsychicEnergy"), count: 26 },
-                    { def: DefDatabase.get<TrainerCardDef>("BaseSet.Potion"), count: 10 },
+                    { def: DefDatabase.get<TrainerCardDef>("BaseSet.Maintenance"), count: 10 },
                     { def: DefDatabase.get<EnergyCardDef>("BaseSet.LightningEnergy"), count: 0 },
-                    { def: DefDatabase.get<PokemonCardDef>("BaseSet.Haunter"), count: 10 }
+                    { def: DefDatabase.get<PokemonCardDef>("BaseSet.DoubleColorlessEnergy"), count: 10 }
                 ];
                 for (const blueprint of deck) {
                     for (let i = 0; i < blueprint.count; i++) {

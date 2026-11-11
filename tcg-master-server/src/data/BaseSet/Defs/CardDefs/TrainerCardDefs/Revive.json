@@ -1,0 +1,6 @@
+{
+    "name": "BaseSet.Revive",
+    "label": "Revive",
+    "text": "Put 1 Basic Pokémon card from your discard pile onto your Bench. Put damage counters on that Pokémon equal to half its HP (rounded down to the nearest 10). <em>(You can't play Revive if your Bench is full.)</em>",
+    "workers": [ "TrainerWorker_Revive" ]
+}

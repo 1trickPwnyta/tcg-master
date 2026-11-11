@@ -11,7 +11,7 @@ export class Command_select extends Command {
             if (!isNaN(num) && num > 0 && num <= interrupt.choices.length) {
                 context.engine.interrupts.resolve(context.player_id, num - 1);
                 return;
-            } else if (context.text === "`") {
+            } else if (context.text === "`" && !interrupt.force) {
                 context.engine.interrupts.resolve(context.player_id, null);
                 return;
             }

@@ -1,0 +1,16 @@
+{
+    "name": "BaseSet.Dratini",
+    "label": "Dratini",
+    "type": "Colorless",
+    "stage": "basic",
+    "hp": 40,
+    "resistance": "Psychic",
+    "retreat": 1,
+    "attacks": [
+        {
+            "name": "Pound",
+            "cost": [ "Colorless" ],
+            "damage": 10
+        }
+    ]
+}

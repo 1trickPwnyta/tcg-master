@@ -1,0 +1,7 @@
+{
+    "name": "BaseSet.PlusPower",
+    "label": "PlusPower",
+    "text": "Attach PlusPower to your Active Pokémon. At the end of your turn, discard PlusPower. If this Pokémon's attack does damage to itself or the Defending Pokémon <em>(after applying Weakness and Resistance)</em>, the attack does 10 more damage to that Pokémon.",
+    "workers": [ { "class": "TrainerWorker_Attach", "args": { "target": "active" } } ],
+    "modifiers": [ "Modifier_PlusPower" ]
+}

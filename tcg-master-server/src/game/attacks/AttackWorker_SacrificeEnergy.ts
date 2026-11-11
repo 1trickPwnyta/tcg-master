@@ -29,10 +29,10 @@ export class AttackWorker_SacrificeEnergy extends AttackWorker {
         }
     }
 
-    public override postEffect(context: AttackContext, knockedOut: boolean, ...energy_id: number[]) {
+    public override postEffect(context: AttackContext, _knockedOut: boolean, ...energy_id: number[]) {
         for (const energy of energy_id) {
             const card = context.engine.search.getCard(energy)!;
-            context.engine.game.activePlayer.discard.add(card);
+            card.discard();
         }
     }
 };
