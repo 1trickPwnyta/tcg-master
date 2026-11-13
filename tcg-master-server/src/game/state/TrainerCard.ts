@@ -1,16 +1,20 @@
 import { TrainerCardDef } from "../../defs/TrainerCardDef.js";
 import { GameEngine } from "../engine/GameEngine.js";
 import { Card } from "./Card.js";
-import { Interrupt } from "./interrupts/Interrupt.js";
+import { Interrupt, InterruptSync } from "./interrupts/Interrupt.js";
+import { InterruptType } from "./interrupts/InterruptType.js";
 import { Location } from "./Location.js";
 import { Player } from "./Player.js";
 import { Serializable } from "./serializer.js";
 
 export type TrainerContext = {
-    engine: GameEngine,
-    player: Player,
-    card: TrainerCard,
-    targetsLocation?: Location
+    engine: GameEngine;
+    player: Player;
+    card: TrainerCard;
+    args: any;
+    targetsLocation?: Location;
+    interruptType?: InterruptType;
+    forceInterrupt?: boolean;
 };
 
 @Serializable()
@@ -25,10 +29,11 @@ export class TrainerCard extends Card {
         const context = {
             engine: this.engine,
             player: this.owner,
-            card: this
+            card: this,
+            args: {}
         };
 
-        if (this.preTarget(context) === "fail") {
+        if (!this.validate(context)) {
             this.cancel(context);
             return false;
         }
@@ -37,11 +42,19 @@ export class TrainerCard extends Card {
             this.engine.send(this.owner, "used", this, ".");
         }
 
-        const interrupt = this.validateTargets(context, ...targets);
-        if (interrupt === "fail") {
-            this.cancel(context);
-            return false;
-        } else if (interrupt) {
+        return this.playTrainer(context.args);
+    }
+
+    public playTrainer(args: any): boolean {
+        const context = {
+            engine: this.engine,
+            player: this.owner,
+            card: this,
+            args: args
+        };
+
+        const interrupt = this.acquireTargets(context);
+        if (interrupt) {
             this.engine.interrupts.interrupt(interrupt);
             return true;
         }
@@ -50,11 +63,11 @@ export class TrainerCard extends Card {
             this.engine.send(this.owner, "used", this, ".");
         }
         
-        this.execute(context, ...targets);
+        this.execute(context);
         if (this.location == this.owner.limbo) {
             this.discard();
         }
-        
+
         return true;
     }
 
@@ -62,20 +75,20 @@ export class TrainerCard extends Card {
         context.player.limbo.sendAllBack();
     }
 
-    private preTarget(context: TrainerContext): true | "fail" {
+    private validate(context: TrainerContext): boolean {
         for (const worker of this.def.workers) {
-            const result = worker.preTarget(context);
-            if (result === "fail") {
-                return "fail";
+            if (!worker.validate(context)) {
+                return false;
             }
         }
 
         return true;
     }
 
-    private validateTargets(context: TrainerContext, ...targets: number[]): Interrupt | "fail" | null {
+    private acquireTargets(context: TrainerContext): Interrupt | null {
         for (const worker of this.def.workers) {
-            const interrupt = worker.validateTargets(context, ...targets);
+            worker.consolidateTargets(context);
+            const interrupt = worker.acquireTargets(context, ...worker.getTargets(context));
             if (interrupt) {
                 return interrupt;
             }
@@ -84,9 +97,10 @@ export class TrainerCard extends Card {
         return null;
     }
 
-    private execute(context: TrainerContext, ...targets: number[]) {
+    private execute(context: TrainerContext) {
         for (const worker of this.def.workers) {
-            worker.execute(context, ...targets);
+            worker.consolidateTargets(context);
+            worker.execute(context, ...worker.getTargets(context));
         }
     }
 };

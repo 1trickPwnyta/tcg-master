@@ -1,7 +1,7 @@
 import { StatusDef } from "../../defs/StatusDef.js";
 import { Modifier, ModifierContext } from "./Modifier.js";
 
-export abstract class ModifierStatus extends Modifier {
+export abstract class StatusModifier extends Modifier {
     public readonly def: StatusDef;
 
     public override get label(): string {

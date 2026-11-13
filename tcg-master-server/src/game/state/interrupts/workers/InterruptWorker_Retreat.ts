@@ -18,13 +18,13 @@ export class InterruptWorker_Retreat extends InterruptWorker {
             context.engine.sendError(player, card, "can't retreat due to", cantRetreatReason, ".");
             return false;
         }
-        const energy = [ ...card.energy ];
+        const energy = card.attachments.energyCards;
         const paid = [];
         let amount = 0;
         while (energy.length && amount < card.def.retreat) {
             const next = energy.pop()!;
-            amount += next.def.amount;
-            paid.push(next.id);
+            amount += next.amount;
+            paid.push(next.card.id);
         }
         if (amount < card.def.retreat) {
             context.engine.sendError(player, card, "doesn't have enough energy to retreat.");

@@ -1,0 +1,24 @@
+{
+    "name": "BaseSet.Dragonair",
+    "label": "Dragonair",
+    "type": "Colorless",
+    "stage": "stage1",
+    "hp": 80,
+    "resistance": "Psychic",
+    "retreat": 2,
+    "attacks": [
+        {
+            "name": "Slam",
+            "cost": [ "Colorless", "Colorless", "Colorless" ],
+            "workers": [ { "class": "AttackWorker_CoinDamage", "args": { "amount": 30, "coins": 2 } } ],
+            "text": "Flip 2 coins. This attack does 30 damage times the number of heads."
+        },
+        {
+            "name": "Hyper Beam",
+            "cost": [ "Colorless", "Colorless", "Colorless", "Colorless" ],
+            "damage": 20,
+            "workers": [ "AttackWorker_DestroyEnergy" ],
+            "text": "If the Defending Pokémon has any Energy cards attached to it, choose 1 of them and discard it."
+        }
+    ]
+}

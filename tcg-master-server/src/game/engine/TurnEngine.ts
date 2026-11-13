@@ -42,6 +42,9 @@ export class TurnEngine extends SubEngine {
         for (const client of this.engine.clients) {
             client.notify_endOfTurn();
         }
+        if (!this.state.turn?.attacked) {
+            this.state.attackResult = undefined;
+        }
         this.state.betweenTurns = true;
     }
 
@@ -66,6 +69,7 @@ export class TurnEngine extends SubEngine {
                     new Choice({ text: "play a card" }, InterruptResolution.PlayCard),
                     new Choice({ text: "attack" }, InterruptResolution.Attack),
                     new Choice({ text: "retreat" }, InterruptResolution.Retreat),
+                    new Choice({ text: "use a Pokémon power" }, InterruptResolution.UsePokemonPower),
                     new Choice({ text: "end turn" }, InterruptResolution.EndTurn)
                 ],
                 force: true

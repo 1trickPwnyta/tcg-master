@@ -1,0 +1,24 @@
+{
+    "name": "BaseSet.Dugtrio",
+    "label": "Dugtrio",
+    "type": "Fighting",
+    "stage": "stage1",
+    "hp": 70,
+    "weakness": "Grass",
+    "resistance": "Lightning",
+    "retreat": 2,
+    "attacks": [
+        {
+            "name": "Slash",
+            "cost": [ "Fighting", "Fighting", "Colorless" ],
+            "damage": 40
+        },
+        {
+            "name": "Earthquake",
+            "cost": [ "Fighting", "Fighting", "Fighting", "Fighting" ],
+            "damage": 70,
+            "workers": [ { "class": "AttackWorker_BenchDamage", "args": { "target": "all", "scope": "attacker", "amount": 10 } } ],
+            "text": "Does 10 damage to each of your own Benched Pokémon. <em>(Don't apply Weakness and Resistance for Benched Pokémon.)</em>"
+        }
+    ]
+}

@@ -1,11 +1,15 @@
 import { DefDatabase } from "../../defs/DefDatabase.js";
 import { StatusDef } from "../../defs/StatusDef.js";
 import { ModifierContext } from "./Modifier.js";
-import { ModifierStatus } from "./ModifierStatus.js";
+import { StatusModifier } from "./StatusModifier.js";
 
-export class Modifier_Confusion extends ModifierStatus {
-    public override notify_given(context: ModifierContext): void {
+export class Modifier_Confusion extends StatusModifier {
+    public override notify_given(context: ModifierContext) {
         context.engine.send(...context.card.fullTokens, "got confused!");
+    }
+
+    public override notify_removed(context: ModifierContext) {
+        context.engine.send(...context.card.fullTokens, "is no longer confused!");
     }
 
     public override try_attack(context: ModifierContext): boolean {

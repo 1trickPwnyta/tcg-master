@@ -106,16 +106,16 @@ export class Player extends State {
         if (amount > 5) {
             this.engine.send(this, "drew", amount, `card${amount > 1 ? "s" : ""}.`)
         } else {
-            this.engine.sendTo(this.opponent.id, this, "drew", amount > 1 ? `${amount} cards` : "a card", ".")
-            this.engine.sendTo(this.id, "You drew", ...Client.getCardList(cardsDrawn));
+            this.engine.sendTo(this.opponent, this, "drew", amount > 1 ? `${amount} cards` : "a card", ".")
+            this.engine.sendTo(this, "You drew", ...Client.getCardList(cardsDrawn));
         }
     }
 
     public takePrize() {
         const card = this.prizes.cards.pop()!;
         this.hand.add(card);
-        this.engine.sendTo(this.opponent.id, this, "took a prize.");
-        this.engine.sendTo(this.id, "You took", card, "as a prize.");
+        this.engine.sendTo(this.opponent, this, "took a prize.");
+        this.engine.sendTo(this, "You took", card, "as a prize.");
         if (this.prizes.count <= 0) {
             this.engine.end(this.id);
         }

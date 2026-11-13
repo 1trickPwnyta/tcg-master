@@ -1,0 +1,25 @@
+{
+    "name": "BaseSet.Electabuzz",
+    "label": "Electabuzz",
+    "type": "Lightning",
+    "stage": "basic",
+    "hp": 70,
+    "weakness": "Fighting",
+    "retreat": 2,
+    "attacks": [
+        {
+            "name": "Thundershock",
+            "cost": [ "Lightning" ],
+            "damage": 10,
+            "workers": [ "AttackWorker_Paralyze" ],
+            "text": "Flip a coin. If heads, the Defending Pokémon is now Paralyzed."
+        },
+        {
+            "name": "Thunderpunch",
+            "cost": [ "Lightning", "Colorless" ],
+            "damage": 30,
+            "workers": [ { "class": "AttackWorker_CoinDamage", "args": { "amount": 10, "coins": 1, "selfDamage": 10 } } ],
+            "text": "Flip a coin. If heads, this attack does 30 damage plus 10 more damage; if tails, this attack does 30 damage plus Electabuzz does 10 damage to itself."
+        }
+    ]
+}

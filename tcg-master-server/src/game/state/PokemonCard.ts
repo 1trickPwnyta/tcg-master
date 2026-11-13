@@ -5,19 +5,18 @@ import { PokemonCardDef } from "../../defs/PokemonCardDef.js";
 import { StatusDef } from "../../defs/StatusDef.js";
 import { GameEngine } from "../engine/GameEngine.js";
 import { Modifier } from "../modifiers/Modifier.js";
+import { Attachments } from "./Attachments.js";
 import { Card } from "./Card.js";
 import { Choice } from "./Choice.js";
-import { EnergyCard } from "./EnergyCard.js";
 import { InterruptResolution } from "./interrupts/InterruptResolution.js";
 import { Location } from "./Location.js";
 import { Player } from "./Player.js";
 import { Serializable, Serialize } from "./serializer.js";
-import { TrainerCard } from "./TrainerCard.js";
 
 export type DamageContext = {
     amount: number;
     attacker?: PokemonCard;
-    source?: string;
+    source?: "attack" | string;
     type?: EnergyTypeDef;
 };
 
@@ -30,7 +29,7 @@ export class PokemonCard extends Card {
     public orientation: "normal" | "asleep" | "confused" | "paralyzed" = "normal";
 
     @Serialize()
-    public readonly attachments: Location;
+    public readonly attachments: Attachments;
 
     @Serialize()
     public readonly statuses: { def: string, args: any }[] = [];
@@ -43,7 +42,7 @@ export class PokemonCard extends Card {
         return [
             super.targetName,
             this.owner.activePokemon == this ? "(active)" : "",
-            this.energy.length ? `[${this.energy.flatMap(e => Array.from({ length: e.def.amount }, () => e.def.type.symbol)).join("")}]` : ""
+            this.attachments.energyString
         ].filter(s => s.length).join(" ");
     }
 
@@ -51,14 +50,14 @@ export class PokemonCard extends Card {
         return super.def as PokemonCardDef;
     }
 
-    public get energy(): EnergyCard[] {
-        return this.attachments.cards.filter(c => c.def.kind === "energy").map(c => c as EnergyCard);
+    public get energy(): EnergyTypeDef[] {
+        return this.attachments.energy;
     }
 
     public get modifiers(): { modifier: Modifier, args: any }[] {
         return [
             ...this.statuses.map(s => ({ modifier: DefDatabase.get<StatusDef>(s.def).modifier, args: s.args })),
-            ...this.attachments.cards.filter(a => a instanceof TrainerCard && a.def.modifiers.length).flatMap(a => (a as TrainerCard).def.modifiers).map(m => ({
+            ...this.attachments.cards.filter(a => a.def.modifiers.length).flatMap(a => a.def.modifiers).map(m => ({
                 modifier: m, args: {}
             }))
         ];
@@ -90,7 +89,7 @@ export class PokemonCard extends Card {
 
     public constructor(id: number, engine: GameEngine, def: PokemonCardDef, owner: Player) {
         super(id, engine, def, owner);
-        this.attachments = new Location(this.id * 100000, this.engine, owner);
+        this.attachments = new Attachments(this.id * 100000, this.engine, owner, this);
     }
 
     public override play(): boolean {
@@ -141,40 +140,41 @@ export class PokemonCard extends Card {
         return null;
     }
 
-    public dealDamage(context: DamageContext): boolean {
-        let amount = context.amount;
-
+    public dealDamage(context: DamageContext): { knockedOut: boolean, finalDamage: number } {
         if (context.type) {
             if (this.weakness === context.type) {
-                amount *= 2;
+                context.amount *= 2;
             }
             if (this.resistance === context.type) {
-                amount -= 30;
-                amount = Math.max(0, amount);
+                context.amount -= 30;
+                context.amount = Math.max(0, context.amount);
             }
         }
 
         for (const status of this.modifiers) {
-            amount = status.modifier.modifyDamageTaken({
+            context.amount = status.modifier.modifyDamageTaken({
                 engine: this.engine,
                 owner: this.owner,
                 card: this
-            }, amount, status.args);
+            }, context, status.args);
         }
 
-        if (amount > 0) {
-            this.damage += amount;
-            this.engine.send(...this.fullTokens, "took", { name: amount.toString(), type: "damage" }, `damage${context.source ? ` due to ${context.source}` : ""}!`);
+        if (context.amount > 0) {
+            this.damage += context.amount;
+            this.engine.send(...this.fullTokens, "took", {
+                name: context.amount.toString(),
+                type: "damage"
+            }, `damage${context.source && context.source !== "attack" ? ` due to ${context.source}` : ""}!`);
             if (this.damage >= this.def.hp) {
                 this.knockOut(context.attacker);
-                return true;
+                return { knockedOut: true, finalDamage: context.amount };
             }
         }
 
-        return false;
+        return { knockedOut: false, finalDamage: context.amount };
     }
 
-    public knockOut(attacker?: PokemonCard) {
+    public knockOut(attacker?: PokemonCard, discard: boolean = true) {
         this.engine.send(...this.fullTokens, "was knocked out!");
         for (const status of this.modifiers) {
             status.modifier.notify_knockedOut({
@@ -183,7 +183,9 @@ export class PokemonCard extends Card {
                 card: this
             }, attacker);
         }
-        this.discard();
+        if (discard) {
+            this.discard();
+        }
         this.owner.opponent.takePrize();
         const interrupt = this.engine.turns.checkActivePokemon();
         if (interrupt) {
@@ -204,6 +206,10 @@ export class PokemonCard extends Card {
     }
 
     public giveStatus(def: StatusDef, args?: any) {
+        const status = this.statuses.find(s => s.def === def.name);
+        if (status) {
+            this.statuses.splice(this.statuses.indexOf(status), 1);
+        }
         this.statuses.push({ def: def.name, args: args });
         this.orientation = def.orientation ?? this.orientation;
         def.modifier.notify_given({
@@ -214,10 +220,17 @@ export class PokemonCard extends Card {
     }
 
     public removeStatus(def: StatusDef) {
-        const status = this.statuses.find(s => s.def === def.name)!;
-        this.statuses.splice(this.statuses.indexOf(status), 1);
-        if (def.orientation) {
-            this.orientation = "normal";
+        const status = this.statuses.find(s => s.def === def.name);
+        if (status) {
+            this.statuses.splice(this.statuses.indexOf(status), 1);
+            if (def.orientation) {
+                this.orientation = "normal";
+            }
+            def.modifier.notify_removed({
+                engine: this.engine,
+                owner: this.owner,
+                card: this
+            }, status.args);
         }
     }
 
@@ -242,5 +255,17 @@ export class PokemonCard extends Card {
 
     public sleep() {
         this.giveStatus(StatusDefOf.Sleep);
+    }
+
+    public override notify_moved(_oldLocation: Location, newLocation: Location) {
+        if (newLocation !== this.owner.active) {
+            this.clearStatus();
+        }
+        if (newLocation !== this.owner.active && newLocation !== this.owner.bench) {
+            this.damage = 0;
+            while (this.attachments.count) {
+                this.attachments.cards[0].discard();
+            }
+        }
     }
 };

@@ -13,6 +13,7 @@ export interface InterruptSync {
     resolution?: InterruptResolution;
     cancelResolution?: InterruptResolution;
     args?: (number | string)[];
+    compoundArgs?: any;
 };
 
 export interface InterruptAsync {

@@ -5,6 +5,7 @@ import { DefDatabase } from "./DefDatabase.js";
 import { EnergyTypeDef } from "./EnergyTypeDef.js";
 import { EnergyTypeDefOf } from "./defof/EnergyTypeDefOf.js";
 import { EvolutionDef } from "./EvolutionDef.js";
+import { PokemonPower } from "../game/powers/PokemonPower.js";
 
 export class PokemonCardDef extends CardDef {
     public override readonly kind = "pokemon";
@@ -14,9 +15,10 @@ export class PokemonCardDef extends CardDef {
     public readonly weakness: EnergyTypeDef | undefined;
     public readonly resistance: EnergyTypeDef | undefined;
     public readonly retreat: number;
+    public power?: PokemonPower;
     public readonly attacks: Attack[];
 
-    private readonly cardData: IDefData & ICardDefData_Pokemon;
+    private readonly pokemonData: IDefData & ICardDefData_Pokemon;
 
     public get evolution(): EvolutionDef {
         return DefDatabase.get<EvolutionDef>(this.label);
@@ -24,18 +26,23 @@ export class PokemonCardDef extends CardDef {
 
     public constructor(defClass: string, data: IDefData) {
         super(defClass, data);
-        this.cardData = data as IDefData & ICardDefData_Pokemon;
-        this.type = DefDatabase.get<EnergyTypeDef>(this.cardData.type);
-        this.stage = this.cardData.stage;
-        this.hp = this.cardData.hp;
-        this.weakness = this.cardData.weakness ? DefDatabase.get<EnergyTypeDef>(this.cardData.weakness) : undefined;
-        this.resistance = this.cardData.resistance ? DefDatabase.get<EnergyTypeDef>(this.cardData.resistance) : undefined;
-        this.retreat = this.cardData.retreat;
+        this.pokemonData = data as IDefData & ICardDefData_Pokemon;
+        this.type = DefDatabase.get<EnergyTypeDef>(this.pokemonData.type);
+        this.stage = this.pokemonData.stage;
+        this.hp = this.pokemonData.hp;
+        this.weakness = this.pokemonData.weakness ? DefDatabase.get<EnergyTypeDef>(this.pokemonData.weakness) : undefined;
+        this.resistance = this.pokemonData.resistance ? DefDatabase.get<EnergyTypeDef>(this.pokemonData.resistance) : undefined;
+        this.retreat = this.pokemonData.retreat;
         this.attacks = [];
     }
 
     public override async init() {
-        for (const attackData of this.cardData.attacks) {
+        await super.init();
+        if (this.pokemonData.power) {
+            this.power = new PokemonPower(this.pokemonData.power);
+            await this.power.init();
+        }
+        for (const attackData of this.pokemonData.attacks) {
             const attack = new Attack(attackData);
             await attack.init();
             this.attacks.push(attack);

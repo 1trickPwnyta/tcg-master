@@ -1,0 +1,25 @@
+{
+    "name": "BaseSet.Pidgeotto",
+    "label": "Pidgeotto",
+    "type": "Colorless",
+    "stage": "stage1",
+    "hp": 60,
+    "weakness": "Lightning",
+    "resistance": "Fighting",
+    "retreat": 1,
+    "attacks": [
+        {
+            "name": "Whirlwind",
+            "cost": [ "Colorless", "Colorless" ],
+            "damage": 20,
+            "workers": [ { "class": "AttackWorker_Switch", "args": { "choice": "defender" } } ],
+            "text": "If your opponent has any Benched Pokémon, they choose 1 of them and switch it with the Defending Pokémon. <em>(Do the damage before switching the Pokémon.)</em>"
+        },
+        {
+            "name": "Mirror Move",
+            "cost": [ "Colorless", "Colorless", "Colorless" ],
+            "workers": [ "AttackWorker_MirrorMove" ],
+            "text": "If Pidgeotto was attacked last turn, do the final result of that attack on Pidgeotto to the Defending Pokémon."
+        }
+    ]
+}

@@ -1,7 +1,7 @@
 import { ModifierContext } from "./Modifier.js";
-import { ModifierStatus } from "./ModifierStatus.js";
+import { StatusModifier } from "./StatusModifier.js";
 
-export class Modifier_Disablement extends ModifierStatus {
+export class Modifier_Disablement extends StatusModifier {
     public override notify_given(context: ModifierContext, args: any): void {
         context.engine.send(...context.card.fullTokens, "'s", args.attack_name, "was disabled.");
     }

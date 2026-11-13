@@ -14,20 +14,29 @@ export class SetupEngine extends SubEngine {
     public update() {
         if (this.state.players.find(p => p.deck.count === 0)) {
             this.engine.send("Starting game between", this.state.players[0], "and", this.state.players[1], ".");
-            for (const player of this.state.players) {
-                const deck = [
-                    { def: DefDatabase.get<PokemonCardDef>("BaseSet.Farfetchd"), count: 14 },
-                    { def: DefDatabase.get<EnergyCardDef>("BaseSet.PsychicEnergy"), count: 26 },
-                    { def: DefDatabase.get<TrainerCardDef>("BaseSet.Maintenance"), count: 10 },
-                    { def: DefDatabase.get<EnergyCardDef>("BaseSet.LightningEnergy"), count: 0 },
-                    { def: DefDatabase.get<PokemonCardDef>("BaseSet.DoubleColorlessEnergy"), count: 10 }
-                ];
-                for (const blueprint of deck) {
-                    for (let i = 0; i < blueprint.count; i++) {
-                        const card = CardFactory.make(this.engine, blueprint.def, player);
-                        player.deck.add(card);
-                    }
+            const deck1 = [
+                { def: DefDatabase.get<PokemonCardDef>("BaseSet.Zapdos"), count: 14 },
+                { def: DefDatabase.get<EnergyCardDef>("BaseSet.LightningEnergy"), count: 26 },
+                { def: DefDatabase.get<TrainerCardDef>("BaseSet.Potion"), count: 10 },
+                { def: DefDatabase.get<PokemonCardDef>("BaseSet.FullHeal"), count: 10 }
+            ];
+            const deck2 = [
+                { def: DefDatabase.get<EnergyCardDef>("BaseSet.GrassEnergy"), count: 26 },
+                { def: DefDatabase.get<TrainerCardDef>("BaseSet.Weedle"), count: 30 }
+            ];
+            for (const blueprint of deck1) {
+                for (let i = 0; i < blueprint.count; i++) {
+                    const card = CardFactory.make(this.engine, blueprint.def, this.state.players[0]);
+                    this.state.players[0].deck.add(card);
                 }
+            }
+            for (const blueprint of deck2) {
+                for (let i = 0; i < blueprint.count; i++) {
+                    const card = CardFactory.make(this.engine, blueprint.def, this.state.players[1]);
+                    this.state.players[1].deck.add(card);
+                }
+            }
+            for (const player of this.state.players) {
                 player.deck.shuffle();
                 player.mulligans = this.setupDraw(player);
             }

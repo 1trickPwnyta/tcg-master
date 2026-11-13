@@ -1,5 +1,5 @@
+import { AttackResult } from "../attacks/Attack.js";
 import { GameEngine } from "../engine/GameEngine.js";
-import { Card } from "./Card.js";
 import { Interrupt } from "./interrupts/Interrupt.js";
 import { Player } from "./Player.js";
 import { PokemonCard } from "./PokemonCard.js";
@@ -32,6 +32,9 @@ export class Game extends State {
 
     @Serialize()
     public nextInterrupt_id: number = 1000;
+
+    @Serialize()
+    public attackResult?: AttackResult;
 
     public constructor(engine: GameEngine, rules: { prizes: number }) {
         super(0, engine);

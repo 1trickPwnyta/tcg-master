@@ -1,0 +1,6 @@
+{
+    "name": "BaseSet.FullHeal",
+    "label": "Full Heal",
+    "text": "Your Active Pokémon is no longer Asleep, Confused, Paralyzed, or Poisoned.",
+    "workers": [ "TrainerWorker_FullHeal" ]
+}

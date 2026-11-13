@@ -2,6 +2,7 @@ import { Attack } from "./Attack.js";
 import { GameEngine } from "../engine/GameEngine.js";
 import { Interrupt } from "../state/interrupts/Interrupt.js";
 import { PokemonCard } from "../state/PokemonCard.js";
+import { StatusDef } from "../../defs/StatusDef.js";
 
 export type AttackContext = {
     engine: GameEngine,

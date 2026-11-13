@@ -10,6 +10,13 @@ import { ITargetable } from "../state/Choice.js";
 
 const __dirname = import.meta.dirname;
 
+export type AttackResult = {
+    attacker_id: number;
+    defender_id: number;
+    damage: number;
+    status: { def: string, args: any }[];
+};
+
 export class Attack implements ITargetable {
     public readonly name: string;
     public readonly cost: EnergyTypeDef[];
@@ -111,27 +118,40 @@ export class Attack implements ITargetable {
             context.engine.send(context.engine.game.activePlayer, "'s", context.attacker, "used", this.name, "!");
             let damage = this.damage;
 
+            const damageContext = {
+                amount: damage,
+                attacker: context.attacker,
+                type: context.attacker.def.type,
+                source: "attack"
+            };
             for (const status of context.attacker.modifiers) {
-                damage = status.modifier.modifyDamageDealt({
+                damageContext.amount = status.modifier.modifyDamageDealt({
                     engine: context.engine,
                     owner: context.attacker.owner,
                     card: context.attacker
-                }, damage, status.args);
-                if (damage < 0) {
+                }, damageContext, status.args);
+                if (damageContext.amount < 0) {
                     break;
                 }
             }
-            if (damage >= 0) {
-                damage = this.preEffects(context, damage);
-                if (damage >= 0) {
-                    context.damage = damage;
-                    const knockedOut = context.defender.dealDamage({
-                        amount: damage,
-                        attacker: context.attacker,
-                        type: context.attacker.def.type
-                    });
-                    
-                    this.postEffects(context, knockedOut, ...targets);
+
+            if (damageContext.amount >= 0) {
+                const statusBefore = [ ...context.defender.statuses ];
+                damageContext.amount = this.preEffects(context, damageContext.amount);
+                if (damageContext.amount >= 0) {
+                    context.damage = damageContext.amount;
+                    const damageResult = context.defender.dealDamage(damageContext);
+                    this.postEffects(context, damageResult.knockedOut, ...targets);
+                    const statusGiven = context.defender.statuses.filter(s1 => 
+                        !statusBefore.some(s2 => s1.def === s2.def && JSON.stringify(s1.args) === JSON.stringify(s2.args))
+                    );
+
+                    context.engine.game.attackResult = {
+                        attacker_id: context.attacker.id,
+                        defender_id: context.defender.id,
+                        damage: damageResult.finalDamage,
+                        status: statusGiven
+                    };
                 }
             }
         }
@@ -141,9 +161,9 @@ export class Attack implements ITargetable {
         return true;
     }
 
-    private analyzeCost(energy: EnergyCard[]): { unsatisfied: EnergyTypeDef[], oversatisfied: EnergyTypeDef[] } {
+    private analyzeCost(energy: EnergyTypeDef[]): { unsatisfied: EnergyTypeDef[], oversatisfied: EnergyTypeDef[] } {
         const reqs = [ ...this.cost ].sort((a, b) => b.resolutionPriority - a.resolutionPriority);
-        const pool = energy.flatMap(e => Array.from({ length: e.def.amount }, () => e.def.type)).sort((a, b) => a.resolutionPriority - b.resolutionPriority);
+        const pool = energy.sort((a, b) => a.resolutionPriority - b.resolutionPriority);
         const unsatisfied = [];
         for (let i = 0; i < reqs.length; i++) {
             let satisfied = false;
@@ -162,15 +182,15 @@ export class Attack implements ITargetable {
         return { unsatisfied: unsatisfied, oversatisfied: pool };
     }
 
-    public costUnsatisfied(energy: EnergyCard[]): EnergyTypeDef[] {
+    public costUnsatisfied(energy: EnergyTypeDef[]): EnergyTypeDef[] {
         return this.analyzeCost(energy).unsatisfied;
     }
 
-    public costSatisfied(energy: EnergyCard[]): boolean {
+    public costSatisfied(energy: EnergyTypeDef[]): boolean {
         return this.analyzeCost(energy).unsatisfied.length === 0;
     }
 
-    public costOversatisfied(energy: EnergyCard[]): EnergyTypeDef[] {
+    public costOversatisfied(energy: EnergyTypeDef[]): EnergyTypeDef[] {
         return this.analyzeCost(energy).oversatisfied;
     }
 

@@ -1,10 +1,10 @@
-import { TrainerCardDef } from "../../defs/TrainerCardDef.js";
+import { CardDef } from "../../defs/CardDef.js";
 import { Modifier, ModifierContext } from "./Modifier.js";
 
-export abstract class ModifierTrainer extends Modifier {
-    public readonly def: TrainerCardDef;
+export abstract class AttachmentModifier extends Modifier {
+    public readonly def: CardDef;
 
-    public constructor(def: TrainerCardDef) {
+    public constructor(def: CardDef) {
         super();
         this.def = def;
     }

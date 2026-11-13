@@ -1,0 +1,7 @@
+{
+    "name": "BaseSet.Defender",
+    "label": "Defender",
+    "text": "Attach Defender to 1 of your Pokémon. At the end of your opponent's next turn, discard Defender. Damage done to that Pokémon by attacks is reduced by 20 <em>(after applying Weakness and Resistance)</em>.",
+    "workers": [ { "class": "TrainerWorker_Attach", "args": { "target": "any" } } ],
+    "modifiers": [ "Modifier_Defender" ]
+}

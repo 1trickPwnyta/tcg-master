@@ -4,12 +4,22 @@ export interface IDefData {
     label?: string;
 };
 
+export interface IPokemonPowerData {
+    name: string;
+    text: string;
+    workers: (string | { class: string, args: any })[];
+};
+
 export interface IAttackData {
     name: string;
     cost: string[];
     damage?: number;
     text?: string;
     workers?: (string | { class: string, args: any })[];
+};
+
+export interface ICardDefData {
+    modifiers?: (string | { class: string, args: any })[];
 };
 
 export interface ICardDefData_Pokemon {
@@ -19,13 +29,13 @@ export interface ICardDefData_Pokemon {
     weakness?: string;
     resistance?: string ;
     retreat: number;
+    power?: IPokemonPowerData;
     attacks: IAttackData[];
 };
 
 export interface ICardDefData_Trainer {
     text: string;
     workers: (string | { class: string, args: any })[];
-    modifiers?: (string | { class: string, args: any })[];
     preannounce?: boolean;
 };
 

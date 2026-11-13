@@ -1,0 +1,25 @@
+{
+    "name": "BaseSet.Zapdos",
+    "label": "Zapdos",
+    "type": "Lightning",
+    "stage": "basic",
+    "hp": 90,
+    "resistance": "Fighting",
+    "retreat": 3,
+    "attacks": [
+        {
+            "name": "Thunder",
+            "cost": [ "Lightning", "Lightning", "Lightning", "Colorless" ],
+            "damage": 60,
+            "workers": [ { "class": "AttackWorker_SelfDamage", "args": { "trigger": "coin", "amount": 30 } } ],
+            "text": "Flip a coin. If tails, Zapdos does 30 damage to itself."
+        },
+        {
+            "name": "Thunderbolt",
+            "cost": [ "Lightning", "Lightning", "Lightning", "Lightning" ],
+            "damage": 100,
+            "workers": [ { "class": "AttackWorker_SacrificeEnergy", "args": { "sacrifice": "all" } } ],
+            "text": "Discard all Energy cards attached to Zapdos in order to use this attack."
+        }
+    ]
+}

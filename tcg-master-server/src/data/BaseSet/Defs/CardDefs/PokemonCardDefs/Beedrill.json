@@ -1,0 +1,25 @@
+{
+    "name": "BaseSet.Beedrill",
+    "label": "Beedrill",
+    "type": "Grass",
+    "stage": "stage2",
+    "hp": 80,
+    "weakness": "Fire",
+    "resistance": "Fighting",
+    "retreat": 0,
+    "attacks": [
+        {
+            "name": "Twineedle",
+            "cost": [ "Colorless", "Colorless", "Colorless" ],
+            "workers": [ { "class": "AttackWorker_CoinDamage", "args": { "amount": 30, "coins": 2 } } ],
+            "text": "Flip 2 coins. This attack does 30 damage times the number of heads."
+        },
+        {
+            "name": "Poison Sting",
+            "cost": [ "Grass", "Grass", "Grass" ],
+            "damage": 40,
+            "workers": [ "AttackWorker_Poison" ],
+            "text": "Flip a coin. If heads, the Defending Pokémon is now Poisoned."
+        }
+    ]
+}

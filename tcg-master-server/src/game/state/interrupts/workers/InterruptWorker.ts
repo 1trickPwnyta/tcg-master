@@ -5,5 +5,6 @@ export abstract class InterruptWorker {
 };
 
 export type InterruptContext = {
-    engine: GameEngine
+    engine: GameEngine;
+    compoundArgs?: any;
 };

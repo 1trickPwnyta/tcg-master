@@ -72,4 +72,6 @@ export abstract class Card extends State implements ITargetable {
     public discard() {
         this.owner.discard.add(this);
     }
+
+    public notify_moved(oldLocation: Location | null, newLocation: Location) { }
 };

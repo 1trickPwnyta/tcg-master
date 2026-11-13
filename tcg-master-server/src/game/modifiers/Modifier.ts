@@ -2,7 +2,7 @@ import { EnergyTypeDef } from "../../defs/EnergyTypeDef.js";
 import { AttackContext } from "../attacks/AttackWorker.js";
 import { GameEngine } from "../engine/GameEngine.js";
 import { Player } from "../state/Player.js";
-import { PokemonCard } from "../state/PokemonCard.js";
+import { DamageContext, PokemonCard } from "../state/PokemonCard.js";
 
 export type ModifierContext = {
     engine: GameEngine;
@@ -14,6 +14,14 @@ export abstract class Modifier {
     public abstract get label(): string;
     public abstract get canAttack(): boolean;
     public abstract get canRetreat(): boolean;
+
+    public get argsKey(): string {
+        return this.constructor.name;
+    }
+
+    public get isEnergy(): boolean {
+        return false;
+    }
 
     public try_attack(context: ModifierContext, attackContext: AttackContext): boolean {
         return true;
@@ -27,12 +35,16 @@ export abstract class Modifier {
         return true;
     }
 
-    public modifyDamageDealt(context: ModifierContext, amount: number, args: any): number {
-        return amount;
+    public provideEnergy(context: ModifierContext, args: any): EnergyTypeDef[] {
+        return [];
     }
 
-    public modifyDamageTaken(context: ModifierContext, amount: number, args: any): number {
-        return amount;
+    public modifyDamageDealt(context: ModifierContext, damageContext: DamageContext, args: any): number {
+        return damageContext.amount;
+    }
+
+    public modifyDamageTaken(context: ModifierContext, damageContext: DamageContext, args: any): number {
+        return damageContext.amount;
     }
 
     public getModifiedWeakness(context: ModifierContext, args: any): EnergyTypeDef | undefined {
@@ -44,6 +56,8 @@ export abstract class Modifier {
     }
 
     public notify_given(context: ModifierContext, args: any) { }
+
+    public notify_removed(context: ModifierContext, args: any) { }
 
     public notify_knockedOut(context: ModifierContext, attacker?: PokemonCard) { }
 

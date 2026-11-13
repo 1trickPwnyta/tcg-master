@@ -1,4 +1,5 @@
 import { EnergyCardDef } from "../../defs/EnergyCardDef.js";
+import { EnergyTypeDef } from "../../defs/EnergyTypeDef.js";
 import { Card } from "./Card.js";
 import { Choice } from "./Choice.js";
 import { InterruptResolution } from "./interrupts/InterruptResolution.js";

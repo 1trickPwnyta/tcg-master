@@ -99,13 +99,13 @@ export class GameEngine {
 
     public send(...parts: any[]) {
         for (const player of this.game.players) {
-            this.sendTo(player.id, ...parts);
+            this.sendTo(player, ...parts);
         }
     }
 
-    public sendTo(player_id: number, ...parts: any[]) {
+    public sendTo(player: Player, ...parts: any[]) {
         if (!this.game.winner_id) {
-            const client = this.clients.find(c => c.player_id === player_id);
+            const client = this.clients.find(c => c.player_id === player.id);
             client?.send(...parts);
         }
     }

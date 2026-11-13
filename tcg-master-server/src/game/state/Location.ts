@@ -34,17 +34,7 @@ export class Location extends State {
 
     public add(card: Card) {
         if (card.location != this) {
-            if (card instanceof PokemonCard) {
-                if (this !== this.owner.active) {
-                    card.clearStatus();
-                }
-                if (this !== this.owner.active && this.id !== this.owner.bench.id) {
-                    card.damage = 0;
-                    while (card.attachments.count) {
-                        card.attachments.cards[0].discard();
-                    }
-                }
-            }
+            card.notify_moved(card.location ?? null, this);
             if (card.location) {
                 card.location.cards.splice(card.location.cards.indexOf(card), 1);
                 card.location.notify_removed(card);

@@ -11,7 +11,7 @@ export class EnergyCardDef extends CardDef {
     public readonly amount: number;
     public readonly text?: string;
 
-    private readonly cardData: IDefData & ICardDefData_Energy;
+    private readonly energyData: IDefData & ICardDefData_Energy;
 
     public override get token(): IToken {
         let symbol = "";
@@ -23,11 +23,11 @@ export class EnergyCardDef extends CardDef {
 
     public constructor(defClass: string, data: IDefData) {
         super(defClass, data);
-        this.cardData = data as IDefData & ICardDefData_Energy;
-        this.basic = this.cardData.basic;
-        this.type = DefDatabase.get<EnergyTypeDef>(this.cardData.type);
-        this.amount = this.cardData.amount;
-        this.text = this.cardData.text;
+        this.energyData = data as IDefData & ICardDefData_Energy;
+        this.basic = this.energyData.basic;
+        this.type = DefDatabase.get<EnergyTypeDef>(this.energyData.type);
+        this.amount = this.energyData.amount;
+        this.text = this.energyData.text;
     }
 
     public override async init() { }

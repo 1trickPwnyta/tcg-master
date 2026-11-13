@@ -1,0 +1,10 @@
+[
+    {
+        "name": "Dratini",
+        "next": [ "Dragonair" ]
+    },
+    {
+        "name": "Dragonair",
+        "next": [ "Dragonite" ]
+    }
+]
