@@ -1,0 +1,25 @@
+{
+    "name": "BaseSet.Raichu",
+    "label": "Raichu",
+    "type": "Lightning",
+    "stage": "stage1",
+    "hp": 80,
+    "weakness": "Fighting",
+    "retreat": 1,
+    "attacks": [
+        {
+            "name": "Agility",
+            "cost": [ "Lightning", "Colorless", "Colorless" ],
+            "damage": 20,
+            "workers": [ "AttackWorker_AttackImmunity" ],
+            "text": "Flip a coin. If heads, during your opponent's next turn, prevent all effects of attacks, including damage, done to Raichu."
+        },
+        {
+            "name": "Thunder",
+            "cost": [ "Lightning", "Lightning", "Lightning", "Colorless" ],
+            "damage": 60,
+            "workers": [ { "class": "AttackWorker_SelfDamage", "args": { "amount": 30, "trigger": "coin" } } ],
+            "text": "Flip a coin. If tails, Raichu does 30 damage to itself."
+        }
+    ]
+}
