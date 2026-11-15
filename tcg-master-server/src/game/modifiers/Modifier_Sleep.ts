@@ -11,7 +11,7 @@ export class Modifier_Sleep extends StatusModifier {
         context.engine.send(...context.card.fullTokens, "woke up!");
     }
 
-    public override notify_endOfTurn(context: ModifierContext) {
+    public override notify_betweenTurns(context: ModifierContext) {
         context.engine.send(...context.card.fullTokens, "is asleep.");
         if (context.engine.game.flipCoin(context.owner)) {
             this.remove(context);

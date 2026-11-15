@@ -42,7 +42,25 @@ export class TurnEngine extends SubEngine {
         for (const client of this.engine.clients) {
             client.notify_endOfTurn();
         }
+
         this.state.betweenTurns = true;
+        for (const player of this.state.players) {
+            for (const pokemon of player.pokemonInPlay) {
+                for (const status of pokemon.modifiers) {
+                    status.modifier.notify_betweenTurns({
+                        engine: this.engine,
+                        owner: player,
+                        card: pokemon
+                    });
+                }
+            }
+        }
+
+        const interrupt = this.checkActivePokemon();
+        if (interrupt) {
+            this.engine.interrupts.interrupt(interrupt);
+            return;
+        }
     }
 
     public update() {

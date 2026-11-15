@@ -4,16 +4,13 @@ import { SubEngine } from "./SubEngine.js";
 
 export class InterruptEngine extends SubEngine {
     public interrupt(interrupt: Interrupt) {
-        this.assignId(interrupt);
-        this.state.interrupt = interrupt;
-        this.engine.sendInterrupt(interrupt);
-    }
-
-    public stack(interrupt: Interrupt) {
-        if (this.state.interrupt) {
-            this.state.interruptStack.push(this.state.interrupt);
+        if (this.state.interrupt && this.state.interrupt.id != interrupt.id) {
+            this.state.interruptQueue.push(interrupt);
+        } else {
+            this.assignId(interrupt);
+            this.state.interrupt = interrupt;
+            this.engine.sendInterrupt(interrupt);
         }
-        this.interrupt(interrupt);
     }
 
     private assignId(interrupt: Interrupt) {

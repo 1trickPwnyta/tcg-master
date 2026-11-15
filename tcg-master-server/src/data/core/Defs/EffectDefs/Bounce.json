@@ -1,0 +1,4 @@
+{
+    "name": "Bounce",
+    "worker": "EffectWorker_Bounce"
+}

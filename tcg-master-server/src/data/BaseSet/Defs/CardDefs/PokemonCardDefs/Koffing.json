@@ -1,0 +1,26 @@
+{
+    "name": "BaseSet.Koffing",
+    "label": "Koffing",
+    "type": "Grass",
+    "stage": "basic",
+    "hp": 50,
+    "weakness": "Psychic",
+    "retreat": 1,
+    "attacks": [
+        {
+            "name": "Foul Gas",
+            "cost": [ "Grass", "Grass" ],
+            "damage": 10,
+            "comps": [
+                {
+                    "class": "AttackComp_SplitCoin",
+                    "args": {
+                        "heads": { "effect": "status", "args": { "status": "Poison" } },
+                        "tails": { "effect": "status", "args": { "status": "Confusion" } }
+                    }
+                }
+            ],
+            "text": "Flip a coin. If heads, the Defending Pokémon is now Poisoned; if tails, it is now Confused."
+        }
+    ]
+}

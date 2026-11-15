@@ -3,7 +3,11 @@ import { ModifierContext } from "./Modifier.js";
 import { StatusModifier } from "./StatusModifier.js";
 
 export class Modifier_DamagePrevention extends StatusModifier {
-    public override modifyDamageTaken(_context: ModifierContext, damageContext: DamageContext, args: any): number {
+    public override modifyDamageTaken(context: ModifierContext, damageContext: DamageContext, args: any): number {
+        if (context.engine.game.betweenTurns) {
+            return damageContext.amount;
+        }
+
         if (args.buffer && damageContext.amount <= args.buffer) {
             damageContext.amount = 0;
         }

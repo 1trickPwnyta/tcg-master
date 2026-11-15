@@ -1,0 +1,16 @@
+{
+    "name": "BaseSet.Voltorb",
+    "label": "Voltorb",
+    "type": "Lightning",
+    "stage": "basic",
+    "hp": 40,
+    "weakness": "Fighting",
+    "retreat": 1,
+    "attacks": [
+        {
+            "name": "Tackle",
+            "cost": [ "Colorless" ],
+            "damage": 10
+        }
+    ]
+}

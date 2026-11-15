@@ -18,7 +18,7 @@ export class EnergyCost {
                 unsatisfied.push(reqs[i]);
             }
         }
-
+        
         return { unsatisfied: unsatisfied, oversatisfied: pool };
     }
 

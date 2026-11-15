@@ -1,0 +1,4 @@
+{
+    "name": "BenchDamage",
+    "worker": "EffectWorker_BenchDamage"
+}

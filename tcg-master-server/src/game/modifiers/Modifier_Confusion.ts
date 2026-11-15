@@ -1,5 +1,6 @@
 import { DefDatabase } from "../../defs/DefDatabase.js";
 import { StatusDef } from "../../defs/StatusDef.js";
+import { AttackContext } from "../attacks/AttackContext.js";
 import { ModifierContext } from "./Modifier.js";
 import { StatusModifier } from "./StatusModifier.js";
 
@@ -12,18 +13,18 @@ export class Modifier_Confusion extends StatusModifier {
         context.engine.send(...context.card.fullTokens, "is no longer confused!");
     }
 
-    public override try_attack(context: ModifierContext): boolean {
+    public override try_attack(context: ModifierContext, attackContext: AttackContext) {
         context.engine.send(...context.card.fullTokens, "is confused.");
         if (context.engine.game.flipCoin(context.owner)) {
-            return true;
+            return;
         } else {
+            attackContext.fail();
             context.card.dealDamage({
                 amount: 20,
                 attacker: context.card,
                 type: context.card.def.type,
                 source: "confusion"
             })
-            return false;
         }
     }
 

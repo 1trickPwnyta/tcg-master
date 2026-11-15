@@ -5,8 +5,13 @@ import { AttackComp } from "./AttackComp.js";
 
 export class AttackComp_AttackerStatus extends AttackComp {
     public override apply(context: AttackContext) {
+        if (this.args.trigger === "guaranteed") {
+            context.attacker.giveStatus(DefDatabase.get<StatusDef>(this.args.status), this.args.args);
+            return;
+        }
+
         if (this.args.trigger === "always" || context.engine.game.flipCoin(context.attacker.owner) === (this.args.trigger === "heads" ? true : false)) {
-            context.addAttackerStatus(DefDatabase.get<StatusDef>(this.args.status));
+            context.addAttackerStatus(DefDatabase.get<StatusDef>(this.args.status), this.args.args);
         }
     }
 };

@@ -12,7 +12,7 @@ export interface InterruptSync {
     force?: boolean;
     resolution?: InterruptResolution;
     cancelResolution?: InterruptResolution;
-    args?: (number | string)[];
+    args?: (number | string | null)[];
     compoundArgs?: any;
 };
 

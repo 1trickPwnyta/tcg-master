@@ -18,6 +18,10 @@
     color: #33cc33;
 }
 
+.token_attack {
+    color: #f04e4e;
+}
+
 .token_hp {
     color: #f04e4e;
 }
@@ -28,6 +32,18 @@
 
 .token_damage::before {
     content: "💥"
+}
+
+.token_heads {
+    color: #e4d12c;
+}
+
+.token_tails {
+    color: #857d3b;
+}
+
+.token_heads::before, .token_tails::before {
+    content: "🪙";
 }
 
 .token_error {

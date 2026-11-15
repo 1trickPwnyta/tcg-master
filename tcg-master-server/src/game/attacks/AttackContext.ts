@@ -44,7 +44,7 @@ export class AttackContext {
     private readonly effects: EffectContext[] = [];
     private _failed: boolean = false;
     private _targets?: (number | string)[];
-    public readonly targets: (number | string)[];
+    public readonly targets: (number | string | null)[];
 
     public readonly attacker: PokemonCard;
     public readonly defender: PokemonCard;
@@ -91,14 +91,18 @@ export class AttackContext {
         }
     }
 
-    public nextTargetCard(): Card {
+    public addTarget(target: number | string | null) {
+        this.targets.push(target);
+    }
+
+    public nextTargetCard(): Card | null {
         const next = this.nextTarget();
         const card = this.engine.search.getCard(next as number);
-        return card as Card;
+        return card as Card | null;
     }
 
     public resolve(): AttackResult {
-
+        
         // Defender damage ///////////////////////
         const damageContext = {
             amount: this.damage_defender,
@@ -146,7 +150,7 @@ export class AttackContext {
 
         // Effects ///////////////////////
         for (const effect of this.effects) {
-            if (affected || effect.def.worker.getTarget(this) !== this.defender) {
+            if (affected || effect.def.worker.getTarget(this, effect.args) !== this.defender) {
                 effect.def.worker.apply(this, effect.args);
             }
         }

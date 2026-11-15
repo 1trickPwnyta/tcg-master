@@ -15,13 +15,14 @@ export class SetupEngine extends SubEngine {
         if (this.state.players.find(p => p.deck.count === 0)) {
             this.engine.send("Starting game between", this.state.players[0], "and", this.state.players[1], ".");
             const deck1 = [
-                { def: DefDatabase.get<PokemonCardDef>("BaseSet.Growlithe"), count: 20 },
-                { def: DefDatabase.get<PokemonCardDef>("BaseSet.Arcanine"), count: 10 },
-                { def: DefDatabase.get<EnergyCardDef>("BaseSet.FireEnergy"), count: 30 }
+                { def: DefDatabase.get<PokemonCardDef>("BaseSet.Zapdos"), count: 20 },
+                { def: DefDatabase.get<PokemonCardDef>("BaseSet.Ivysaur"), count: 10 },
+                { def: DefDatabase.get<PokemonCardDef>("BaseSet.Venusaur"), count: 6 },
+                { def: DefDatabase.get<EnergyCardDef>("BaseSet.LightningEnergy"), count: 24 }
             ];
             const deck2 = [
-                { def: DefDatabase.get<EnergyCardDef>("BaseSet.GrassEnergy"), count: 30 },
-                { def: DefDatabase.get<TrainerCardDef>("BaseSet.Bulbasaur"), count: 30 }
+                { def: DefDatabase.get<EnergyCardDef>("BaseSet.LightningEnergy"), count: 30 },
+                { def: DefDatabase.get<TrainerCardDef>("BaseSet.Doduo"), count: 30 }
             ];
             for (const blueprint of deck1) {
                 for (let i = 0; i < blueprint.count; i++) {

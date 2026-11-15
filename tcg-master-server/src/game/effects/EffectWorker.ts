@@ -8,7 +8,7 @@ export type EffectContext = {
 };
 
 export abstract class EffectWorker {
-    public abstract getTarget(context: AttackContext): PokemonCard | null;
+    public abstract getTarget(context: AttackContext, args?: any): PokemonCard | null;
 
     public abstract apply(context: AttackContext, args?: any): void;
 };

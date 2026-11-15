@@ -1,14 +1,11 @@
-import { DamageContext } from "../state/PokemonCard.js";
+import { AttackContext } from "../attacks/AttackContext.js";
 import { ModifierContext } from "./Modifier.js";
 import { StatusModifier } from "./StatusModifier.js";
 
 export class Modifier_Smokescreen extends StatusModifier {
-    public override modifyDamageDealt(context: ModifierContext, damageContext: DamageContext): number {
-        if (!context.engine.game.flipCoin(context.card.owner)) {
-            context.engine.send("The attack did nothing.");
-            return -1;
-        } else {
-            return damageContext.amount;
+    public override try_attack(context: ModifierContext, attackContext: AttackContext) {
+        if (!context.engine.game.flipCoin(context.owner)) {
+            attackContext.fail();
         }
     }
 

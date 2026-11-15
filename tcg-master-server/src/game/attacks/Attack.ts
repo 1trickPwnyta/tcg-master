@@ -10,6 +10,7 @@ import { AcceptanceReport } from "../../AcceptanceReport.js";
 import { EnergyCost } from "./EnergyCost.js";
 import { AttackContext, AttackResult } from "./AttackContext.js";
 import { Interrupt } from "../state/interrupts/Interrupt.js";
+import { IToken } from "../../IToken.js";
 
 const __dirname = import.meta.dirname;
 
@@ -27,7 +28,11 @@ export class Attack implements ITargetable {
     }
 
     public get targetName(): string {
-        return `${this.name} [${this.cost.map(c => c.symbol).join("")}]`;
+        return `${this.name} [${this.cost.map(c => c.symbol).join("")}] ${this.damage ? this.damage : ""} ${this.comps.length ? "..." : ""}`;
+    }
+
+    public get token(): IToken {
+        return { name: this.name, type: "attack" };
     }
 
     public constructor(data: IAttackData) {
@@ -86,22 +91,25 @@ export class Attack implements ITargetable {
         engine.send(...pokemon.fullTokens, "used", this, "!");
 
         const context = new AttackContext(engine, this, this.damage, ...targets);
-        for (const comp of this.comps) {
-            comp.apply(context);
-            if (context.failed) {
-                break;
-            }
-        }
-
         const modifierContext = {
             engine: context.engine,
             owner: context.engine.game.activePlayer,
             card: context.attacker
         };
+
         for (const modifier of context.attacker.modifiers) {
-            if (!modifier.modifier.try_attack(modifierContext, context)) {
-                context.fail();
+            modifier.modifier.try_attack(modifierContext, context);
+            if (context.failed) {
                 break;
+            }
+        }
+
+        if (!context.failed) {
+            for (const comp of this.comps) {
+                comp.apply(context);
+                if (context.failed) {
+                    break;
+                }
             }
         }
 

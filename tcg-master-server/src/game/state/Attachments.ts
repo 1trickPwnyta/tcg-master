@@ -89,4 +89,12 @@ export class Attachments extends Location {
     public getArgs(card: number): any {
         return this.args.find(a => a.card === card);
     }
+
+    public transfer(other: Attachments) {
+        while (this.cards.length) {
+            const card = this.cards[0];
+            const args = this.args.find(a => a.card === card.id);
+            other.add(card, args?.args);
+        }
+    }
 };

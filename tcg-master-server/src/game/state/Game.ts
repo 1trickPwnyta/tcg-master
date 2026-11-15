@@ -19,7 +19,7 @@ export class Game extends State {
     public interrupt: Interrupt | null = null;
 
     @Serialize()
-    public readonly interruptStack: Interrupt[] = [];
+    public readonly interruptQueue: Interrupt[] = [];
 
     @Serialize()
     public readonly rules: { prizes: number };
@@ -94,21 +94,23 @@ export class Game extends State {
     }
 
     public flipCoin(player?: Player): boolean {
-        const heads = Math.random() < 0.5;
+        const heads = { name: "heads", type: "heads" };
+        const tails = { name: "tails", type: "tails" };
+        const result = Math.random() < 0.5;
         if (player) {
-            this.engine.send(player, "flipped a coin... It was", heads ? "heads" : "tails", "!");
+            this.engine.send(player, "flipped a coin... It was", result ? heads : tails, "!");
         } else {
-            this.engine.send("A coin was flipped... It was", heads ? "heads" : "tails", "!");
+            this.engine.send("A coin was flipped... It was", result ? heads : tails, "!");
         }
-        return heads;
+        return result;
     }
 
     public update() {
         if (!this.winner_id) {
             if (this.interrupt) {
                 this.engine.interrupts.interrupt(this.interrupt);
-            } else if (this.interruptStack.length) {
-                this.engine.interrupts.interrupt(this.interruptStack.pop()!);
+            } else if (this.interruptQueue.length) {
+                this.engine.interrupts.interrupt(this.interruptQueue.splice(0, 1)[0]);
             } else if (!this.turn) {
                 this.engine.setup.update();
             } else if (this.betweenTurns) {

@@ -1,0 +1,22 @@
+{
+    "name": "BaseSet.Diglett",
+    "label": "Diglett",
+    "type": "Fighting",
+    "stage": "basic",
+    "hp": 30,
+    "weakness": "Grass",
+    "resistance": "Lightning",
+    "retreat": 0,
+    "attacks": [
+        {
+            "name": "Dig",
+            "cost": [ "Fighting" ],
+            "damage": 10
+        },
+        {
+            "name": "Mud Slap",
+            "cost": [ "Fighting", "Fighting" ],
+            "damage": 30
+        }
+    ]
+}

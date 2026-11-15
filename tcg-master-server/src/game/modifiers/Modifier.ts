@@ -23,9 +23,7 @@ export abstract class Modifier {
         return false;
     }
 
-    public try_attack(context: ModifierContext, attackContext: AttackContext): boolean {
-        return true;
-    }
+    public try_attack(context: ModifierContext, attackContext: AttackContext) { }
 
     public try_retreat(context: ModifierContext): boolean {
         return true;
@@ -66,6 +64,8 @@ export abstract class Modifier {
     public notify_knockedOut(context: ModifierContext, attacker?: PokemonCard) { }
 
     public notify_endOfTurn(context: ModifierContext, turn_id: number) { }
+
+    public notify_betweenTurns(context: ModifierContext) { }
 
     protected abstract remove(context: ModifierContext): void;
 };

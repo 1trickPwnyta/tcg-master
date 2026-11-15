@@ -11,9 +11,7 @@ export class InterruptWorker_Evolve extends InterruptWorker {
         if (card.location && card && evolution) {
             card.location.add(evolution);
             evolution.damage = card.damage;
-            for (const attachment of [ ...card.attachments.cards ]) {
-                evolution.attachments.add(attachment);
-            }
+            card.attachments.transfer(evolution.attachments);
             evolution.attachments.add(card);
             context.engine.send(context.engine.game.activePlayer, "'s", card, "evolved into", evolution, "!");
         } else {

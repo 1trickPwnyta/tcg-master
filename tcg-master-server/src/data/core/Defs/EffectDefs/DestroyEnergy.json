@@ -1,0 +1,4 @@
+{
+    "name": "DestroyEnergy",
+    "worker": "EffectWorker_DestroyEnergy"
+}

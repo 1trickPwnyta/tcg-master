@@ -1,0 +1,17 @@
+{
+    "name": "BaseSet.Rattata",
+    "label": "Rattata",
+    "type": "Colorless",
+    "stage": "basic",
+    "hp": 30,
+    "weakness": "Fighting",
+    "resistance": "Psychic",
+    "retreat": 0,
+    "attacks": [
+        {
+            "name": "Bite",
+            "cost": [ "Colorless" ],
+            "damage": 20
+        }
+    ]
+}

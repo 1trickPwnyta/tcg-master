@@ -187,10 +187,6 @@ export class PokemonCard extends Card {
             this.discard();
         }
         this.owner.opponent.takePrize();
-        const interrupt = this.engine.turns.checkActivePokemon();
-        if (interrupt) {
-            this.engine.interrupts.interrupt(interrupt);
-        }
     }
 
     public heal(amount: number) {
