@@ -3,8 +3,10 @@ import { EffectDef } from "../../defs/EffectDef.js";
 import { StatusDef } from "../../defs/StatusDef.js";
 import { EffectContext } from "../effects/EffectWorker.js";
 import { GameEngine } from "../engine/GameEngine.js";
+import { Card } from "../state/Card.js";
 import { PokemonCard } from "../state/PokemonCard.js";
 import { Serializable, Serialize } from "../state/serializer.js";
+import { Attack } from "./Attack.js";
 
 @Serializable()
 export class StatusContext {
@@ -33,6 +35,7 @@ export type AttackResult = {
 
 export class AttackContext {
     public readonly engine: GameEngine;
+    public readonly attack: Attack;
     public damage_attacker: number = 0;
     public damage_defender: number;
     private _finalDamage?: number;
@@ -40,7 +43,8 @@ export class AttackContext {
     private readonly status_defender: StatusContext[] = [];
     private readonly effects: EffectContext[] = [];
     private _failed: boolean = false;
-    private targets?: (number | string)[];
+    private _targets?: (number | string)[];
+    public readonly targets: (number | string)[];
 
     public readonly attacker: PokemonCard;
     public readonly defender: PokemonCard;
@@ -53,9 +57,11 @@ export class AttackContext {
         return this._finalDamage ?? 0;
     }
 
-    public constructor(engine: GameEngine, damage: number, ...targets: (number | string)[]) {
+    public constructor(engine: GameEngine, attack: Attack, damage: number, ...targets: (number | string)[]) {
         this.engine = engine;
+        this.attack = attack;
         this.damage_defender = damage;
+        this._targets = [ ...targets ];
         this.targets = targets;
         this.attacker = engine.game.activePokemon;
         this.defender = engine.game.defendingPokemon;
@@ -78,11 +84,17 @@ export class AttackContext {
     }
 
     public nextTarget(): number | string | null {
-        if (this.targets!.length) {
-            return this.targets!.splice(0, 1)[0];
+        if (this._targets!.length) {
+            return this._targets!.splice(0, 1)[0];
         } else {
             return null;
         }
+    }
+
+    public nextTargetCard(): Card {
+        const next = this.nextTarget();
+        const card = this.engine.search.getCard(next as number);
+        return card as Card;
     }
 
     public resolve(): AttackResult {

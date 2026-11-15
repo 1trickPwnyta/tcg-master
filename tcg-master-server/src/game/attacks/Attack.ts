@@ -69,7 +69,7 @@ export class Attack implements ITargetable {
     }
 
     public validateTargets(engine: GameEngine, ...targets: (number | string)[]): Interrupt | null {
-        const context = new AttackContext(engine, this.damage, ...targets);
+        const context = new AttackContext(engine, this, this.damage, ...targets);
         for (const comp of this.comps) {
             const interrupt = comp.validateTargets(context);
             if (interrupt) {
@@ -85,7 +85,7 @@ export class Attack implements ITargetable {
         engine.game.turn!.phase = "attack";
         engine.send(...pokemon.fullTokens, "used", this, "!");
 
-        const context = new AttackContext(engine, this.damage, ...targets);
+        const context = new AttackContext(engine, this, this.damage, ...targets);
         for (const comp of this.comps) {
             comp.apply(context);
             if (context.failed) {

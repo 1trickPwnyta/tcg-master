@@ -1,6 +1,8 @@
 import { AcceptanceReport } from "../../../AcceptanceReport.js";
 import { GameEngine } from "../../engine/GameEngine.js";
-import { Interrupt } from "../../state/interrupts/Interrupt.js";
+import { Choice } from "../../state/Choice.js";
+import { Interrupt, InterruptSync } from "../../state/interrupts/Interrupt.js";
+import { InterruptResolution } from "../../state/interrupts/InterruptResolution.js";
 import { AttackContext } from "../AttackContext.js";
 
 export abstract class AttackComp {
@@ -19,4 +21,14 @@ export abstract class AttackComp {
     }
 
     public abstract apply(context: AttackContext): void;
+
+    protected generateInterrupt(context: AttackContext, prompt: string, choices: Choice[]): InterruptSync {
+        return {
+            player: context.attacker.owner.id,
+            prompt: prompt,
+            choices: choices,
+            resolution: InterruptResolution.AttackTargets,
+            args: [ context.attack.name, ...context.targets ]
+        };
+    }
 };
