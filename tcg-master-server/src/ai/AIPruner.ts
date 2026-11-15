@@ -1,4 +1,5 @@
 import { PokemonCardDef } from "../defs/PokemonCardDef.js";
+import { EnergyCost } from "../game/attacks/EnergyCost.js";
 import { GameEngine } from "../game/engine/GameEngine.js";
 import { Choice } from "../game/state/Choice.js";
 import { InterruptSync } from "../game/state/interrupts/Interrupt.js";
@@ -37,7 +38,7 @@ export class AIPruner {
                     case InterruptResolution.AttachEnergy:
                         const target = engine.search.getCard(choice.target as number) as PokemonCard;
                         const def = target.def as PokemonCardDef;
-                        const unsatisfiedAttacks = def.attacks.filter(a => !a.costSatisfied(target.energy));
+                        const unsatisfiedAttacks = def.attacks.filter(a => !EnergyCost.costSatisfied(a.cost, target.energy));
                         if (!unsatisfiedAttacks.length) {
                             choice.valid = false;
                         }

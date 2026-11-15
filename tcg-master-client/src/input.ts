@@ -16,7 +16,12 @@ globalThis.formSubmit = (e: Event) => {
 $("#input")[0].focus();
 
 export class Input {
-    private static socket = io("http://localhost:3000");
+    private static socket = io("http://localhost:3000", {
+        timeout: 600000,
+        reconnection: true,
+        reconnectionAttempts: Infinity,
+        reconnectionDelay: 1000
+    });
 
     static {
         Input.socket.on("MSG", Input.receive);

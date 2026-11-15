@@ -1,11 +1,11 @@
 import { ICardDefData_Pokemon, IDefData } from "./IDefData.js";
 import { CardDef } from "./CardDef.js";
-import { Attack } from "../game/attacks/Attack.js";
 import { DefDatabase } from "./DefDatabase.js";
 import { EnergyTypeDef } from "./EnergyTypeDef.js";
 import { EnergyTypeDefOf } from "./defof/EnergyTypeDefOf.js";
 import { EvolutionDef } from "./EvolutionDef.js";
 import { PokemonPower } from "../game/powers/PokemonPower.js";
+import { Attack } from "../game/attacks/Attack.js";
 
 export class PokemonCardDef extends CardDef {
     public override readonly kind = "pokemon";

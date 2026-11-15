@@ -1,3 +1,4 @@
+import { EnergyCost } from "../game/attacks/EnergyCost.js";
 import { GameEngine } from "../game/engine/GameEngine.js";
 
 export class AIEvaluator {
@@ -14,14 +15,14 @@ export class AIEvaluator {
         const activeDef = active?.def;
         const activeHp = activeDef ? activeDef.hp - active!.damage : 0;
         const activeEnergy = activeDef ? active.energy : [];
-        const unsatisfiedEnergyCosts = activeDef ? activeDef.attacks.flatMap(a => a.costUnsatisfied(activeEnergy)) : [];
-        const activeHighestDamage = activeDef ? ([ ...activeDef.attacks.filter(a => a.costSatisfied(activeEnergy)) ].sort((a, b) => b.damage - a.damage)[0]?.damage ?? 0) : 0;
+        const unsatisfiedEnergyCosts = activeDef ? activeDef.attacks.flatMap(a => EnergyCost.costUnsatisfied(a.cost, activeEnergy)) : [];
+        const activeHighestDamage = activeDef ? ([ ...activeDef.attacks.filter(a => EnergyCost.costSatisfied(a.cost, activeEnergy)) ].sort((a, b) => b.damage - a.damage)[0]?.damage ?? 0) : 0;
         const xactive = opponent.activePokemon;
         const xactiveDef = xactive?.def;
         const xactiveHp = xactiveDef ? xactiveDef.hp - xactive!.damage : 0;
         const xactiveEnergy = xactiveDef ? xactive.energy : [];
-        const xunsatisfiedEnergyCosts = xactiveDef ? xactiveDef.attacks.flatMap(a => a.costUnsatisfied(xactiveEnergy)) : [];
-        const xactiveHighestDamage = xactiveDef ? ([ ...xactiveDef.attacks.filter(a => a.costSatisfied(xactiveEnergy)) ].sort((a, b) => b.damage - a.damage)[0]?.damage ?? 0) : 0;
+        const xunsatisfiedEnergyCosts = xactiveDef ? xactiveDef.attacks.flatMap(a => EnergyCost.costUnsatisfied(a.cost, xactiveEnergy)) : [];
+        const xactiveHighestDamage = xactiveDef ? ([ ...xactiveDef.attacks.filter(a => EnergyCost.costSatisfied(a.cost, xactiveEnergy)) ].sort((a, b) => b.damage - a.damage)[0]?.damage ?? 0) : 0;
     
         const benchSize = player.bench.count;
         const xbenchSize = opponent.bench.count;

@@ -2,5 +2,5 @@ export interface Turn {
     number: number;
     player: number;
     energyPlayed: boolean;
-    attacked: boolean;
+    phase: "preattack" | "attack" | "postattack";
 };

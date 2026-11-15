@@ -15,7 +15,7 @@ export interface IAttackData {
     cost: string[];
     damage?: number;
     text?: string;
-    workers?: (string | { class: string, args: any })[];
+    comps?: (string | { class: string, args: any })[];
 };
 
 export interface ICardDefData {
@@ -53,6 +53,10 @@ export interface IDefData_EnergyType {
 
 export interface IDefData_Evolution {
     next: string[];
+};
+
+export interface IDefData_Effect {
+    worker: string | { class: string, args: any };
 };
 
 export interface IDefData_Status {

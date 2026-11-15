@@ -5,30 +5,25 @@ import { InterruptContext, InterruptWorker } from "./InterruptWorker.js";
 
 @ResolvesInterrupt(InterruptResolution.Attack)
 export class InterruptWorker_Attack extends InterruptWorker {
-    public override execute(context: InterruptContext, attack_name: string, ...args: number[]): boolean {
+    public override execute(context: InterruptContext, attack_name: string): boolean {
         const player = context.engine.game.activePlayer;
         const card = player.activePokemon!;
+
         const cantAttackReason = card.cantAttackReason();
         if (cantAttackReason) {
             context.engine.sendError(player, card, "can't attack due to", cantAttackReason, ".");
             return false;
         }
+
         if (attack_name) {
             const attack = card.def.attacks.find(a => a.name === attack_name)!;
-            if (!attack.costSatisfied(card.energy)) {
-                context.engine.sendError(player, card, "doesn't have enough energy to use", attack.name, ".");
+
+            const report = attack.canUse(context.engine);
+            if (!report.accepted) {
+                context.engine.sendError(player, report.reason ?? `${card.name} can't use ${attack_name} right now.`);
                 return false;
             }
-            const attackContext = {
-                engine: context.engine,
-                attack: attack,
-                attacker: card,
-                defender: context.engine.game.defendingPokemon!
-            };
-            if (!attack.canUse(attackContext)) {
-                context.engine.sendError(player, card, "can't use", attack, "right now.");
-                return false;
-            }
+
             for (const status of card.modifiers) {
                 if (!status.modifier.canUseAttack({
                     engine: context.engine,
@@ -39,7 +34,15 @@ export class InterruptWorker_Attack extends InterruptWorker {
                     return false;
                 }
             }
-            return attack.execute(attackContext, ...args);
+
+            const interrupt = attack.validateTargets(context.engine);
+            if (interrupt) {
+                context.engine.interrupts.interrupt(interrupt);
+                return true;
+            }
+
+            context.engine.game.attackResult = attack.execute(context.engine);
+            return true;
         } else {
             context.engine.interrupts.interrupt({
                 player: player.id,
@@ -49,13 +52,5 @@ export class InterruptWorker_Attack extends InterruptWorker {
             });
             return true;
         }
-    }
-
-    private failAttack(context: InterruptContext, ...message: any[]): boolean {
-        if (message.length) {
-            context.engine.send(...message);
-        }
-        context.engine.game.turn!.attacked = true;
-        return true;
     }
 };

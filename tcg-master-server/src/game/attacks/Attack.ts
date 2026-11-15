@@ -1,28 +1,24 @@
-import path from "path";
-import { AttackContext, AttackWorker } from "./AttackWorker.js";
-import { IAttackData } from "../../defs/IDefData.js";
 import { pathToFileURL } from "url";
-import { Interrupt } from "../state/interrupts/Interrupt.js";
-import { DefDatabase } from "../../defs/DefDatabase.js";
-import { EnergyTypeDef } from "../../defs/EnergyTypeDef.js";
-import { EnergyCard } from "../state/EnergyCard.js";
+import path from "path";
 import { ITargetable } from "../state/Choice.js";
+import { EnergyTypeDef } from "../../defs/EnergyTypeDef.js";
+import { AttackComp } from "./comps/AttackComp.js";
+import { IAttackData } from "../../defs/IDefData.js";
+import { DefDatabase } from "../../defs/DefDatabase.js";
+import { GameEngine } from "../engine/GameEngine.js";
+import { AcceptanceReport } from "../../AcceptanceReport.js";
+import { EnergyCost } from "./EnergyCost.js";
+import { AttackContext, AttackResult } from "./AttackContext.js";
+import { Interrupt } from "../state/interrupts/Interrupt.js";
 
 const __dirname = import.meta.dirname;
-
-export type AttackResult = {
-    attacker_id: number;
-    defender_id: number;
-    damage: number;
-    status: { def: string, args: any }[];
-};
 
 export class Attack implements ITargetable {
     public readonly name: string;
     public readonly cost: EnergyTypeDef[];
     public readonly damage: number;
     public readonly text?: string;
-    public readonly workers: AttackWorker[];
+    public readonly comps: AttackComp[];
 
     private readonly attackData: IAttackData;
 
@@ -40,36 +36,42 @@ export class Attack implements ITargetable {
         this.cost = this.attackData.cost.map(c => DefDatabase.get<EnergyTypeDef>(c));
         this.damage = this.attackData.damage ?? 0;
         this.text = this.attackData.text;
-        this.workers = [];
+        this.comps = [];
     }
 
     public async init() {
-        if (this.attackData.workers) {
-            for (const workerData of this.attackData.workers) {
-                const workerClass = typeof workerData === "string" ? workerData : workerData.class;
-                const workerArgs = typeof workerData !== "string" ? workerData.args : [];
-                const fullName = path.join(__dirname, `${workerClass}.ts`);
+        if (this.attackData.comps) {
+            for (const compData of this.attackData.comps) {
+                const compClass = typeof compData === "string" ? compData : compData.class;
+                const compArgs = typeof compData !== "string" ? compData.args : [];
+                const fullName = path.join(__dirname, "comps", `${compClass}.ts`);
                 const module = await import(pathToFileURL(fullName).href);
-                const workerConstructor = module[workerClass];
-                const worker = new workerConstructor(workerArgs);
-                this.workers.push(worker);
+                const compConstructor = module[compClass];
+                const comp = new compConstructor(compArgs);
+                this.comps.push(comp);
             }
         }
     }
 
-    public canUse(context: AttackContext): boolean {
-        for (const worker of this.workers) {
-            if (!worker.canUse(context)) {
-                return false;
+    public canUse(engine: GameEngine): AcceptanceReport {
+        const pokemon = engine.game.activePokemon;
+        if (!EnergyCost.costSatisfied(this.cost, pokemon.energy)) {
+            return AcceptanceReport.Rejected(`${pokemon.name} doesn't have enough energy to use ${this.name}.`);
+        }
+        for (const comp of this.comps) {
+            const report = comp.canUse(engine);
+            if (!report.accepted) {
+                return report;
             }
         }
-        
-        return true;
+
+        return AcceptanceReport.Accepted;
     }
 
-    private validateTargets(context: AttackContext, ...targets: (number | string)[]): Interrupt | null {
-        for (const worker of this.workers) {
-            const interrupt = worker.validateTargets(context, ...targets);
+    public validateTargets(engine: GameEngine, ...targets: (number | string)[]): Interrupt | null {
+        const context = new AttackContext(engine, this.damage, ...targets);
+        for (const comp of this.comps) {
+            const interrupt = comp.validateTargets(context);
             if (interrupt) {
                 return interrupt;
             }
@@ -78,120 +80,40 @@ export class Attack implements ITargetable {
         return null;
     }
 
-    private preEffects(context: AttackContext, damage: number): number {
-        for (const worker of this.workers) {
-            damage = worker.preEffect(context, damage);
-            if (damage < 0) {
-                return damage;
-            }
-        }
+    public execute(engine: GameEngine, ...targets: (number | string)[]): AttackResult | undefined {
+        const pokemon = engine.game.activePokemon;
+        engine.game.turn!.phase = "attack";
+        engine.send(...pokemon.fullTokens, "used", this, "!");
 
-        return damage;
-    }
-
-    private postEffects(context: AttackContext, knockedOut: boolean, ...targets: (number | string)[]) {
-        for (const worker of this.workers) {
-            worker.postEffect(context, knockedOut, ...targets);
-        }
-    }
-
-    public execute(context: AttackContext, ...targets: (number | string)[]): boolean {
-        const interrupt = this.validateTargets(context, ...targets);
-        if (interrupt) {
-            context.engine.interrupts.interrupt(interrupt);
-            return true;
-        }
-
-        let failToStatus = false;
-        for (const status of context.attacker.modifiers) {
-            if (!status.modifier.try_attack({
-                engine: context.engine,
-                owner: context.engine.game.activePlayer,
-                card: context.attacker
-            }, context)) {
-                failToStatus = true;
+        const context = new AttackContext(engine, this.damage, ...targets);
+        for (const comp of this.comps) {
+            comp.apply(context);
+            if (context.failed) {
                 break;
             }
         }
 
-        if (!failToStatus) {
-            context.engine.send(context.engine.game.activePlayer, "'s", context.attacker, "used", this.name, "!");
-            let damage = this.damage;
-
-            const damageContext = {
-                amount: damage,
-                attacker: context.attacker,
-                type: context.attacker.def.type,
-                source: "attack"
-            };
-            for (const status of context.attacker.modifiers) {
-                damageContext.amount = status.modifier.modifyDamageDealt({
-                    engine: context.engine,
-                    owner: context.attacker.owner,
-                    card: context.attacker
-                }, damageContext, status.args);
-                if (damageContext.amount < 0) {
-                    break;
-                }
-            }
-
-            if (damageContext.amount >= 0) {
-                const statusBefore = [ ...context.defender.statuses ];
-                damageContext.amount = this.preEffects(context, damageContext.amount);
-                if (damageContext.amount >= 0) {
-                    context.damage = damageContext.amount;
-                    const damageResult = context.defender.dealDamage(damageContext);
-                    this.postEffects(context, damageResult.knockedOut, ...targets);
-                    const statusGiven = context.defender.statuses.filter(s1 => 
-                        !statusBefore.some(s2 => s1.def === s2.def && JSON.stringify(s1.args) === JSON.stringify(s2.args))
-                    );
-
-                    context.engine.game.attackResult = {
-                        attacker_id: context.attacker.id,
-                        defender_id: context.defender.id,
-                        damage: damageResult.finalDamage,
-                        status: statusGiven
-                    };
-                }
+        const modifierContext = {
+            engine: context.engine,
+            owner: context.engine.game.activePlayer,
+            card: context.attacker
+        };
+        for (const modifier of context.attacker.modifiers) {
+            if (!modifier.modifier.try_attack(modifierContext, context)) {
+                context.fail();
+                break;
             }
         }
 
-        context.engine.game.turn!.attacked = true;
-
-        return true;
-    }
-
-    private analyzeCost(energy: EnergyTypeDef[]): { unsatisfied: EnergyTypeDef[], oversatisfied: EnergyTypeDef[] } {
-        const reqs = [ ...this.cost ].sort((a, b) => b.resolutionPriority - a.resolutionPriority);
-        const pool = energy.sort((a, b) => a.resolutionPriority - b.resolutionPriority);
-        const unsatisfied = [];
-        for (let i = 0; i < reqs.length; i++) {
-            let satisfied = false;
-            for (let j = 0; j < pool.length; j++) {
-                if (pool[j].satisfies(reqs[i])) {
-                    pool.splice(j, 1);
-                    satisfied = true;
-                    break;
-                }
-            }
-            if (!satisfied) {
-                unsatisfied.push(reqs[i]);
-            }
+        let result;
+        if (!context.failed) {
+            result = context.resolve();
+        } else {
+            engine.send(...pokemon.fullTokens, "'s attack failed.");
         }
 
-        return { unsatisfied: unsatisfied, oversatisfied: pool };
-    }
-
-    public costUnsatisfied(energy: EnergyTypeDef[]): EnergyTypeDef[] {
-        return this.analyzeCost(energy).unsatisfied;
-    }
-
-    public costSatisfied(energy: EnergyTypeDef[]): boolean {
-        return this.analyzeCost(energy).unsatisfied.length === 0;
-    }
-
-    public costOversatisfied(energy: EnergyTypeDef[]): EnergyTypeDef[] {
-        return this.analyzeCost(energy).oversatisfied;
+        engine.game.turn!.phase = "postattack";
+        return result;
     }
 
     public getDetails(): any[] {

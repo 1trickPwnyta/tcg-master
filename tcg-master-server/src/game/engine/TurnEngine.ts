@@ -16,7 +16,7 @@ export class TurnEngine extends SubEngine {
             number: (this.state.turn?.number ?? 0) + 1,
             player: player.id,
             energyPlayed: false,
-            attacked: false
+            phase: "preattack"
         };
         this.state.betweenTurns = false;
         this.engine.send();
@@ -42,9 +42,6 @@ export class TurnEngine extends SubEngine {
         for (const client of this.engine.clients) {
             client.notify_endOfTurn();
         }
-        if (!this.state.turn?.attacked) {
-            this.state.attackResult = undefined;
-        }
         this.state.betweenTurns = true;
     }
 
@@ -61,7 +58,7 @@ export class TurnEngine extends SubEngine {
             return;
         }
 
-        if (!this.turn.attacked) {
+        if (this.turn.phase === "preattack") {
             this.engine.interrupts.interrupt({
                 player: this.turn.player,
                 prompt: "Your turn.",

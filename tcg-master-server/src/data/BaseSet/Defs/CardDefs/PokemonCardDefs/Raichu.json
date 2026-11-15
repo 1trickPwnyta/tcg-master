@@ -11,14 +11,14 @@
             "name": "Agility",
             "cost": [ "Lightning", "Colorless", "Colorless" ],
             "damage": 20,
-            "workers": [ "AttackWorker_AttackImmunity" ],
+            "comps": [ { "class": "AttackComp_AttackerStatus", "args": { "status": "AttackImmunity", "trigger": "heads" } } ],
             "text": "Flip a coin. If heads, during your opponent's next turn, prevent all effects of attacks, including damage, done to Raichu."
         },
         {
             "name": "Thunder",
             "cost": [ "Lightning", "Lightning", "Lightning", "Colorless" ],
             "damage": 60,
-            "workers": [ { "class": "AttackWorker_SelfDamage", "args": { "amount": 30, "trigger": "coin" } } ],
+            "comps": [ { "class": "AttackComp_SelfDamage", "args": { "amount": 30, "trigger": "coin" } } ],
             "text": "Flip a coin. If tails, Raichu does 30 damage to itself."
         }
     ]

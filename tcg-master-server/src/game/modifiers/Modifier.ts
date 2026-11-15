@@ -1,5 +1,5 @@
 import { EnergyTypeDef } from "../../defs/EnergyTypeDef.js";
-import { AttackContext } from "../attacks/AttackWorker.js";
+import { AttackContext } from "../attacks/AttackContext.js";
 import { GameEngine } from "../engine/GameEngine.js";
 import { Player } from "../state/Player.js";
 import { DamageContext, PokemonCard } from "../state/PokemonCard.js";
@@ -53,6 +53,10 @@ export abstract class Modifier {
 
     public getModifiedResistance(context: ModifierContext, args: any): EnergyTypeDef | undefined {
         return context.card.def.resistance;
+    }
+
+    public isAffectedByAttacks(context: ModifierContext): boolean {
+        return true;
     }
 
     public notify_given(context: ModifierContext, args: any) { }

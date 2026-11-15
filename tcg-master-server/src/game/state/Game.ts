@@ -1,4 +1,4 @@
-import { AttackResult } from "../attacks/Attack.js";
+import { AttackResult } from "../attacks/AttackContext.js";
 import { GameEngine } from "../engine/GameEngine.js";
 import { Interrupt } from "./interrupts/Interrupt.js";
 import { Player } from "./Player.js";
