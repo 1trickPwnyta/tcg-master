@@ -12,7 +12,9 @@ export class TrainerCard extends Card {
     }
 
     public override play(...targets: (number | string)[]): boolean {
-        if (!this.validate(...targets)) {
+        const report = this.validate();
+        if (!report.accepted) {
+            this.engine.sendError(this.owner, report.reason!);
             return false;
         }
 
@@ -31,13 +33,15 @@ export class TrainerCard extends Card {
         }
         
         this.execute(...targets);
-        this.discard();
+        if (this.location == this.owner.hand) {
+            this.discard();
+        }
 
         return true;
     }
 
-    private validate(...targets: (number | string)[]): AcceptanceReport {
-        const context = new TrainerContext(this.engine, this, ...targets);
+    private validate(): AcceptanceReport {
+        const context = new TrainerContext(this.engine, this);
         for (const worker of this.def.workers) {
             const report = worker.validate(context);
             if (!report.accepted) {

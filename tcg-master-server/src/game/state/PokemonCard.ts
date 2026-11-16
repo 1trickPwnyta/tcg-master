@@ -34,6 +34,9 @@ export class PokemonCard extends Card {
     @Serialize()
     public readonly statuses: { def: string, args: any }[] = [];
 
+    @Serialize()
+    public evolutionEligible: boolean = false;
+
     public get fullTokens(): any[] {
         return [ this.owner, "'s", this ];
     }
@@ -112,7 +115,7 @@ export class PokemonCard extends Card {
                 return true;
             }
         } else {
-            const cards = this.owner.pokemonInPlay.filter(c => c.def.evolution?.evolvesDirect(this.name));
+            const cards = this.owner.pokemonInPlay.filter(c => c.evolutionEligible && c.def.evolution?.evolvesDirect(this.name));
             if (cards.length) {
                 this.engine.interrupts.interrupt({
                     player: this.owner.id,
@@ -127,6 +130,14 @@ export class PokemonCard extends Card {
                 return false;
             }
         }
+    }
+
+    public evolve(evolution: PokemonCard) {
+        this.location!.add(evolution);
+        evolution.damage = this.damage;
+        this.attachments.transfer(evolution.attachments);
+        evolution.attachments.add(this);
+        this.engine.send(...this.fullTokens, "evolved into", evolution, "!");
     }
 
     public cantAttackReason(): string | null {
@@ -277,6 +288,7 @@ export class PokemonCard extends Card {
         }
         if (newLocation !== this.owner.active && newLocation !== this.owner.bench) {
             this.damage = 0;
+            this.evolutionEligible = false;
             while (this.attachments.count) {
                 this.attachments.cards[0].discard();
             }

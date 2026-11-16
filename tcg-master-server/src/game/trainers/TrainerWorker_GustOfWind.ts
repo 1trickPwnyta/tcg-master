@@ -6,6 +6,10 @@ import { TrainerContext } from "./TrainerContext.js";
 import { TrainerWorker } from "./TrainerWorker.js";
 
 export class TrainerWorker_GustOfWind extends TrainerWorker {
+    private getTargetChoices(context: TrainerContext): Choice[] {
+        return this.getValidChoices(context, context.player.opponent.bench.cards.map(c => new Choice(c)));
+    }
+
     public override validate(context: TrainerContext): AcceptanceReport {
         if (!context.player.opponent.bench.count) {
             return AcceptanceReport.Rejected("Your opponent doesn't have any benched Pokémon.");
@@ -19,7 +23,7 @@ export class TrainerWorker_GustOfWind extends TrainerWorker {
         if (!target) {
             return this.generateInterrupt(context,
                 "Which of your opponent's Pokémon will switch in?",
-                context.player.opponent.bench.cards.map(c => new Choice(c)),
+                this.getTargetChoices(context)
             );
         }
         

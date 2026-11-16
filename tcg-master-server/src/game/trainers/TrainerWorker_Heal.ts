@@ -15,8 +15,16 @@ export class TrainerWorker_Heal extends TrainerWorker {
         this.discardEnergy = args.discard_energy ?? 0;
     }
 
+    private getTargetChoices(context: TrainerContext) {
+        return this.getValidChoices(context, context.player.pokemonInPlay.filter(p => p.damage && (p.energy.length >= this.discardEnergy)).map(p => new Choice(p)));
+    }
+
+    private getEnergyChoices(context: TrainerContext, target: PokemonCard) {
+        return this.getValidChoices(context, target.attachments.energyCards.map(e => new Choice(e.card)));
+    }
+
     public override validate(context: TrainerContext): AcceptanceReport {
-        if (!context.player.pokemonInPlay.some(c => c.damage && (c.energy.length >= this.discardEnergy))) {
+        if (!this.getTargetChoices(context).length) {
             return AcceptanceReport.Rejected("None of your Pokémon can be healed right now.");
         }
 
@@ -28,7 +36,7 @@ export class TrainerWorker_Heal extends TrainerWorker {
         if (!target) {
             return this.generateInterrupt(context,
                 "Heal which Pokémon?",
-                context.player.pokemonInPlay.filter(p => p.damage && (p.energy.length >= this.discardEnergy)).map(p => new Choice(p)),
+                this.getTargetChoices(context),
             );
         }
 
@@ -37,7 +45,7 @@ export class TrainerWorker_Heal extends TrainerWorker {
             if (!energy) {
                 return this.generateInterrupt(context,
                     `Discard which energy card from ${target.name}?`,
-                    target.energy.map(e => new Choice(e)),
+                    this.getEnergyChoices(context, target),
                 );
             }
         }

@@ -5,12 +5,16 @@ import { TrainerContext } from "./TrainerContext.js";
 import { TrainerWorker } from "./TrainerWorker.js";
 
 export class TrainerWorker_ScoopUp extends TrainerWorker {
+    private getTargetChoices(context: TrainerContext): Choice[] {
+        return this.getValidChoices(context, context.player.pokemonInPlay.map(p => new Choice(p)));
+    }
+
     public override acquireTargets(context: TrainerContext): Interrupt | null {
         const target = context.nextTarget();
         if (!target) {
             return this.generateInterrupt(context,
                 "Which Pokémon will be returned?",
-                context.player.pokemonInPlay.map(p => new Choice(p))
+                this.getTargetChoices(context)
             );
         }
 

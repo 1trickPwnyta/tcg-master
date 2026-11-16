@@ -6,8 +6,12 @@ import { TrainerContext } from "./TrainerContext.js";
 import { TrainerWorker } from "./TrainerWorker.js";
 
 export class TrainerWorker_Revive extends TrainerWorker {
+    private getTargetChoices(context: TrainerContext): Choice[] {
+        return this.getValidChoices(context, context.player.discard.cards.filter(c => c instanceof PokemonCard && c.def.stage === "basic").map(c => new Choice(c)));
+    }
+
     public override validate(context: TrainerContext): AcceptanceReport {
-        if (!context.player.discard.cards.some(c => c instanceof PokemonCard && c.def.stage === "basic")) {
+        if (!this.getTargetChoices(context).length) {
             return AcceptanceReport.Rejected("There are no basic Pokémon cards in your discard pile.");
         } else if (context.player.bench.full) {
             return AcceptanceReport.Rejected("Your bench is full.");
@@ -21,7 +25,7 @@ export class TrainerWorker_Revive extends TrainerWorker {
         if (!target) {
             return this.generateInterrupt(context,
                 "Select a basic Pokémon card from your discard pile.",
-                context.player.discard.cards.filter(c => c instanceof PokemonCard && c.def.stage === "basic").map(c => new Choice(c))
+                this.getTargetChoices(context)
             );
         }
 

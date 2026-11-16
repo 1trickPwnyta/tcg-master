@@ -1,4 +1,5 @@
 import { AIEvaluator } from "../ai/AIEvaluator.js";
+import { Client } from "../Client.js";
 import { Command, InvalidCommandArgumentsError } from "./Command.js";
 import { CommandContext } from "./CommandContext.js";
 
@@ -13,6 +14,8 @@ export class Command_debug extends Command {
         switch (subcommand) {
             case "score": return [ AIEvaluator.evaluate(context.engine, player.id) ];
             case "xscore": return [ AIEvaluator.evaluate(context.engine, opponent.id) ];
+            case "deck": return Client.getCardList(player.deck.cards);
+            case "xdeck": return Client.getCardList(player.opponent.deck.cards);
         }
 
         throw new InvalidCommandArgumentsError(context.name, context.args);

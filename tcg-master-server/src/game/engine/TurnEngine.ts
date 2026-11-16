@@ -38,6 +38,7 @@ export class TurnEngine extends SubEngine {
                         card: pokemon
                     }, this.state.turn!.player);
                 }
+                pokemon.evolutionEligible = true;
             }
         }
         for (const client of this.engine.clients) {

@@ -13,6 +13,14 @@ export class TrainerWorker_EnergyRemoval extends TrainerWorker {
         this.amount = args?.amount ?? 1;
     }
 
+    private getPokemonChoices(context: TrainerContext): Choice[] {
+        return this.getValidChoices(context, context.player.opponent.pokemonInPlay.filter(p => p.energy.length).map(p => new Choice(p)));
+    }
+
+    private getEnergyChoices(context: TrainerContext, pokemon: PokemonCard): Choice[] {
+        return this.getValidChoices(context, pokemon.attachments.energyCards.filter(c => !context.targets.includes(c.card.id)).map(c => new Choice(c.card)));
+    }
+
     public override validate(context: TrainerContext): AcceptanceReport {
         if (!context.player.opponent.pokemonInPlay.some(p => p.energy.length)) {
             return AcceptanceReport.Rejected("Your opponent doesn't have any Pokémon with energy attached.");
@@ -26,18 +34,18 @@ export class TrainerWorker_EnergyRemoval extends TrainerWorker {
         if (!target_pokemon) {
             return this.generateInterrupt(context,
                 "Select one of your opponent's Pokémon to target.",
-                context.player.opponent.pokemonInPlay.filter(p => p.energy.length).map(p => new Choice(p)),
+                this.getPokemonChoices(context),
             );
         }
         
         for (let i = 0; i < this.amount; i++) {
             const energy = context.nextTarget();
             if (energy === undefined) {
-                const energyChoices = target_pokemon.attachments.energyCards.filter(c => !context.targets.includes(c.card.id));
+                const energyChoices = this.getEnergyChoices(context, target_pokemon);
                 if (energyChoices.length) {
                     return this.generateInterrupt(context,
                         "Select an energy card to discard.",
-                        energyChoices.map(e => new Choice(e.card)),
+                        energyChoices,
                     );
                 } else {
                     context.addNullTarget();

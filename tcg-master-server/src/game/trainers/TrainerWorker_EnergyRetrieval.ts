@@ -12,6 +12,10 @@ export class TrainerWorker_EnergyRetrieval extends TrainerWorker {
         this.amount = args.amount;
     }
 
+    private getTargetChoices(context: TrainerContext): Choice[] {
+        return this.getValidChoices(context, context.player.discard.cards.filter(c => c instanceof EnergyCard && c.def.basic).map(e => new Choice(e)));
+    }
+
     public override validate(context: TrainerContext): AcceptanceReport {
         if (!context.player.discard.cards.some(c => c instanceof EnergyCard && c.def.basic)) {
             return AcceptanceReport.Rejected("There are no basic energy cards in your discard pile.");
@@ -21,11 +25,12 @@ export class TrainerWorker_EnergyRetrieval extends TrainerWorker {
     }
 
     public override acquireTargets(context: TrainerContext): Interrupt | null {
+        const choices = this.getTargetChoices(context);
         for (let i = 0; i < this.amount; i++) {
-            if (context.player.discard.cards.some(c => c instanceof EnergyCard && c.def.basic)) {
+            if (choices.length) {
                 return this.generateInterrupt(context,
                     "Select a basic energy card from your discard pile.",
-                    context.player.discard.cards.filter(c => c instanceof EnergyCard && c.def.basic).map(e => new Choice(e))
+                    choices
                 );
             } else {
                 context.addNullTarget();

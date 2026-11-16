@@ -6,7 +6,7 @@ import { TrainerContext } from "./TrainerContext.js";
 
 export abstract class TrainerWorker {
     protected getValidChoices(context: TrainerContext, possibleChoices: Choice[]): Choice[] {
-        return possibleChoices.filter(c => !c.id || !context.targets.includes(c.id));
+        return possibleChoices.filter(c => !c.id || (c.id !== context.card.id && !context.targets.includes(c.id)));
     }
 
     public validate(context: TrainerContext): AcceptanceReport {

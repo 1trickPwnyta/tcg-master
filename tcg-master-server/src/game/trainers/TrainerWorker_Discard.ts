@@ -12,6 +12,10 @@ export class TrainerWorker_Discard extends TrainerWorker {
         this.amount = args.amount;
     }
 
+    private getTargetChoices(context: TrainerContext): Choice[] {
+        return this.getValidChoices(context, context.player.hand.cards.map(c => new Choice(c)));
+    }
+
     public override validate(context: TrainerContext): AcceptanceReport {
         if (this.amount !== "all" && context.player.hand.count < this.amount) {
             return AcceptanceReport.Rejected("You don't have enough cards in your hand to discard.");
@@ -27,7 +31,7 @@ export class TrainerWorker_Discard extends TrainerWorker {
                 if (!target) {
                     return this.generateInterrupt(context,
                         "Select a card from your hand to discard.",
-                        context.player.hand.cards.map(c => new Choice(c))
+                        this.getTargetChoices(context)
                     );
                 }
             }
