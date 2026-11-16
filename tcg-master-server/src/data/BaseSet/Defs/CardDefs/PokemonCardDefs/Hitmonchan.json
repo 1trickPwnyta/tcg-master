@@ -1,0 +1,21 @@
+{
+    "name": "BaseSet.Hitmonchan",
+    "label": "Hitmonchan",
+    "type": "Fighting",
+    "stage": "basic",
+    "hp": 70,
+    "weakness": "Psychic",
+    "retreat": 2,
+    "attacks": [
+        {
+            "name": "Jab",
+            "cost": [ "Fighting" ],
+            "damage": 20
+        },
+        {
+            "name": "Special Punch",
+            "cost": [ "Fighting", "Fighting", "Colorless" ],
+            "damage": 40
+        }
+    ]
+}

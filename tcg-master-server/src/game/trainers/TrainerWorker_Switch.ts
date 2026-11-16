@@ -1,20 +1,22 @@
+import { AcceptanceReport } from "../../AcceptanceReport.js";
 import { Choice } from "../state/Choice.js";
 import { Interrupt } from "../state/interrupts/Interrupt.js";
 import { InterruptType } from "../state/interrupts/InterruptType.js";
-import { TrainerContext } from "../state/TrainerCard.js";
+import { PokemonCard } from "../state/PokemonCard.js";
+import { TrainerContext } from "./TrainerContext.js";
 import { TrainerWorker } from "./TrainerWorker.js";
 
 export class TrainerWorker_Switch extends TrainerWorker {
-    public override validate(context: TrainerContext): boolean {
+    public override validate(context: TrainerContext): AcceptanceReport {
         if (!context.player.bench.count) {
-            context.engine.sendError(context.player, "There are no Pokémon on your bench to switch with.");
-            return false;
+            return AcceptanceReport.Rejected("There are no Pokémon on your bench to switch with.");
         }
 
-        return true;
+        return AcceptanceReport.Accepted;
     }
 
-    public override acquireTargets(context: TrainerContext, target: number): Interrupt | null {
+    public override acquireTargets(context: TrainerContext): Interrupt | null {
+        const target = context.nextTarget();
         if (!target) {
             context.interruptType = InterruptType.Switch;
             return this.generateInterrupt(context,
@@ -26,10 +28,10 @@ export class TrainerWorker_Switch extends TrainerWorker {
         return null;
     }
 
-    public override execute(context: TrainerContext, target: number) {
-        const card = context.engine.search.getCard(target)!;
-        context.engine.send(context.player, "switched", context.player.activePokemon, "with", context.engine.search.getCard(context.args.switchTarget), ".");
+    public override execute(context: TrainerContext) {
+        const target = context.nextTargetCard() as PokemonCard;
+        context.engine.send(context.player, "switched", context.player.activePokemon, "with", target, ".");
         context.player.bench.add(context.player.activePokemon!);
-        context.player.active.add(card);
+        context.player.active.add(target);
     }
 };

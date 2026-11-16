@@ -8,6 +8,7 @@ export interface IPokemonPowerData {
     name: string;
     text: string;
     workers: (string | { class: string, args: any })[];
+    modifiers: (string | { class: string, args: any })[];
 };
 
 export interface IAttackData {

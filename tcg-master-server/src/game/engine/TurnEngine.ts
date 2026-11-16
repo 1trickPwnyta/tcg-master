@@ -4,6 +4,7 @@ import { Turn } from "../state/Turn.js";
 import { SubEngine } from "./SubEngine.js";
 import { Choice } from "../state/Choice.js";
 import { TrainerCard } from "../state/TrainerCard.js";
+import { EnergyCard } from "../state/EnergyCard.js";
 
 export class TurnEngine extends SubEngine {
     private get turn(): Turn {
@@ -43,6 +44,23 @@ export class TurnEngine extends SubEngine {
             client.notify_endOfTurn();
         }
 
+        // Reset any energy conversions for the turn
+        for (const player of this.state.players) {
+            for (const pokemon of player.pokemonInPlay) {
+                for (const energy of pokemon.attachments.energyCards) {
+                    if (energy.card instanceof EnergyCard) {
+                        energy.card.clearOverride();
+                    } else {
+                        const args = pokemon.attachments.getArgs(energy.card.id);
+                        if (args?.originalType) {
+                            args.type = args.originalType;
+                            args.originalType = undefined;
+                        }
+                    }
+                }
+            }
+        }
+
         this.state.betweenTurns = true;
         for (const player of this.state.players) {
             for (const pokemon of player.pokemonInPlay) {
@@ -51,7 +69,7 @@ export class TurnEngine extends SubEngine {
                         engine: this.engine,
                         owner: player,
                         card: pokemon
-                    });
+                    }, status.args);
                 }
             }
         }

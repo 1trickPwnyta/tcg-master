@@ -10,7 +10,7 @@ export class AttackComp_DefenderStatus extends AttackComp {
 
     public override apply(context: AttackContext) {
         if (this.args.trigger === "always" || context.engine.game.flipCoin(context.attacker.owner)) {
-            context.addDefenderStatus(this.status);
+            context.addDefenderStatus(this.status, this.args.args);
         }
     }
 };

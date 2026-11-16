@@ -1,0 +1,24 @@
+{
+    "name": "BaseSet.Charizard",
+    "label": "Charizard",
+    "type": "Fire",
+    "stage": "stage2",
+    "hp": 120,
+    "weakness": "Water",
+    "resistance": "Fighting",
+    "retreat": 3,
+    "attacks": [
+        {
+            "name": "Fire Spin",
+            "cost": [ "Fire", "Fire", "Fire", "Fire" ],
+            "damage": 100,
+            "comps": [ { "class": "AttackComp_PayEnergy", "args": { "cost": [ "Colorless", "Colorless" ] } } ],
+            "text": "Discard 2 Energy cards attached to Charizard in order to use this attack."
+        }
+    ],
+    "power": {
+        "name": "Energy Burn",
+        "workers": [ "PokemonPower_EnergyBurn" ],
+        "text": "As often as you like during your turn <em>(before your attack)</em>, you may turn all Energy attached to Charizard into {Fire} Energy for the rest of the turn. This power can't be used if Charizard is Asleep, Confused, or Paralyzed."
+    }
+}

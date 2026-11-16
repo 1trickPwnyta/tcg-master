@@ -7,7 +7,8 @@ export class InterruptWorker_AttackTargets extends InterruptWorker {
     public override execute(context: InterruptContext, target_id: number | string, attackName: string, ...targets: (number | string)[]): boolean {
         const player = context.engine.game.activePlayer;
         const card = player.activePokemon!;
-        const attack = card.def.attacks.find(a => a.name === attackName)!;
+        // Check opponent too in case of Metronome
+        const attack = card.def.attacks.find(a => a.name === attackName) ?? context.engine.game.defendingPokemon.def.attacks.find(a => a.name === attackName)!;
         targets.push(target_id);
 
         const interrupt = attack.validateTargets(context.engine, ...targets);

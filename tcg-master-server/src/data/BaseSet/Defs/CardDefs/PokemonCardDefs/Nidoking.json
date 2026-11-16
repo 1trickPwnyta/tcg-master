@@ -1,0 +1,25 @@
+{
+    "name": "BaseSet.Nidoking",
+    "label": "Nidoking",
+    "type": "Grass",
+    "stage": "stage2",
+    "hp": 90,
+    "weakness": "Psychic",
+    "retreat": 3,
+    "attacks": [
+        {
+            "name": "Thrash",
+            "cost": [ "Grass", "Colorless", "Colorless" ],
+            "damage": 30,
+            "comps": [ { "class": "AttackComp_CoinDamage", "args": { "amount": 10, "coins": 1, "selfDamage": 10 } } ],
+            "text": "Flip a coin. If heads, this attack does 30 damage plus 10 more damage; if tails, this attack does 30 damage plus Nidoking does 10 damage to itself."
+        },
+        {
+            "name": "Toxic",
+            "cost": [ "Grass", "Grass", "Grass" ],
+            "damage": 20,
+            "comps": [ { "class": "AttackComp_Poison", "args": { "trigger": "always", "args": { "amount": 20 } } } ],
+            "text": "The Defending Pokémon is now Poisoned. It now takes 20 Poison damage instead of 10 after each player's turn <em>(even if it was already Poisoned)</em>."
+        }
+    ]
+}

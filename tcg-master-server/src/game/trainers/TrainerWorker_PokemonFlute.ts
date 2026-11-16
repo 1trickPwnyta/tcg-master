@@ -1,23 +1,23 @@
+import { AcceptanceReport } from "../../AcceptanceReport.js";
 import { Choice } from "../state/Choice.js";
 import { Interrupt } from "../state/interrupts/Interrupt.js";
 import { PokemonCard } from "../state/PokemonCard.js";
-import { TrainerContext } from "../state/TrainerCard.js";
+import { TrainerContext } from "./TrainerContext.js";
 import { TrainerWorker } from "./TrainerWorker.js";
 
 export class TrainerWorker_PokemonFlute extends TrainerWorker {
-    public override validate(context: TrainerContext): boolean {
+    public override validate(context: TrainerContext): AcceptanceReport {
         if (context.player.opponent.bench.full) {
-            context.engine.sendError(context.player, "Your opponent's bench is full.");
-            return false;
+            return AcceptanceReport.Rejected("Your opponent's bench is full.");
         } else if (!context.player.opponent.discard.cards.some(c => c instanceof PokemonCard && c.def.stage === "basic")) {
-            context.engine.sendError(context.player, "Your opponent has no basic Pokémon cards in their discard pile.");
-            return false;
+            return AcceptanceReport.Rejected("Your opponent has no basic Pokémon cards in their discard pile.");
         }
 
-        return true;
+        return AcceptanceReport.Accepted;
     }
 
-    public override acquireTargets(context: TrainerContext, target: number): Interrupt | null {
+    public override acquireTargets(context: TrainerContext): Interrupt | null {
+        const target = context.nextTarget();
         if (!target) {
             return this.generateInterrupt(context,
                 "Which Pokémon will be sent to your opponent's bench?",
@@ -28,8 +28,8 @@ export class TrainerWorker_PokemonFlute extends TrainerWorker {
         return null;
     }
 
-    public override execute(context: TrainerContext, target: number) {
-        const card = context.engine.search.getCard(target, context.player.opponent.discard) as PokemonCard;
+    public override execute(context: TrainerContext) {
+        const card = context.nextTargetCard() as PokemonCard;
         context.player.opponent.bench.add(card);
         context.engine.send(...card.fullTokens, "was brought back!");
     }

@@ -1,0 +1,21 @@
+{
+    "name": "BaseSet.Machamp",
+    "label": "Machamp",
+    "type": "Fighting",
+    "stage": "stage2",
+    "hp": 100,
+    "weakness": "Psychic",
+    "retreat": 3,
+    "attacks": [
+        {
+            "name": "Seismic Toss",
+            "cost": [ "Fighting", "Fighting", "Fighting", "Colorless" ],
+            "damage": 60
+        }
+    ],
+    "power": {
+        "name": "Strikes Back",
+        "modifiers": [ "Modifier_StrikesBack" ],
+        "text": "Whenever your opponent's attack damages Machamp (even if Machamp is Knocked Out), this power does 10 damage to the attacking Pokémon. <em>(Don't apply Weakness and Resistance.)</em> This power can't be used if Machamp is already Asleep, Confused, or Paralyzed when your opponent attacks."
+    }
+}

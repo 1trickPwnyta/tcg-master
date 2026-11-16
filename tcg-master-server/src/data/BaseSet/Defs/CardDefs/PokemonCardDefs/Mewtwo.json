@@ -1,0 +1,27 @@
+{
+    "name": "BaseSet.Mewtwo",
+    "label": "Mewtwo",
+    "type": "Psychic",
+    "stage": "basic",
+    "hp": 60,
+    "weakness": "Psychic",
+    "retreat": 3,
+    "attacks": [
+        {
+            "name": "Psychic",
+            "cost": [ "Psychic", "Colorless" ],
+            "damage": 10,
+            "comps": [ "AttackComp_Psychic" ],
+            "text": "Does 10 damage plus 10 more damage for each Energy card attached to the Defending Pokémon."
+        },
+        {
+            "name": "Barrier",
+            "cost": [ "Psychic", "Psychic" ],
+            "comps": [
+                { "class": "AttackComp_PayEnergy", "args": { "cost": [ "Psychic" ] } },
+                { "class": "AttackComp_AttackerStatus", "args": { "status": "AttackImmunity", "trigger": "always" } }
+            ],
+            "text": "Discard 1 {Psychic} Energy card attached to Mewtwo in order to prevent all effects of attacks, including damage, done to Mewtwo during your opponent's next turn."
+        }
+    ]
+}

@@ -1,21 +1,9 @@
+import { AcceptanceReport } from "../../AcceptanceReport.js";
 import { TrainerCardDef } from "../../defs/TrainerCardDef.js";
-import { GameEngine } from "../engine/GameEngine.js";
+import { TrainerContext } from "../trainers/TrainerContext.js";
 import { Card } from "./Card.js";
-import { Interrupt, InterruptSync } from "./interrupts/Interrupt.js";
-import { InterruptType } from "./interrupts/InterruptType.js";
-import { Location } from "./Location.js";
-import { Player } from "./Player.js";
+import { Interrupt } from "./interrupts/Interrupt.js";
 import { Serializable } from "./serializer.js";
-
-export type TrainerContext = {
-    engine: GameEngine;
-    player: Player;
-    card: TrainerCard;
-    args: any;
-    targetsLocation?: Location;
-    interruptType?: InterruptType;
-    forceInterrupt?: boolean;
-};
 
 @Serializable()
 export class TrainerCard extends Card {
@@ -23,18 +11,8 @@ export class TrainerCard extends Card {
         return super.def as TrainerCardDef;
     }
 
-    public override play(...targets: number[]): boolean {
-        this.owner.limbo.add(this);
-
-        const context = {
-            engine: this.engine,
-            player: this.owner,
-            card: this,
-            args: {}
-        };
-
-        if (!this.validate(context)) {
-            this.cancel(context);
+    public override play(...targets: (number | string)[]): boolean {
+        if (!this.validate(...targets)) {
             return false;
         }
 
@@ -42,18 +20,7 @@ export class TrainerCard extends Card {
             this.engine.send(this.owner, "used", this, ".");
         }
 
-        return this.playTrainer(context.args);
-    }
-
-    public playTrainer(args: any): boolean {
-        const context = {
-            engine: this.engine,
-            player: this.owner,
-            card: this,
-            args: args
-        };
-
-        const interrupt = this.acquireTargets(context);
+        const interrupt = this.acquireTargets(...targets);
         if (interrupt) {
             this.engine.interrupts.interrupt(interrupt);
             return true;
@@ -63,32 +30,28 @@ export class TrainerCard extends Card {
             this.engine.send(this.owner, "used", this, ".");
         }
         
-        this.execute(context);
-        if (this.location == this.owner.limbo) {
-            this.discard();
-        }
+        this.execute(...targets);
+        this.discard();
 
         return true;
     }
 
-    private cancel(context: TrainerContext) {
-        context.player.limbo.sendAllBack();
-    }
-
-    private validate(context: TrainerContext): boolean {
+    private validate(...targets: (number | string)[]): AcceptanceReport {
+        const context = new TrainerContext(this.engine, this, ...targets);
         for (const worker of this.def.workers) {
-            if (!worker.validate(context)) {
-                return false;
+            const report = worker.validate(context);
+            if (!report.accepted) {
+                return report;
             }
         }
 
-        return true;
+        return AcceptanceReport.Accepted;
     }
 
-    private acquireTargets(context: TrainerContext): Interrupt | null {
+    private acquireTargets(...targets: (number | string)[]): Interrupt | null {
+        const context = new TrainerContext(this.engine, this, ...targets);
         for (const worker of this.def.workers) {
-            worker.consolidateTargets(context);
-            const interrupt = worker.acquireTargets(context, ...worker.getTargets(context));
+            const interrupt = worker.acquireTargets(context);
             if (interrupt) {
                 return interrupt;
             }
@@ -97,10 +60,10 @@ export class TrainerCard extends Card {
         return null;
     }
 
-    private execute(context: TrainerContext) {
+    private execute(...targets: (number | string)[]) {
+        const context = new TrainerContext(this.engine, this, ...targets);
         for (const worker of this.def.workers) {
-            worker.consolidateTargets(context);
-            worker.execute(context, ...worker.getTargets(context));
+            worker.execute(context);
         }
     }
 };

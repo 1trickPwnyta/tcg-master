@@ -1,3 +1,4 @@
+import { StatusDefOf } from "../../defs/defof/StatusDefOf.js";
 import { GameEngine } from "../engine/GameEngine.js";
 import { Choice } from "../state/Choice.js";
 import { Interrupt, InterruptSync } from "../state/interrupts/Interrupt.js";
@@ -28,6 +29,10 @@ export abstract class PokemonPowerWorker {
 
     public cantUseReason(context: PokemonPowerContext): string | null {
         return null;
+    }
+
+    protected hasDisqualifyingStatus(user: PokemonCard): boolean {
+        return user.hasStatus(StatusDefOf.Sleep) || user.hasStatus(StatusDefOf.Confusion) || user.hasStatus(StatusDefOf.Paralysis);
     }
 
     public acquireTargets(context: PokemonPowerContext, ...targets: (number | string)[]): Interrupt | null {

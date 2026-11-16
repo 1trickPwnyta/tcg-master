@@ -26,13 +26,14 @@ export class Attachments extends Location {
     }
 
     public get energy(): EnergyTypeDef[] {
-        return this.energyCards.flatMap(e => Array.from({ length: e.amount }, () => e.type));
+        return this.energyCards.flatMap(e => e instanceof EnergyCard ? e.energy : Array.from({ length: e.amount }, () => e.type));
     }
 
     public get energyCards(): ResolvedEnergyCard[] {
         let energyArray: ResolvedEnergyCard[] = [];
         for (const energy of this.cards.filter(c => c instanceof EnergyCard)) {
-            energyArray.push({ card: energy, amount: energy.def.amount, type: energy.def.type });
+            const energyProduced = energy.energy;
+            energyArray.push({ card: energy, amount: energyProduced.length, type: energyProduced[0] });
         }
         for (const card of this.cards) {
             const args = this.args.find(a => a.card === card.id);

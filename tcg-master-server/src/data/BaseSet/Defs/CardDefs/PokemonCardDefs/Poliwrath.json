@@ -1,0 +1,25 @@
+{
+    "name": "BaseSet.Poliwrath",
+    "label": "Poliwrath",
+    "type": "Water",
+    "stage": "stage2",
+    "hp": 90,
+    "weakness": "Grass",
+    "retreat": 3,
+    "attacks": [
+        {
+            "name": "Water Gun",
+            "cost": [ "Water", "Water", "Colorless" ],
+            "damage": 30,
+            "comps": [ { "class": "AttackComp_WaterGun", "args": { "cost": "Water", "amount": 10, "limit": 2 } } ],
+            "text": "Does 30 damage plus 10 more damage for each {Water} Energy attached to Poliwrath but not used to pay for this attack's Energy cost. Extra {Water} Energy after the 2nd doesn't count."
+        },
+        {
+            "name": "Whirlpool",
+            "cost": [ "Water", "Water", "Colorless", "Colorless" ],
+            "damage": 40,
+            "comps": [ "AttackComp_DestroyEnergy" ],
+            "text": "If the Defending Pokémon has any Energy cards attached to it, choose 1 of them and discard it."
+        }
+    ]
+}

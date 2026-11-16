@@ -1,0 +1,23 @@
+{
+    "name": "BaseSet.Blastoise",
+    "label": "Blastoise",
+    "type": "Water",
+    "stage": "stage2",
+    "hp": 100,
+    "weakness": "Lightning",
+    "retreat": 3,
+    "attacks": [
+        {
+            "name": "Hydro Pump",
+            "cost": [ "Water", "Water", "Water" ],
+            "damage": 40,
+            "comps": [ { "class": "AttackComp_WaterGun", "args": { "cost": "Water", "amount": 10, "limit": 2 } } ],
+            "text": "Does 40 damage plus 10 more damage for each {Water} Energy attached to Blastoise but not used to pay for this attack's Energy cost. Extra {Water} Energy after the 2nd doesn't count."
+        }
+    ],
+    "power": {
+        "name": "Rain Dance",
+        "modifiers": [ "Modifier_RainDance" ],
+        "text": "As often as you like during your turn <em>(before your attack)</em>, you may attach 1 {Water} Energy card to 1 of your {Water} Pokémon. <em>(This doesn't use up your 1 Energy card attachment for the turn.)</em> This power can't be used if Blastoise is Asleep, Confused, or Paralyzed."
+    }
+}

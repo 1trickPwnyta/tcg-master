@@ -96,7 +96,7 @@ export class Player extends State {
         amount = Math.min(amount, this.deck.count);
         const cardsDrawn = [];
         for (let i = 0; i < amount; i++) {
-            const card = this.deck.cards.pop()!;
+            const card = this.deck.cards[this.deck.count - 1];
             if (!card) {
                 debugger;
             }

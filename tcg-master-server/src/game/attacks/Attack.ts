@@ -59,8 +59,17 @@ export class Attack implements ITargetable {
     }
 
     public canUse(engine: GameEngine): AcceptanceReport {
+        let cost = [ ...this.cost ];
         const pokemon = engine.game.activePokemon;
-        if (!EnergyCost.costSatisfied(this.cost, pokemon.energy)) {
+        for (const modifier of pokemon.modifiers) {
+            cost = modifier.modifier.modifyAttackCost({
+                engine: engine,
+                owner: pokemon.owner,
+                card: pokemon
+            }, this, modifier.args);
+        }
+
+        if (!EnergyCost.costSatisfied(cost, pokemon.energy)) {
             return AcceptanceReport.Rejected(`${pokemon.name} doesn't have enough energy to use ${this.name}.`);
         }
         for (const comp of this.comps) {

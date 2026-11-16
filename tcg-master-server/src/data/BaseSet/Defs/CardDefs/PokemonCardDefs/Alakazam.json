@@ -1,0 +1,23 @@
+{
+    "name": "BaseSet.Alakazam",
+    "label": "Alakazam",
+    "type": "Psychic",
+    "stage": "stage2",
+    "hp": 80,
+    "weakness": "Psychic",
+    "retreat": 3,
+    "attacks": [
+        {
+            "name": "Confuse Ray",
+            "cost": [ "Psychic", "Psychic", "Psychic" ],
+            "damage": 30,
+            "comps": [ "AttackComp_Confuse" ],
+            "text": "Flip a coin. If heads, the Defending Pokémon is now Confused."
+        }
+    ],
+    "power": {
+        "name": "Damage Swap",
+        "workers": [ "PokemonPower_DamageSwap" ],
+        "text": "As often as you like during your turn <em>(before your attack)</em>, you may move 1 damage counter from 1 of your Pokémon to another as long as you don't Knock Out that Pokémon. This power can't be used if Alakazam is Asleep, Confused, or Paralyzed."
+    }
+}

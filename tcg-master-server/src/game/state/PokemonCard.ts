@@ -50,8 +50,16 @@ export class PokemonCard extends Card {
         return super.def as PokemonCardDef;
     }
 
+    public get inPlay(): boolean {
+        return this.location == this.owner.active || this.location == this.owner.bench;
+    }
+
     public get energy(): EnergyTypeDef[] {
         return this.attachments.energy;
+    }
+
+    public get remainingHealth(): number {
+        return this.def.hp - this.damage;
     }
 
     public get modifiers(): { modifier: Modifier, args: any }[] {
@@ -59,7 +67,8 @@ export class PokemonCard extends Card {
             ...this.statuses.map(s => ({ modifier: DefDatabase.get<StatusDef>(s.def).modifier, args: s.args })),
             ...this.attachments.cards.filter(a => a.def.modifiers.length).flatMap(a => a.def.modifiers).map(m => ({
                 modifier: m, args: {}
-            }))
+            })),
+            ...(this.def.power ? this.def.power.modifiers.map(m => ({ modifier: m, args: {} })) : [])
         ];
     }
 
@@ -165,6 +174,15 @@ export class PokemonCard extends Card {
                 name: context.amount.toString(),
                 type: "damage"
             }, `damage${context.source && context.source !== "attack" ? ` due to ${context.source}` : ""}!`);
+
+            for (const status of this.modifiers) {
+                status.modifier.notify_damageTaken({
+                    engine: this.engine,
+                    owner: this.owner,
+                    card: this
+                }, context);
+            }
+
             if (this.damage >= this.def.hp) {
                 this.knockOut(context.attacker);
                 return { knockedOut: true, finalDamage: context.amount };

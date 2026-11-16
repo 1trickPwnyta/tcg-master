@@ -7,7 +7,7 @@ import { PokemonPowerContext, PokemonPowerWorker } from "./PokemonPowerWorker.js
 
 export class PokemonPower_EnergyTrans extends PokemonPowerWorker {
     public override cantUseReason(context: PokemonPowerContext): string | null {
-        if (context.card.hasStatus(StatusDefOf.Sleep) || context.card.hasStatus(StatusDefOf.Paralysis) || context.card.hasStatus(StatusDefOf.Confusion)) {
+        if (this.hasDisqualifyingStatus(context.card)) {
             return "a status condition";
         } else if (!context.owner.pokemonInPlay.some(p => p.energy.includes(EnergyTypeDefOf.Grass))) {
             return `no ${EnergyTypeDefOf.Grass} energy attached to any of your Pokémon`;

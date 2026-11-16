@@ -1,6 +1,8 @@
 import { EnergyTypeDef } from "../../defs/EnergyTypeDef.js";
+import { Attack } from "../attacks/Attack.js";
 import { AttackContext } from "../attacks/AttackContext.js";
 import { GameEngine } from "../engine/GameEngine.js";
+import { EnergyCard } from "../state/EnergyCard.js";
 import { Player } from "../state/Player.js";
 import { DamageContext, PokemonCard } from "../state/PokemonCard.js";
 
@@ -37,6 +39,10 @@ export abstract class Modifier {
         return [];
     }
 
+    public modifyAttackCost(context: ModifierContext, attack: Attack, args: any): EnergyTypeDef[] {
+        return attack.cost;
+    };
+
     public modifyDamageDealt(context: ModifierContext, damageContext: DamageContext, args: any): number {
         return damageContext.amount;
     }
@@ -57,15 +63,21 @@ export abstract class Modifier {
         return true;
     }
 
+    public overrideAllowPlayEnergy(context: ModifierContext, energy: EnergyCard, target: PokemonCard): boolean {
+        return false;
+    }
+
     public notify_given(context: ModifierContext, args: any) { }
 
     public notify_removed(context: ModifierContext, args: any) { }
 
+    public notify_damageTaken(context: ModifierContext, damageContext: DamageContext) { }
+ 
     public notify_knockedOut(context: ModifierContext, attacker?: PokemonCard) { }
 
     public notify_endOfTurn(context: ModifierContext, turn_id: number) { }
 
-    public notify_betweenTurns(context: ModifierContext) { }
+    public notify_betweenTurns(context: ModifierContext, args: any) { }
 
     protected abstract remove(context: ModifierContext): void;
 };

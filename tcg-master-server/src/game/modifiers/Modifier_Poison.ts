@@ -10,7 +10,7 @@ export class Modifier_Poison extends StatusModifier {
         context.engine.send(...context.card.fullTokens, "is no longer poisoned!");
     }
 
-    public override notify_betweenTurns(context: ModifierContext) {
-        context.card.dealDamage({ amount: 10, source: "poison" });
+    public override notify_betweenTurns(context: ModifierContext, args?: any) {
+        context.card.dealDamage({ amount: args?.amount ?? 10, source: "poison" });
     }
 };

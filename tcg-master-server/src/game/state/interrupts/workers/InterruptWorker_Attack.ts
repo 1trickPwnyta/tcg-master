@@ -16,7 +16,8 @@ export class InterruptWorker_Attack extends InterruptWorker {
         }
 
         if (attack_name) {
-            const attack = card.def.attacks.find(a => a.name === attack_name)!;
+            // Also check the opponent's attacks in case of Metronome
+            const attack = card.def.attacks.find(a => a.name === attack_name) ?? context.engine.game.defendingPokemon.def.attacks.find(a => a.name === attack_name)!;
 
             const report = attack.canUse(context.engine);
             if (!report.accepted) {

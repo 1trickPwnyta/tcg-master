@@ -1,5 +1,5 @@
 import { StatusDefOf } from "../../defs/defof/StatusDefOf.js";
-import { TrainerContext } from "../state/TrainerCard.js";
+import { TrainerContext } from "./TrainerContext.js";
 import { TrainerWorker } from "./TrainerWorker.js";
 
 export class TrainerWorker_FullHeal extends TrainerWorker {

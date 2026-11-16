@@ -1,0 +1,25 @@
+{
+    "name": "BaseSet.Chansey",
+    "label": "Chansey",
+    "type": "Colorless",
+    "stage": "basic",
+    "hp": 120,
+    "weakness": "Fighting",
+    "resistance": "Psychic",
+    "retreat": 1,
+    "attacks": [
+        {
+            "name": "Scrunch",
+            "cost": [ "Colorless", "Colorless" ],
+            "comps": [ { "class": "AttackComp_AttackerStatus", "args": { "status": "DamagePrevention", "trigger": "heads", "args": { "amount": "all" } } } ],
+            "text": "Flip a coin. If heads, prevent all damage done to Chansey during your opponent's next turn. <em>(Any other effects of attacks still happen.)</em>"
+        },
+        {
+            "name": "Double-edge",
+            "cost": [ "Colorless", "Colorless", "Colorless", "Colorless" ],
+            "damage": 80,
+            "comps": [ { "class": "AttackComp_SelfDamage", "args": { "amount": 80, "trigger": "always" } } ],
+            "text": "Chansey does 80 damage to itself."
+        }
+    ]
+}

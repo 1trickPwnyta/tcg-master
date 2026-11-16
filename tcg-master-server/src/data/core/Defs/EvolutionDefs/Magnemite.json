@@ -1,0 +1,10 @@
+[
+    {
+        "name": "Magnemite",
+        "next": [ "Magneton" ]
+    },
+    {
+        "name": "Magneton",
+        "next": [ "Magnezone" ]
+    }
+]

@@ -1,0 +1,28 @@
+{
+    "name": "BaseSet.Magneton",
+    "label": "Magneton",
+    "type": "Lightning",
+    "stage": "stage1",
+    "hp": 60,
+    "weakness": "Fighting",
+    "retreat": 1,
+    "attacks": [
+        {
+            "name": "Thunder Wave",
+            "cost": [ "Lightning", "Lightning", "Colorless" ],
+            "damage": 30,
+            "comps": [ "AttackComp_Paralyze" ],
+            "text": "Flip a coin. If heads, the Defending Pokémon is now Paralyzed."
+        },
+        {
+            "name": "Selfdestruct",
+            "cost": [ "Lightning", "Lightning", "Colorless", "Colorless" ],
+            "damage": 80,
+            "comps": [
+                { "class": "AttackComp_SelfDamage", "args": { "amount": 80, "trigger": "always" } },
+                { "class": "AttackComp_BenchDamage", "args": { "amount": 20, "target": "all", "scope": "both" } }
+            ],
+            "text": "Does 20 damage to each Pokémon on each player's Bench. <em>(Don't apply Weakness and Resistance for Benched Pokémon.)</em> Magneton does 80 damage to itself."
+        }
+    ]
+}

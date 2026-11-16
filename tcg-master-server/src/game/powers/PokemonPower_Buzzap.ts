@@ -7,7 +7,7 @@ import { Interrupt } from "../state/interrupts/Interrupt.js";
 import { PokemonCard } from "../state/PokemonCard.js";
 import { PokemonPowerContext, PokemonPowerWorker } from "./PokemonPowerWorker.js";
 
-export class PokemonPowerWorker_Buzzap extends PokemonPowerWorker {
+export class PokemonPower_Buzzap extends PokemonPowerWorker {
     public override cantUseReason(context: PokemonPowerContext): string | null {
         if (context.card.hasStatus(StatusDefOf.Sleep) || context.card.hasStatus(StatusDefOf.Paralysis) || context.card.hasStatus(StatusDefOf.Confusion)) {
             return "a status condition";

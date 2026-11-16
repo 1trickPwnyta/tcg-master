@@ -1,0 +1,24 @@
+{
+    "name": "BaseSet.Gyarados",
+    "label": "Gyarados",
+    "type": "Water",
+    "stage": "stage1",
+    "hp": 100,
+    "weakness": "Grass",
+    "resistance": "Fighting",
+    "retreat": 3,
+    "attacks": [
+        {
+            "name": "Dragon Rage",
+            "cost": [ "Water", "Water", "Water" ],
+            "damage": 50
+        },
+        {
+            "name": "Bubblebeam",
+            "cost": [ "Water", "Water", "Water", "Water" ],
+            "damage": 40,
+            "comps": [ "AttackComp_Paralyze" ],
+            "text": "Flip a coin. If heads, the Defending Pokémon is now Paralyzed."
+        }
+    ]
+}

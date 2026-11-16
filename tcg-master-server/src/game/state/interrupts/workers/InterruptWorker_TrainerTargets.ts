@@ -5,10 +5,10 @@ import { InterruptContext, InterruptWorker } from "./InterruptWorker.js";
 
 @ResolvesInterrupt(InterruptResolution.TrainerTargets)
 export class InterruptWorker_TrainerTargets extends InterruptWorker {
-    public override execute(context: InterruptContext, target_id: number, card_id: number, key: string): boolean {
+    public override execute(context: InterruptContext, target_id: number | string, card_id: number, ...targets: (number | string)[]): boolean {
         const card = context.engine.search.getCard(card_id) as TrainerCard;
-        context.compoundArgs[key] = target_id;
-        card.playTrainer(context.compoundArgs);
+        targets.push(target_id);
+        card.play(...targets);
         return true;
     }
 };
