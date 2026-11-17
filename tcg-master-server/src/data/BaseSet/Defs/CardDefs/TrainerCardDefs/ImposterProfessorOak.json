@@ -1,0 +1,6 @@
+{
+    "name": "BaseSet.ImposterProfessorOak",
+    "label": "Imposter Professor Oak",
+    "text": "Your opponent shuffles their hand into their deck, then draws 7 cards.",
+    "workers": [ "TrainerWorker_ImposterProfessorOak" ]
+}

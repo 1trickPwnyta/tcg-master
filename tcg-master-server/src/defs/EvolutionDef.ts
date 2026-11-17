@@ -32,4 +32,23 @@ export class EvolutionDef extends Def {
 
         return false;
     }
+
+    public eveolvesFromDirect(previous: string): boolean {
+        const prevolution = DefDatabase.get<EvolutionDef>(previous);
+        return prevolution.evolvesDirect(this.name);
+    }
+
+    public evolvesFromEver(previous: string): boolean {
+        if (this.eveolvesFromDirect(previous)) {
+            return true;
+        }
+
+        for (const evolution of DefDatabase.getAll<EvolutionDef>("EvolutionDef").filter(e => e.evolvesDirect(this.name))) {
+            if (evolution.evolvesFromEver(previous)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
 };

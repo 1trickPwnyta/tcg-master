@@ -1,0 +1,9 @@
+{
+    "name": "BaseSet.ClefairyDollWrapper",
+    "label": "Clefairy Doll",
+    "type": "Colorless",
+    "stage": "basic",
+    "hp": 10,
+    "attacks": [],
+    "prizes": 0
+}

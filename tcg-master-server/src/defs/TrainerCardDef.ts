@@ -3,6 +3,8 @@ import { CardDef } from "./CardDef.js";
 import path from "path";
 import { pathToFileURL } from "url";
 import { TrainerWorker } from "../game/trainers/TrainerWorker.js";
+import { PokemonCardDef } from "./PokemonCardDef.js";
+import { DefDatabase } from "./DefDatabase.js";
 
 const __dirname = import.meta.dirname;
 
@@ -11,8 +13,17 @@ export class TrainerCardDef extends CardDef {
     public readonly text: string;
     public readonly workers: TrainerWorker[];
     public readonly preannounce: boolean;
+    public readonly wrapper_def?: string;
 
     private readonly trainerData: IDefData & ICardDefData_Trainer;
+
+    public get wrapper(): PokemonCardDef | undefined {
+        if (this.wrapper_def) {
+            return DefDatabase.get<PokemonCardDef>(this.wrapper_def);
+        }
+
+        return undefined;
+    }
 
     public constructor(defClass: string, data: IDefData) {
         super(defClass, data);
@@ -20,6 +31,7 @@ export class TrainerCardDef extends CardDef {
         this.text = this.trainerData.text;
         this.workers = [];
         this.preannounce = this.trainerData.preannounce ?? false;
+        this.wrapper_def = this.trainerData.wrapper;
     }
 
     public override async init() {

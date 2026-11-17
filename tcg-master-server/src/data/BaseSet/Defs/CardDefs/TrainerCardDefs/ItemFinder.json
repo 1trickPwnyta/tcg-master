@@ -1,0 +1,9 @@
+{
+    "name": "BaseSet.ItemFinder",
+    "label": "Item Finder",
+    "text": "Discard 2 of the other cards from your hand in order to put a Trainer card from your discard pile into your hand.",
+    "workers": [
+        { "class": "TrainerWorker_Discard", "args": { "amount": 2 } },
+        { "class": "TrainerWorker_TakeFromDiscard", "args": { "amount": 1, "kind": "trainer" } }
+    ]
+}

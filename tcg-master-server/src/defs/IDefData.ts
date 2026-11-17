@@ -32,12 +32,14 @@ export interface ICardDefData_Pokemon {
     retreat: number;
     power?: IPokemonPowerData;
     attacks: IAttackData[];
+    prizes?: number;
 };
 
 export interface ICardDefData_Trainer {
     text: string;
     workers: (string | { class: string, args: any })[];
     preannounce?: boolean;
+    wrapper?: string;
 };
 
 export interface ICardDefData_Energy {

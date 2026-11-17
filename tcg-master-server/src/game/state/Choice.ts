@@ -8,6 +8,14 @@ export interface ITargetable {
 
 @Serializable()
 export class Choice {
+    public static get Yes(): Choice {
+        return new Choice({ text: "yes", id: "yes" });
+    }
+
+    public static get No(): Choice {
+        return new Choice({ text: "no", id: "no" });
+    }
+
     @Serialize()
     public readonly label: string;
 

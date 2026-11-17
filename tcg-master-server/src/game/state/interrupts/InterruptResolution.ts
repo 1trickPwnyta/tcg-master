@@ -9,9 +9,11 @@ export enum InterruptResolution {
     ,AttackTargets
     ,Retreat
     ,UsePokemonPower
+    ,DiscardWrapper
     ,EndTurn
     ,Promote
     ,UseMulliganBonus
     ,SkipMulliganBonus
     ,SkipBench
+    ,OptionalMulligan
 };

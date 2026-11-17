@@ -140,6 +140,18 @@ export class PokemonCard extends Card {
         this.engine.send(...this.fullTokens, "evolved into", evolution, "!");
     }
 
+    public devolve(prevolution: PokemonCard) {
+        this.location!.add(prevolution);
+        if (prevolution.def.stage === "basic") {
+            const higher = this.attachments.cards.find(c => c instanceof PokemonCard && c.def.stage === "stage1");
+            higher?.discard();
+        }
+        this.attachments.transfer(prevolution.attachments);
+        prevolution.damage = this.damage;
+        this.discard();
+        this.engine.send(...this.fullTokens, "devolved into", prevolution, "!");
+    }
+
     public cantAttackReason(): string | null {
         for (const status of this.modifiers) {
             if (!status.modifier.canAttack) {
@@ -215,7 +227,11 @@ export class PokemonCard extends Card {
         if (discard) {
             this.discard();
         }
-        this.owner.opponent.takePrize();
+        for (let i = 0; i < this.def.prizes; i++) {
+            if (this.owner.opponent.prizes.count) {
+                this.owner.opponent.takePrize();
+            }
+        }
     }
 
     public heal(amount: number) {

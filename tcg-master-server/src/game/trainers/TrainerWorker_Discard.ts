@@ -17,7 +17,7 @@ export class TrainerWorker_Discard extends TrainerWorker {
     }
 
     public override validate(context: TrainerContext): AcceptanceReport {
-        if (this.amount !== "all" && context.player.hand.count < this.amount) {
+        if (this.amount !== "all" && this.getTargetChoices(context).length < this.amount) {
             return AcceptanceReport.Rejected("You don't have enough cards in your hand to discard.");
         }
 

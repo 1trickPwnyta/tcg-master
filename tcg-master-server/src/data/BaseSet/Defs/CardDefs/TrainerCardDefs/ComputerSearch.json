@@ -1,0 +1,9 @@
+{
+    "name": "BaseSet.ComputerSearch",
+    "label": "Computer Search",
+    "text": "Discard 2 of the other cards from your hand in order to search your deck for any card and put it into your hand. Shuffle your deck afterward.",
+    "workers": [
+        { "class": "TrainerWorker_Discard", "args": { "amount": 2 } },
+        { "class": "TrainerWorker_SearchDeck", "args": { "amount": 1 } }
+    ]
+}

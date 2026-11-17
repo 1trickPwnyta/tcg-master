@@ -17,6 +17,7 @@ export class PokemonCardDef extends CardDef {
     public readonly retreat: number;
     public power?: PokemonPower;
     public readonly attacks: Attack[];
+    public readonly prizes: number;
 
     private readonly pokemonData: IDefData & ICardDefData_Pokemon;
 
@@ -34,6 +35,7 @@ export class PokemonCardDef extends CardDef {
         this.resistance = this.pokemonData.resistance ? DefDatabase.get<EnergyTypeDef>(this.pokemonData.resistance) : undefined;
         this.retreat = this.pokemonData.retreat;
         this.attacks = [];
+        this.prizes = this.pokemonData.prizes ?? 1;
     }
 
     public override async init() {

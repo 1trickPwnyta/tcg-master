@@ -9,22 +9,23 @@ import { EnergyCardDef } from "../../defs/EnergyCardDef.js";
 import { TrainerCardDef } from "../../defs/TrainerCardDef.js";
 import { CardFactory } from "../CardFactory.js";
 import { Choice } from "../state/Choice.js";
+import { PokemonCard } from "../state/PokemonCard.js";
 
 export class SetupEngine extends SubEngine {
     public update() {
         if (this.state.players.find(p => p.deck.count === 0)) {
             this.engine.send("Starting game between", this.state.players[0], "and", this.state.players[1], ".");
             const deck1 = [
-                { def: DefDatabase.get<PokemonCardDef>("BaseSet.Poliwag"), count: 20 },
-                { def: DefDatabase.get<PokemonCardDef>("BaseSet.Poliwrath"), count: 10 },
-                { def: DefDatabase.get<PokemonCardDef>("BaseSet.PokemonBreeder"), count: 6 },
+                { def: DefDatabase.get<PokemonCardDef>("BaseSet.Poliwag"), count: 0 },
+                { def: DefDatabase.get<PokemonCardDef>("BaseSet.Poliwhirl"), count: 0 },
+                { def: DefDatabase.get<PokemonCardDef>("BaseSet.ClefairyDoll"), count: 36 },
                 { def: DefDatabase.get<EnergyCardDef>("BaseSet.WaterEnergy"), count: 24 },
                 { def: DefDatabase.get<EnergyCardDef>("BaseSet.DoubleColorlessEnergy"), count: 0 },
-                { def: DefDatabase.get<PokemonCardDef>("BaseSet.Doduo"), count: 0 }
+                { def: DefDatabase.get<PokemonCardDef>("BaseSet.Bill"), count: 0 }
             ];
             const deck2 = [
                 { def: DefDatabase.get<EnergyCardDef>("BaseSet.PsychicEnergy"), count: 50 },
-                { def: DefDatabase.get<TrainerCardDef>("BaseSet.Magikarp"), count: 10 }
+                { def: DefDatabase.get<TrainerCardDef>("BaseSet.Drowzee"), count: 10 }
             ];
             for (const blueprint of deck1) {
                 for (let i = 0; i < blueprint.count; i++) {
@@ -40,10 +41,13 @@ export class SetupEngine extends SubEngine {
             }
             for (const player of this.state.players) {
                 player.deck.shuffle();
-                player.mulligans = this.setupDraw(player);
+                const mulligans = this.setupDraw(player);
+                if (mulligans !== null) {
+                    player.mulligans = mulligans;
+                }
             }
             this.engine.game.update();
-        } else if (this.state.players.find(p => p.mulligans && !this.state.players.find(o => o.id !== p.id)!.mulliganBonusUsed)) {
+        } else if (this.state.players.find(p => p.mulligans && !p.opponent.mulliganBonusUsed)) {
             this.engine.interrupts.interrupt({
                 interrupts: this.state.players.map((p): Interrupt | undefined => {
                     const opponent = this.state.players.find(o => o.id !== p.id)!;
@@ -101,11 +105,23 @@ export class SetupEngine extends SubEngine {
         }
     }
 
-    private setupDraw(player: Player, mulligans: number = 0): number {
+    public setupDraw(player: Player, mulligans: number = 0): number | null {
         player.draw(7);
         if (player.hand.basicPokemon.length) {
+            if (!player.hand.cards.some(c => c instanceof PokemonCard)) {
+                this.engine.interrupts.interrupt({
+                    player: player.id,
+                    prompt: "The only basic Pokémon in your hand are Trainer cards. Do you want to take a mulligan?",
+                    choices: [ Choice.Yes, Choice.No ],
+                    resolution: InterruptResolution.OptionalMulligan,
+                    force: true,
+                    args: [ player.id, mulligans ]
+                });
+                return null;
+            }
             return mulligans;
         } else {
+            player.hand.reveal();
             this.engine.send(player, "has no basic Pokémon in", player.pronouns.possessive, "hand.", player.pronouns.subjective.capitalizeFirst(), "must take a mulligan.");
             player.hand.shuffleIntoDeck();
             return this.setupDraw(player, mulligans + 1);

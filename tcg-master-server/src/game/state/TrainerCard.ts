@@ -1,8 +1,11 @@
 import { AcceptanceReport } from "../../AcceptanceReport.js";
+import { DefDatabase } from "../../defs/DefDatabase.js";
 import { TrainerCardDef } from "../../defs/TrainerCardDef.js";
 import { TrainerContext } from "../trainers/TrainerContext.js";
 import { Card } from "./Card.js";
 import { Interrupt } from "./interrupts/Interrupt.js";
+import { Location } from "./Location.js";
+import { PokemonCardWrapper } from "./PokemonCardWrapper.js";
 import { Serializable } from "./serializer.js";
 
 @Serializable()
@@ -68,6 +71,16 @@ export class TrainerCard extends Card {
         const context = new TrainerContext(this.engine, this, ...targets);
         for (const worker of this.def.workers) {
             worker.execute(context);
+        }
+    }
+
+    public override notify_moved(_oldLocation: Location | null, newLocation: Location): void {
+        if (newLocation == this.owner.active || newLocation == this.owner.bench) {
+            if (this.def.wrapper) {
+                const wrapper = new PokemonCardWrapper(this.engine, this.def.wrapper, this);
+                newLocation.cards.splice(newLocation.cards.indexOf(this), 1);
+                newLocation.add(wrapper);
+            }
         }
     }
 };

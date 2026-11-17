@@ -3,12 +3,32 @@ import { Interrupt } from "../state/interrupts/Interrupt.js";
 import { Turn } from "../state/Turn.js";
 import { SubEngine } from "./SubEngine.js";
 import { Choice } from "../state/Choice.js";
-import { TrainerCard } from "../state/TrainerCard.js";
 import { EnergyCard } from "../state/EnergyCard.js";
+import { PokemonCardWrapper } from "../state/PokemonCardWrapper.js";
 
 export class TurnEngine extends SubEngine {
     private get turn(): Turn {
         return this.state.turn!;
+    }
+
+    private get mainMenu(): Choice[] {
+        const player = this.engine.game.getPlayer(this.turn.player);
+
+        const choices = [
+            new Choice({ text: "play a card" }, InterruptResolution.PlayCard),
+            new Choice({ text: "attack" }, InterruptResolution.Attack),
+            new Choice({ text: "retreat" }, InterruptResolution.Retreat)
+        ];
+
+        if (player.pokemonInPlay.some(p => p.def.power?.workers.length)) {
+            choices.push(new Choice({ text: "use a Pokémon power" }, InterruptResolution.UsePokemonPower));
+        }
+
+        if (player.pokemonInPlay.some(p => p instanceof PokemonCardWrapper)) {
+            choices.push(new Choice({ text: "discard trainer card Pokémon" }, InterruptResolution.DiscardWrapper));
+        }
+
+        return [ ...choices, new Choice({ text: "end turn" }, InterruptResolution.EndTurn) ];
     }
 
     public begin(player_id: number) {
@@ -99,13 +119,7 @@ export class TurnEngine extends SubEngine {
             this.engine.interrupts.interrupt({
                 player: this.turn.player,
                 prompt: "Your turn.",
-                choices: [
-                    new Choice({ text: "play a card" }, InterruptResolution.PlayCard),
-                    new Choice({ text: "attack" }, InterruptResolution.Attack),
-                    new Choice({ text: "retreat" }, InterruptResolution.Retreat),
-                    new Choice({ text: "use a Pokémon power" }, InterruptResolution.UsePokemonPower),
-                    new Choice({ text: "end turn" }, InterruptResolution.EndTurn)
-                ],
+                choices: this.mainMenu,
                 force: true
             });
         } else {

@@ -95,7 +95,9 @@ export class Attachments extends Location {
         while (this.cards.length) {
             const card = this.cards[0];
             const args = this.args.find(a => a.card === card.id);
-            other.add(card, args?.args);
+            if (card != other.pokemon) {
+                other.add(card, args?.args);
+            }
         }
     }
 };

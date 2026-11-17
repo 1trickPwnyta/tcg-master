@@ -34,13 +34,14 @@ export class Location extends State {
 
     public add(card: Card) {
         if (card.location != this) {
-            card.notify_moved(card.location ?? null, this);
             if (card.location) {
                 card.location.cards.splice(card.location.cards.indexOf(card), 1);
                 card.location.notify_removed(card);
             }
             this.cards.push(card);
+            const oldLocation = card.location;
             card.location = this;
+            card.notify_moved(oldLocation ?? null, this);
         }
     }
 
