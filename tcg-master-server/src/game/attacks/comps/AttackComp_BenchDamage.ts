@@ -21,4 +21,8 @@ export class AttackComp_BenchDamage extends AttackComp {
             }
         }
     }
+
+    public override applyAverage(context: AttackContext): void {
+        this.apply(context);
+    }
 };

@@ -54,4 +54,8 @@ export class AttackComp_PayEnergy extends AttackComp {
             }
         }
     }
+
+    public override applyAverage(context: AttackContext): void {
+        this.apply(context);
+    }
 };

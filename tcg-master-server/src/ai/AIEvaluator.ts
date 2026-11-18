@@ -3,12 +3,6 @@ import { GameEngine } from "../game/engine/GameEngine.js";
 
 export class AIEvaluator {
     public static evaluate(engine: GameEngine, for_player: number): number {
-        if (engine.game.winner_id === for_player) {
-            return Number.MAX_VALUE;
-        } else if (engine.game.winner_id !== undefined) {
-            return Number.MIN_VALUE;
-        }
-    
         const player = engine.game.players.find(p => p.id === for_player)!;
         const opponent = engine.game.players.find(p => p.id !== for_player)!;
         const active = player.activePokemon;
@@ -67,7 +61,14 @@ export class AIEvaluator {
         }
 
         score -= player.menus / 10;
-        
+        score += opponent.menus / 10;
+
+        if (engine.game.winner_id === for_player) {
+            score += 99999999;
+        } else if (engine.game.winner_id !== undefined) {
+            score -= 99999999;
+        }
+
         return score;
     };
 };

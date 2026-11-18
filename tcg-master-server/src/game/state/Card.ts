@@ -61,6 +61,10 @@ export abstract class Card extends State implements ITargetable {
         this._location = location;
     }
 
+    public get hasher(): any {
+        return [ this.def_name ];
+    }
+
     public constructor(id: number, engine: GameEngine, def: CardDef, owner: Player) {
         super(id, engine);
         this.def_name = def.name;

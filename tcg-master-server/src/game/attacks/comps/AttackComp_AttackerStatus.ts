@@ -14,4 +14,9 @@ export class AttackComp_AttackerStatus extends AttackComp {
             context.addAttackerStatus(DefDatabase.get<StatusDef>(this.args.status), this.args.args);
         }
     }
+
+    public override applyAverage(context: AttackContext): void {
+        // TODO Apply half status
+        context.addAttackerStatus(DefDatabase.get<StatusDef>(this.args.status), this.args.args);
+    }
 };

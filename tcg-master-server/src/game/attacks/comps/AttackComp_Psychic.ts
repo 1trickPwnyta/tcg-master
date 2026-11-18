@@ -5,4 +5,8 @@ export class AttackComp_Psychic extends AttackComp {
     public override apply(context: AttackContext): void {
         context.damage_defender += context.defender.attachments.energyCards.length * 10;
     }
+
+    public override applyAverage(context: AttackContext): void {
+        this.apply(context);
+    }
 };

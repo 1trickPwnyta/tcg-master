@@ -6,4 +6,8 @@ export class AttackComp_Heal extends AttackComp {
         const amount = this.args.amount === "all" ? context.attacker.damage : this.args.amount;
         context.damage_attacker -= amount;
     }
+
+    public override applyAverage(context: AttackContext): void {
+        this.apply(context);
+    }
 };

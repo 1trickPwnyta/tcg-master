@@ -28,4 +28,8 @@ export class AttackComp_Conversion1 extends AttackComp {
             context.addDefenderStatus(DefDatabase.get<StatusDef>("ModifiedWeakness"), { type: type });
         }
     }
+
+    public override applyAverage(context: AttackContext): void {
+        this.apply(context);
+    }
 };

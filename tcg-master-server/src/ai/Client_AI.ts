@@ -34,7 +34,6 @@ export type ScoredChoice = {
 export class Client_AI extends Client {
     public override name: string = "COM";
     public invalid: boolean = false;
-    private readonly movesUsed: Map<number, (number | null)[]> = new Map<number, (number | null)[]>();
     protected interrupt_id: number | null = null;
 
     public constructor() {
@@ -60,13 +59,8 @@ export class Client_AI extends Client {
         const worker = new Worker(path.join(import.meta.dirname, "AIWorker.js"));
         worker.on("message", (scores: ScoredChoice[]) => {
             worker.terminate();
-            const hash = this.engine!.game.hash();
-            const scoresUnused = scores.filter(s => s.score !== null && !(this.movesUsed.get(hash) ?? []).includes(s.choice.i)).sort((a, b) => b.score! - a.score!);
+            const scoresUnused = scores.filter(s => s.score !== null).sort((a, b) => b.score! - a.score!);
             const choice = scoresUnused[0]?.choice ?? scores[0].choice;
-            if (!this.movesUsed.has(hash)) {
-                this.movesUsed.set(hash, []);
-            }
-            this.movesUsed.set(hash, [ ...this.movesUsed.get(hash)!, choice.i ]);
             if (this.interrupt_id === this.engine!.interrupts.get(this.player_id!)?.id) {
                 console.log(`> ${choice.i ?? "(cancel)"}`);
                 this.interrupt_id = null;

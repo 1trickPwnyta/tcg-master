@@ -28,4 +28,8 @@ export class AttackComp_Bounce extends AttackComp {
             context.addEffect(DefDatabase.get<EffectDef>("Bounce"));
         }
     }
+
+    public override applyAverage(context: AttackContext): void {
+        this.apply(context);
+    }
 };

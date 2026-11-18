@@ -28,4 +28,8 @@ export class AttackComp_DestroyEnergy extends AttackComp {
             context.addEffect(DefDatabase.get<EffectDef>("DestroyEnergy"), { energy: energy.id });
         }
     }
+
+    public override applyAverage(context: AttackContext): void {
+        this.apply(context);
+    }
 };

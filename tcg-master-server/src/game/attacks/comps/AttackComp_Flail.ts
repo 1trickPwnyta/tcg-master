@@ -5,4 +5,8 @@ export class AttackComp_Flail extends AttackComp {
     public override apply(context: AttackContext): void {
         context.damage_defender += context.attacker.damage;
     }
+
+    public override applyAverage(context: AttackContext): void {
+        this.apply(context);
+    }
 };

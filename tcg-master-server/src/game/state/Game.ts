@@ -65,20 +65,34 @@ export class Game extends State {
     public hash(): number {
         const str = JSON.stringify([
             this.players.map(p => [
-                p.active,
-                [ ...p.bench.cards ].sort((a, b) => a.id - b.id),
-                p.limbo,
-                [ ...p.hand.cards ].sort((a, b) => a.id - b.id),
-                p.discard,
-                p.prizes,
-                p.deck
+                p.active.cards.map(c => c.hasher),
+                [ ...p.bench.cards ].sort((a, b) => a.id - b.id).map(c => c.hasher),
+                p.limbo.cards.map(c => c.hasher),
+                [ ...p.hand.cards ].sort((a, b) => a.id - b.id).map(c => c.hasher),
+                p.discard.cards.map(c => c.hasher),
+                p.prizes.cards.map(c => c.hasher),
+                p.deck.cards.map(c => c.hasher)
             ]),
-            this.turn,
+            this.turn?.number,
+            this.turn?.energyPlayed,
+            this.turn?.player,
             this.winner_id,
             this.interrupt?.player,
             this.interrupt?.prompt,
-            this.interrupt?.choices
-        ], SerializationReplace);
+            this.interrupt?.choices?.map(c => [ c.label ])
+        ]);
+        let hash = 5381;
+        for (let i = 0; i < str.length; i++) {
+            hash = (hash * 33) ^ str.charCodeAt(i);
+        }
+        return hash >>> 0;
+    }
+
+    public activeHash(): number {
+        const str = JSON.stringify(this.turn ? [
+            this.activePokemon.id,
+            this.activePokemon.statuses
+        ] : []);
         let hash = 5381;
         for (let i = 0; i < str.length; i++) {
             hash = (hash * 33) ^ str.charCodeAt(i);

@@ -14,4 +14,8 @@ export class AttackComp_DreamEater extends AttackComp {
     }
 
     public override apply(context: AttackContext): void { }
+
+    public override applyAverage(context: AttackContext): void {
+        this.apply(context);
+    }
 };

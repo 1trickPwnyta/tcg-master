@@ -99,6 +99,16 @@ export class PokemonCard extends Card {
         return resistance;
     }
 
+    public override get hasher(): any {
+        return [
+            super.hasher,
+            this.damage,
+            this.orientation,
+            this.attachments.cards.map(a => a.hasher),
+            this.statuses
+        ];
+    }
+
     public constructor(id: number, engine: GameEngine, def: PokemonCardDef, owner: Player) {
         super(id, engine, def, owner);
         this.attachments = new Attachments(this.id * 100000, this.engine, owner, this);

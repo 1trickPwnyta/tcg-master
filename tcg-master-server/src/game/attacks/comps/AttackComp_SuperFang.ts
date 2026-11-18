@@ -6,4 +6,8 @@ export class AttackComp_SuperFang extends AttackComp {
         const remaining = context.defender.def.hp - context.defender.damage;
         context.damage_defender = Math.ceil(remaining / 20) * 10;
     }
+
+    public override applyAverage(context: AttackContext): void {
+        this.apply(context);
+    }
 };

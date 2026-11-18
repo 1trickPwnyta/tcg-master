@@ -15,4 +15,16 @@ export class AttackComp_SplitCoin extends AttackComp {
             context.addEffect(effect, path.args);
         }
     }
+
+    public override applyAverage(context: AttackContext): void {
+        // TODO This should actually use "half status" which applies the status in the simulation but doesn't give it points on its own
+        // And effects need to have an average function too
+        if (this.args.heads.effect === "status") {
+            const status = DefDatabase.get<StatusDef>(this.args.heads.args.status);
+            context.addDefenderStatus(status, this.args.heads.args);
+        } else {
+            const effect = DefDatabase.get<EffectDef>(this.args.heads.effect);
+            context.addEffect(effect, this.args.heads.args);
+        }
+    }
 };

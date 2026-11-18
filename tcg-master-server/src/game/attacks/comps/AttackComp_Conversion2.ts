@@ -24,4 +24,8 @@ export class AttackComp_Conversion2 extends AttackComp {
         const type = context.nextTarget() as string;
         context.addAttackerStatus(DefDatabase.get<StatusDef>("ModifiedResistance"), { type: type });
     }
+
+    public override applyAverage(context: AttackContext): void {
+        this.apply(context);
+    }
 };

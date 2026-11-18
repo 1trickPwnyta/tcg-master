@@ -115,7 +115,11 @@ export class Attack implements ITargetable {
 
         if (!context.failed) {
             for (const comp of this.comps) {
-                comp.apply(context);
+                if (!context.engine.simulation) {
+                    comp.apply(context);
+                } else {
+                    comp.applyAverage(context);
+                }
                 if (context.failed) {
                     break;
                 }

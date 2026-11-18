@@ -22,6 +22,8 @@ export abstract class AttackComp {
 
     public abstract apply(context: AttackContext): void;
 
+    public abstract applyAverage(context: AttackContext): void;
+
     protected generateInterrupt(context: AttackContext, prompt: string, choices: Choice[]): InterruptSync {
         return {
             player: context.attacker.owner.id,

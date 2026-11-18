@@ -5,4 +5,8 @@ export class AttackComp_Meditate extends AttackComp {
     public override apply(context: AttackContext): void {
         context.damage_defender += context.defender.damage;
     }
+
+    public override applyAverage(context: AttackContext): void {
+        this.apply(context);
+    }
 };

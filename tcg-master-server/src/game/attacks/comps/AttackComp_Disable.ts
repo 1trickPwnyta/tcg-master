@@ -22,4 +22,8 @@ export class AttackComp_Disable extends AttackComp {
         const attack_name = context.nextTarget() as string;
         context.addDefenderStatus(DefDatabase.get<StatusDef>("Disablement"), { "attack_name": attack_name });
     }
+
+    public override applyAverage(context: AttackContext): void {
+        this.apply(context);
+    }
 };

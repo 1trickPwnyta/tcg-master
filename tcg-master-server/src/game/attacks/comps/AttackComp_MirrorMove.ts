@@ -11,4 +11,8 @@ export class AttackComp_MirrorMove extends AttackComp {
             }
         }
     }
+
+    public override applyAverage(context: AttackContext): void {
+        this.apply(context);
+    }
 };

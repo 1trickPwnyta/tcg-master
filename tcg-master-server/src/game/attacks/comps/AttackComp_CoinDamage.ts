@@ -11,4 +11,9 @@ export class AttackComp_CoinDamage extends AttackComp {
             }
         }
     }
+
+    public override applyAverage(context: AttackContext): void {
+        context.damage_defender += this.args.amount * this.args.coins / 2;
+        context.damage_attacker += (this.args.selfDamage ?? 0) * this.args.coins / 2;
+    }
 };

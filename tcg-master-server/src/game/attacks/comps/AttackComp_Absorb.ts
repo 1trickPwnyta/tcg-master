@@ -7,4 +7,8 @@ export class AttackComp_Absorb extends AttackComp {
     public override apply(context: AttackContext) {
         context.addEffect(DefDatabase.get<EffectDef>("Absorb"), this.args);
     }
+
+    public override applyAverage(context: AttackContext): void {
+        this.apply(context);
+    }
 };
