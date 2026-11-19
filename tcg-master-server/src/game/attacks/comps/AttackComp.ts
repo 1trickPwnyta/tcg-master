@@ -28,7 +28,7 @@ export abstract class AttackComp {
         return {
             player: context.attacker.owner.id,
             prompt: prompt,
-            choices: choices.filter(c => !c.id || !context.targets.includes(c.id)),
+            choices: choices.filter(c => !c.id || !context.targets.includes(c.id)).map(c => new Choice({ id: c.id, text: c.label }).endsTurn()),
             resolution: InterruptResolution.AttackTargets,
             args: [ context.attack.name, ...context.targets ]
         };

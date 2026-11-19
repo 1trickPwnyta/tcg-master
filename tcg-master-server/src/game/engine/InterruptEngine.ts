@@ -24,22 +24,8 @@ export class InterruptEngine extends SubEngine {
         }
     }
 
-    public get(player_id: number, root?: Interrupt): InterruptSync | null {
-        if (this.state.interrupt?.player === player_id) {
-            return this.state.interrupt as InterruptSync;
-        } else if (root?.player === player_id) {
-            return root as InterruptSync;
-        } else {
-            const interrupts = (root ?? this.state.interrupt)?.interrupts;
-            if (interrupts) {
-                for (const interrupt of interrupts) {
-                    if (this.get(player_id, interrupt)) {
-                        return interrupt as InterruptSync;
-                    }
-                }
-            }
-        }
-        return null;
+    public get(player_id: number): InterruptSync | null {
+        return this.state.getInterrupt(player_id);
     }
 
     private close(interrupt_id: number) {
@@ -91,7 +77,7 @@ export class InterruptEngine extends SubEngine {
                 this.close(interrupt.id!);
             }
             this.engine.game.getPlayer(player_id).menus++;
-            this.engine.getClient(player_id).wait();
+            this.engine.getClient(player_id)?.wait();
             this.engine.game.update();
         } else {
             throw new Error(`No interrupt found for player ${player_id}.`)

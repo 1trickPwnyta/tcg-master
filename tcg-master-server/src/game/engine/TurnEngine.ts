@@ -15,20 +15,20 @@ export class TurnEngine extends SubEngine {
         const player = this.engine.game.getPlayer(this.turn.player);
 
         const choices = [
-            new Choice({ text: "play a card" }, InterruptResolution.PlayCard),
-            new Choice({ text: "attack" }, InterruptResolution.Attack),
-            new Choice({ text: "retreat" }, InterruptResolution.Retreat)
+            new Choice({ text: "play a card" }).withResolution(InterruptResolution.PlayCard),
+            new Choice({ text: "attack" }).withResolution(InterruptResolution.Attack),
+            new Choice({ text: "retreat" }).withResolution(InterruptResolution.Retreat).withAiScoreOffset(-50)
         ];
 
         if (player.pokemonInPlay.some(p => p.def.power?.workers.length)) {
-            choices.push(new Choice({ text: "use a Pokémon power" }, InterruptResolution.UsePokemonPower));
+            choices.push(new Choice({ text: "use a Pokémon power" }).withResolution(InterruptResolution.UsePokemonPower));
         }
 
         if (player.pokemonInPlay.some(p => p instanceof PokemonCardWrapper)) {
-            choices.push(new Choice({ text: "discard trainer card Pokémon" }, InterruptResolution.DiscardWrapper));
+            choices.push(new Choice({ text: "discard trainer card Pokémon" }).withResolution(InterruptResolution.DiscardWrapper));
         }
 
-        return [ ...choices, new Choice({ text: "end turn" }, InterruptResolution.EndTurn) ];
+        return [ ...choices, new Choice({ text: "end turn" }).withResolution(InterruptResolution.EndTurn).endsTurn() ];
     }
 
     public begin(player_id: number) {

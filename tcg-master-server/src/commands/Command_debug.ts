@@ -12,8 +12,8 @@ export class Command_debug extends Command {
         const player = state.players.find(p => p.id === context.player_id)!;
         const opponent = state.players.find(p => p.id !== context.player_id)!;
         switch (subcommand) {
-            case "score": return [ AIEvaluator.evaluate(context.engine, player.id) ];
-            case "xscore": return [ AIEvaluator.evaluate(context.engine, opponent.id) ];
+            case "score": return [ AIEvaluator.evaluate(context.engine.game, player.id) ];
+            case "xscore": return [ AIEvaluator.evaluate(context.engine.game, opponent.id) ];
             case "deck": return Client.getCardList(player.deck.cards);
             case "xdeck": return Client.getCardList(player.opponent.deck.cards);
         }

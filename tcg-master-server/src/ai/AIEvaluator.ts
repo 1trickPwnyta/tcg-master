@@ -1,10 +1,11 @@
 import { EnergyCost } from "../game/attacks/EnergyCost.js";
 import { GameEngine } from "../game/engine/GameEngine.js";
+import { Game } from "../game/state/Game.js";
 
 export class AIEvaluator {
-    public static evaluate(engine: GameEngine, for_player: number): number {
-        const player = engine.game.players.find(p => p.id === for_player)!;
-        const opponent = engine.game.players.find(p => p.id !== for_player)!;
+    public static evaluate(game: Game, for_player: number): number {
+        const player = game.players.find(p => p.id === for_player)!;
+        const opponent = game.players.find(p => p.id !== for_player)!;
         const active = player.activePokemon;
         const activeDef = active?.def;
         const activeHp = activeDef ? activeDef.hp - active!.damage : 0;
@@ -43,8 +44,8 @@ export class AIEvaluator {
         score += xactive && activeHighestDamage >= xactiveHp ? 50 : 0;
         score -= active && xactiveHighestDamage >= activeHp ? 50 : 0;
 
-        score += benchSize ? 20 + (benchSize - 1) * 2 : 0;
-        score -= xbenchSize ? 20 + (xbenchSize - 1) * 2 : 0;
+        score += benchSize ? 20 + (benchSize - 1) * 20 : 0;
+        score -= xbenchSize ? 20 + (xbenchSize - 1) * 20 : 0;
 
         score += handSize;
         score -= xhandSize;
@@ -63,12 +64,12 @@ export class AIEvaluator {
         score -= player.menus / 10;
         score += opponent.menus / 10;
 
-        if (engine.game.winner_id === for_player) {
+        if (game.winner_id === for_player) {
             score += 99999999;
-        } else if (engine.game.winner_id !== undefined) {
+        } else if (game.winner_id !== undefined) {
             score -= 99999999;
         }
-
+        
         return score;
     };
 };

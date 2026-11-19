@@ -1,6 +1,6 @@
 import { AttackResult } from "../attacks/AttackContext.js";
 import { GameEngine } from "../engine/GameEngine.js";
-import { Interrupt } from "./interrupts/Interrupt.js";
+import { Interrupt, InterruptSync } from "./interrupts/Interrupt.js";
 import { Player } from "./Player.js";
 import { PokemonCard } from "./PokemonCard.js";
 import { Serializable, SerializationHydrate, SerializationReplace, Serialize } from "./serializer.js";
@@ -98,6 +98,24 @@ export class Game extends State {
             hash = (hash * 33) ^ str.charCodeAt(i);
         }
         return hash >>> 0;
+    }
+
+    public getInterrupt(player_id: number, root?: Interrupt): InterruptSync | null {
+        if (this.interrupt?.player === player_id) {
+            return this.interrupt as InterruptSync;
+        } else if (root?.player === player_id) {
+            return root as InterruptSync;
+        } else {
+            const interrupts = (root ?? this.interrupt)?.interrupts;
+            if (interrupts) {
+                for (const interrupt of interrupts) {
+                    if (this.getInterrupt(player_id, interrupt)) {
+                        return interrupt as InterruptSync;
+                    }
+                }
+            }
+        }
+        return null;
     }
 
     public clone(engine: GameEngine): Game {

@@ -1,34 +1,13 @@
 import { Client } from "../Client.js";
-import { GameEngine } from "../game/engine/GameEngine.js";
 import path from "path";
 import { Worker } from "worker_threads";
 import { InterruptSync } from "../game/state/interrupts/Interrupt.js";
-import { AIPruner } from "./AIPruner.js";
-import { HistoryEntry } from "./Client_AIWorker.js";
 import { SerializationReplace } from "../game/state/serializer.js";
-
-export type AIChoice = {
-    i: number | null;
-    target: number | null;
-    key: string;
-    valid: boolean;
-};
+import { Choice } from "../game/state/Choice.js";
 
 export type AIContext = {
-    prompt: string;
-    choices: AIChoice[];
-    force: boolean;
-    interrupt: InterruptSync;
-    interrupt_id: number;
     player_id: number;
-    state: string;
-    attemptedChoices?: Map<string, number>
-};
-
-export type ScoredChoice = {
-    choice: AIChoice;
-    score: number;
-    history: HistoryEntry[];
+    game: string;
 };
 
 export class Client_AI extends Client {
@@ -57,26 +36,25 @@ export class Client_AI extends Client {
         this.interrupt_id = this.engine!.interrupts.get(this.player_id!)!.id!;
 
         const worker = new Worker(path.join(import.meta.dirname, "AIWorker.js"));
-        worker.on("message", (scores: ScoredChoice[]) => {
+        worker.on("message", (message: Choice | string | null) => {
+            if (typeof message === "string") {
+                console.log(message);
+                return;
+            }
+
             worker.terminate();
-            const scoresUnused = scores.filter(s => s.score !== null).sort((a, b) => b.score! - a.score!);
-            const choice = scoresUnused[0]?.choice ?? scores[0].choice;
             if (this.interrupt_id === this.engine!.interrupts.get(this.player_id!)?.id) {
-                console.log(`> ${choice.i ?? "(cancel)"}`);
+                const choice = message as Choice | null;
+                console.log(`> ${choice ? interrupt.choices.findIndex(c => (c.id ?? c.label) === (choice.id ?? choice.label)) : "(cancel)"}`);
                 this.interrupt_id = null;
-                this.engine!.interrupts.resolve(this.player_id!, choice.i);
+                this.engine!.interrupts.resolve(this.player_id!, choice ? interrupt.choices.findIndex(c => (c.id ?? c.label) === (choice.id ?? choice.label)) : null);
             } else {
                 throw new Error(`Attempted to respond to interrupt ${this.interrupt_id} but it wasn't available.`);
             }
         });
         worker.postMessage({
-            prompt: interrupt.prompt,
-            choices: AIPruner.prune(this.engine!, interrupt),
-            force: interrupt.force,
-            interrupt: interrupt,
-            interrupt_id: this.interrupt_id,
             player_id: this.player_id!,
-            state: JSON.stringify(this.engine!.game, SerializationReplace)
+            game: JSON.stringify(this.engine!.game, SerializationReplace)
         });
     }
 

@@ -23,17 +23,35 @@ export class Choice {
     public readonly id?: number | string;
 
     @Serialize()
-    public readonly resolution?: InterruptResolution;
+    public resolution?: InterruptResolution;
 
     @Serialize()
-    public readonly args?: number[]
+    public args?: number[];
 
-    public constructor(target: ITargetable | { text: string, id?: number | string }, resolution?: InterruptResolution, ...args: number[]) {
+    @Serialize()
+    public turnEnding: boolean = false;
+
+    @Serialize()
+    public aiScoreOffset: number = 0;
+
+    public constructor(target: ITargetable | { text: string, id?: number | string }) {
         this.label = "targetName" in target ? target.targetName : target.text;
         this.id = target.id;
+    }
+
+    public withResolution(resolution: InterruptResolution, ...args: number[]) {
         this.resolution = resolution;
-        if (args?.length) {
-            this.args = args;
-        }
+        this.args = args;
+        return this;
+    }
+
+    public endsTurn(): Choice {
+        this.turnEnding = true;
+        return this;
+    }
+
+    public withAiScoreOffset(offset: number): Choice {
+        this.aiScoreOffset = offset;
+        return this;
     }
 };

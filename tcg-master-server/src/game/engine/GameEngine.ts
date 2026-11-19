@@ -10,7 +10,7 @@ import { InterruptEngine } from "./InterruptEngine.js";
 import { SearchEngine } from "./SearchEngine.js";
 
 export class GameEngine {
-    public readonly clients: Client[];
+    public readonly clients: Client[] = [];
     private _game?: Game;
     private options: { prizes?: number };
     private _simulation: boolean = false;
@@ -22,26 +22,31 @@ export class GameEngine {
     public readonly interrupts: InterruptEngine;
     public readonly search: SearchEngine;
 
-    public constructor(client1?: Client, client2?: Client, options: { prizes?: number } = {}) {
+    public constructor(client1?: Client | null, client2?: Client | null, options: { prizes?: number } = {}) {
         this.options = options;
         this.setup = new SetupEngine(this);
         this.turns = new TurnEngine(this);
 
         if (client1) {
             client1.engine = this;
-        } else {
+        } else if (client1 === undefined) {
             client1 = new Client_AI();
             client1.engine = this;
         }
+        if (client1) {
+            client1.player_id = client1.player_id ?? 1;
+            this.clients.push(client1);
+        }
         if (client2) {
             client2.engine = this;
-        } else {
+        } else if (client2 === undefined) {
             client2 = new Client_AI();
             client2.engine = this;
         }
-        this.clients = [ client1, client2 ];
-        client1.player_id = client1.player_id ?? 1;
-        client2.player_id = client2.player_id ?? 2;
+        if (client2) {
+            client2.player_id = client2.player_id ?? 2;
+            this.clients.push(client2);
+        }
 
         this.interrupts = new InterruptEngine(this);
         this.search = new SearchEngine(this);
@@ -69,8 +74,8 @@ export class GameEngine {
         return this._game!;
     }
 
-    public getClient(player_id: number): Client {
-        return this.clients.find(c => c.player_id === player_id)!;
+    public getClient(player_id: number): Client | null {
+        return this.clients.find(c => c.player_id === player_id) ?? null;
     }
 
     public end(winner_id: number) {
@@ -93,7 +98,8 @@ export class GameEngine {
             }
         } else {
             this.promptsGiven++;
-            this.clients.find(c => c.player_id === interrupt.player)!.prompt(interrupt as InterruptSync);
+            const client = this.clients.find(c => c.player_id === interrupt.player);
+            client?.prompt(interrupt as InterruptSync);
         }
     }
 
@@ -112,7 +118,12 @@ export class GameEngine {
 
     public sendError(player: Player, ...parts: (IToken | string)[]) {
         if (!this.game.winner_id) {
-            this.clients.find(c => c.player_id === player.id)?.error(...parts);
+            const client = this.clients.find(c => c.player_id === player.id);
+            if (client) {
+                client.error(...parts);
+            } else {
+                throw new Error(parts.map(p => typeof p !== "string" ? p.name : p).join(" "));
+            }
         }
     }
 };
