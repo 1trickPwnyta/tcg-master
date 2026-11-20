@@ -3,6 +3,12 @@ import { InterruptResolution } from "./InterruptResolution.js";
 import { InterruptSync } from "./Interrupt.js";
 import { InterruptWorker } from "./workers/InterruptWorker.js";
 
+export class IllegalMoveError extends Error {
+    public constructor(message?: string) {
+        super(`Illegal move: ${message ?? "unspecified"}`);
+    }
+};
+
 const workers = new Map<InterruptResolution, InterruptWorker>();
 export function ResolvesInterrupt(resolution: InterruptResolution) {
     return (worker: new () => InterruptWorker) => {

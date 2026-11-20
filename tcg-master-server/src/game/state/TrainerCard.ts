@@ -74,7 +74,7 @@ export class TrainerCard extends Card {
         }
     }
 
-    public override notify_moved(_oldLocation: Location | null, newLocation: Location): void {
+    public override notify_postmove(_oldLocation: Location | null, newLocation: Location): void {
         if (newLocation == this.owner.active || newLocation == this.owner.bench) {
             if (this.def.wrapper) {
                 const wrapper = new PokemonCardWrapper(this.engine, this.def.wrapper, this);

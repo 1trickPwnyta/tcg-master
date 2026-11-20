@@ -1,3 +1,4 @@
+import { parentPort } from "worker_threads";
 import { GameEngine } from "../engine/GameEngine.js";
 import { Card } from "./Card.js";
 import { Player } from "./Player.js";
@@ -34,6 +35,7 @@ export class Location extends State {
 
     public add(card: Card) {
         if (card.location != this) {
+            card.notify_premove(card.location ?? null, this);
             if (card.location) {
                 card.location.cards.splice(card.location.cards.indexOf(card), 1);
                 card.location.notify_removed(card);
@@ -41,7 +43,7 @@ export class Location extends State {
             this.cards.push(card);
             const oldLocation = card.location;
             card.location = this;
-            card.notify_moved(oldLocation ?? null, this);
+            card.notify_postmove(oldLocation ?? null, this);
         }
     }
 

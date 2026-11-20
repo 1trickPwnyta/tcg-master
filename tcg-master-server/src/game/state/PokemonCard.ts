@@ -1,3 +1,4 @@
+import { parentPort } from "worker_threads";
 import { DefDatabase } from "../../defs/DefDatabase.js";
 import { StatusDefOf } from "../../defs/defof/StatusDefOf.js";
 import { EnergyTypeDef } from "../../defs/EnergyTypeDef.js";
@@ -226,6 +227,7 @@ export class PokemonCard extends Card {
     }
 
     public knockOut(attacker?: PokemonCard, discard: boolean = true) {
+        if (this.engine.simulation && this.attachments.cards.some(c => !c.def)) parentPort?.postMessage("==============================================");
         this.engine.send(...this.fullTokens, "was knocked out!");
         for (const status of this.modifiers) {
             status.modifier.notify_knockedOut({
@@ -308,11 +310,11 @@ export class PokemonCard extends Card {
         this.giveStatus(StatusDefOf.Sleep);
     }
 
-    public override notify_moved(_oldLocation: Location, newLocation: Location) {
+    public override notify_premove(_oldLocation: Location, newLocation: Location) {
         if (newLocation !== this.owner.active) {
             this.clearStatus();
         }
-        if (newLocation !== this.owner.active && newLocation !== this.owner.bench) {
+        if (!newLocation.inPlay) {
             this.damage = 0;
             this.evolutionEligible = false;
             while (this.attachments.count) {

@@ -7,10 +7,13 @@ import { Game } from "../game/state/Game.js";
 import { AIEvaluator } from "./AIEvaluator.js";
 import { Choice } from "../game/state/Choice.js";
 import { AIPruner } from "./AIPruner.js";
+import { IllegalMoveError } from "../game/state/interrupts/InterruptResolver.js";
 
 const { DefDatabase } = await import("../defs/DefDatabase.js");
 await DefDatabase.init();
 await import("../loader.js");
+
+const DEBUG: boolean = false;
 
 parentPort?.on("message", async (context: AIContext) => {
     const engine = new GameEngine(null, null);
@@ -19,7 +22,7 @@ parentPort?.on("message", async (context: AIContext) => {
     expectiminimax(game, context.player_id, 0, -Infinity, Infinity, 0);
 });
 
-const MAX_DEPTH = 6;
+const MAX_DEPTH = 8;
 function expectiminimax(game: Game, for_player: number, depth: number, alpha: number, beta: number, actions: number): { score: number } {
     if (game.winner_id || depth === MAX_DEPTH) {
         const score = AIEvaluator.evaluate(game, for_player);
@@ -52,8 +55,12 @@ function expectiminimax(game: Game, for_player: number, depth: number, alpha: nu
         const currentTurn = clone.turn?.player;
         try {
             engine.interrupts.resolve(interrupt.player, choice ? interrupt.choices.indexOf(choice) : null);
-        } catch {
-            continue;
+        } catch (e: any) {
+            if (e instanceof IllegalMoveError) {
+                continue;
+            } else {
+                throw e;
+            }
         }
         const newTurn = clone.turn?.player;
 
@@ -73,7 +80,7 @@ function expectiminimax(game: Game, for_player: number, depth: number, alpha: nu
             result.score += choice?.aiScoreOffset ?? 0;
         }
 
-        if (depth === 0) {
+        if (DEBUG && depth === 0) {
             parentPort?.postMessage(`Choice: ${choice?.label ?? 'CANCEL'} | Actions: ${cloneActions} | Score Received: ${result.score}`);
         }
 
@@ -106,39 +113,8 @@ function expectiminimax(game: Game, for_player: number, depth: number, alpha: nu
             console.warn("Minimax failed to find a valid path. Picking default choice.")
             bestChoice = interrupt.force ? choices[0] : null;
         }
-        parentPort?.postMessage(highScore.toString());
         parentPort?.postMessage(bestChoice);
     }
 
     return { score: highScore };
 }
-
-/*parentPort?.on("message", async (context: AIContext) => {
-    const state = SerializationHydrate(JSON.parse(context.state));
-    const scores: ScoredChoice[] = [];
-    let received = 0;
-    const validChoices = context.choices.filter(c => c.valid);
-    for (const choice of validChoices) {
-        const clients: Client_AIWorker[] = [];
-        const clientCallback = (results: { score: number | null, history: HistoryEntry[] }) => {
-            if (results.score !== null) {
-                scores.push({ choice: choice, score: results.score, history: results.history });
-            }
-            if (++received === validChoices.length) {
-                parentPort?.postMessage(scores);
-            }
-        };
-        for (const player of state.players) {
-            const client = new Client_AIWorker(1, context.player_id, clientCallback);
-            client.player_id = player.id;
-            clients.push(client);
-        }
-        
-        const engine = new GameEngine(clients[0], clients[1]);
-        engine.start(state.clone(engine));
-        engine.interrupts.resolve(context.player_id, choice.i);
-        if (engine.game.winner_id) {
-            clientCallback({ score: engine.game.winner_id === context.player_id ? Number.MAX_VALUE : Number.MIN_VALUE, history: [] });
-        }
-    }
-});*/

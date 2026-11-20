@@ -1,3 +1,4 @@
+import { parentPort } from "worker_threads";
 import { DefDatabase } from "../../defs/DefDatabase.js";
 import { EffectDef } from "../../defs/EffectDef.js";
 import { StatusDef } from "../../defs/StatusDef.js";
@@ -102,7 +103,7 @@ export class AttackContext {
     }
 
     public resolve(): AttackResult {
-        
+
         // Defender damage ///////////////////////
         const damageContext = {
             amount: this.damage_defender,
@@ -118,6 +119,7 @@ export class AttackContext {
                 card: this.attacker
             }, damageContext, modifier.args);
         }
+        
         for (const modifier of this.defender.modifiers) {
             if (!modifier.modifier.isAffectedByAttacks({
                 engine: this.engine,
@@ -129,6 +131,7 @@ export class AttackContext {
                 break;
             }
         }
+        
         const { knockedOut, finalDamage } = this.defender.dealDamage(damageContext);
         this._finalDamage = finalDamage;
 
@@ -166,7 +169,7 @@ export class AttackContext {
                 type: this.attacker.def.type
             });
         }
-
+        
         return {
             attacker: this.attacker.id,
             defender: this.defender.id,

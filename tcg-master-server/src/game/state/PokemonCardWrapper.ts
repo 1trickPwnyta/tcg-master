@@ -24,7 +24,7 @@ export class PokemonCardWrapper extends PokemonCard {
         this.wrapped = wrapped;
     }
 
-    public override notify_moved(_oldLocation: Location, newLocation: Location): void {
+    public override notify_postmove(_oldLocation: Location, newLocation: Location): void {
         if (!this.inPlay) {
             newLocation.add(this.wrapped);
             newLocation.cards.splice(newLocation.cards.indexOf(this), 1);

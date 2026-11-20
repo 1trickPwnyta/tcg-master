@@ -8,13 +8,13 @@ import { SetupEngine } from "./SetupEngine.js";
 import { TurnEngine } from "./TurnEngine.js";
 import { InterruptEngine } from "./InterruptEngine.js";
 import { SearchEngine } from "./SearchEngine.js";
+import { IllegalMoveError } from "../state/interrupts/InterruptResolver.js";
 
 export class GameEngine {
     public readonly clients: Client[] = [];
     private _game?: Game;
     private options: { prizes?: number };
     private _simulation: boolean = false;
-    private promptsGiven: number = 0;
 
     public readonly setup: SetupEngine;
     public readonly turns: TurnEngine;
@@ -89,27 +89,27 @@ export class GameEngine {
     }
 
     public sendInterrupt(interrupt: Interrupt) {
-        if (this.simulation && this.promptsGiven > 0) {
-            return;
-        }
+        if (this.simulation) return;
+
         if (interrupt.interrupts?.length) {
             for (const sub of interrupt.interrupts) {
                 this.sendInterrupt(sub);
             }
         } else {
-            this.promptsGiven++;
             const client = this.clients.find(c => c.player_id === interrupt.player);
             client?.prompt(interrupt as InterruptSync);
         }
     }
 
     public send(...parts: any[]) {
+        if (this.simulation) return;
         for (const player of this.game.players) {
             this.sendTo(player, ...parts);
         }
     }
 
     public sendTo(player: Player, ...parts: any[]) {
+        if (this.simulation) return;
         if (!this.game.winner_id) {
             const client = this.clients.find(c => c.player_id === player.id);
             client?.send(...parts);
@@ -122,7 +122,7 @@ export class GameEngine {
             if (client) {
                 client.error(...parts);
             } else {
-                throw new Error(parts.map(p => typeof p !== "string" ? p.name : p).join(" "));
+                throw new IllegalMoveError(parts.map(p => typeof p !== "string" ? p.name : p).join(" "));
             }
         }
     }

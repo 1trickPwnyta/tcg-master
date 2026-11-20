@@ -51,7 +51,7 @@ export abstract class Card extends State implements ITargetable {
 
     public get location(): Location | undefined {
         if (!this._location) {
-            this._location = this.engine.search.getLocation(this.location_id!) ?? undefined;
+            this._location = this.location_id ? this.engine.search.getLocation(this.location_id) : undefined;
         }
         return this._location;
     }
@@ -77,5 +77,7 @@ export abstract class Card extends State implements ITargetable {
         this.owner.discard.add(this);
     }
 
-    public notify_moved(oldLocation: Location | null, newLocation: Location) { }
+    public notify_premove(oldLocation: Location | null, newLocation: Location) { }
+
+    public notify_postmove(oldLocation: Location | null, newLocation: Location) { }
 };

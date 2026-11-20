@@ -37,7 +37,7 @@ export class SearchEngine extends SubEngine {
         return null;
     }
 
-    public getLocation(location_id: number): Location | null {
+    public getLocation(location_id: number): Location {
         if (this.locations.has(location_id)) {
             return this.locations.get(location_id)!;
         }
@@ -55,6 +55,7 @@ export class SearchEngine extends SubEngine {
                 }
             }
         }
-        return null;
+        
+        throw new Error("Failed to find location " + location_id);
     }
 };

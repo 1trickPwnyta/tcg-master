@@ -11,6 +11,7 @@ import { EnergyCost } from "./EnergyCost.js";
 import { AttackContext, AttackResult } from "./AttackContext.js";
 import { Interrupt } from "../state/interrupts/Interrupt.js";
 import { IToken } from "../../IToken.js";
+import { parentPort } from "worker_threads";
 
 const __dirname = import.meta.dirname;
 
