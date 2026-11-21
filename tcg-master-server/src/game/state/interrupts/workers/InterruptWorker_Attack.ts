@@ -48,7 +48,7 @@ export class InterruptWorker_Attack extends InterruptWorker {
             context.engine.interrupts.interrupt({
                 player: player.id,
                 prompt: `Which attack will ${card.name} use?`,
-                choices: card.def.attacks.map(a => new Choice(a).endsTurn()),
+                choices: card.def.attacks.map(a => new Choice(a).withPriority(100)),
                 resolution: InterruptResolution.Attack
             });
             return true;

@@ -28,7 +28,7 @@ export class TurnEngine extends SubEngine {
             choices.push(new Choice({ text: "discard trainer card Pokémon" }).withResolution(InterruptResolution.DiscardWrapper));
         }
 
-        return [ ...choices, new Choice({ text: "end turn" }).withResolution(InterruptResolution.EndTurn).endsTurn() ];
+        return [ ...choices, new Choice({ text: "end turn" }).withResolution(InterruptResolution.EndTurn).withPriority(-1000) ];
     }
 
     public begin(player_id: number) {
@@ -37,6 +37,7 @@ export class TurnEngine extends SubEngine {
             number: (this.state.turn?.number ?? 0) + 1,
             player: player.id,
             energyPlayed: false,
+            retreats: 0,
             phase: "preattack"
         };
         this.state.betweenTurns = false;

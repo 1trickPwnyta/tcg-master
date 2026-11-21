@@ -7,6 +7,11 @@ import { InterruptContext, InterruptWorker } from "./InterruptWorker.js";
 export class InterruptWorker_Retreat extends InterruptWorker {
     public override execute(context: InterruptContext, replacement_id: number): boolean {
         const player = context.engine.game.activePlayer;
+        if (context.engine.simulation && context.engine.game.turn!.retreats >= 2) {
+            context.engine.sendError(player, "You can't retreat more than twice per turn in a simulation.");
+            return false;
+        }
+
         if (!player.bench.count) {
             context.engine.sendError(player, "There are no Pokémon on your bench to switch with.");
             return false;
@@ -51,6 +56,7 @@ export class InterruptWorker_Retreat extends InterruptWorker {
                 player.active.add(replacement);
                 context.engine.send(player, "'s", card, "retreated to the bench.");
                 context.engine.send(player, "sent out", player.activePokemon, "!");
+                context.engine.game.turn!.retreats++;
             }
             return true;
         } else {

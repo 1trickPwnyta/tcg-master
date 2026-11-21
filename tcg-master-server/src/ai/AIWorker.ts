@@ -1,3 +1,10 @@
+/*
+    Notes for future AI speedup development:
+    1. Convert to hybrid minimax/heuristic model by using the AIPruner to prune strategically bad moves
+    2. Use Choice hint_priority to give types of moves that are often strategically viable a higher score
+    3. Switch to single game state with transactions and rollbacks to see if it's faster than cloning
+*/
+
 import { parentPort } from "worker_threads";
 import { GameEngine } from "../game/engine/GameEngine.js";
 import "../extensions.js";
@@ -15,15 +22,41 @@ await import("../loader.js");
 
 const DEBUG: boolean = false;
 
+const enum TTFlag { Exact, LowerBound, UpperBound }
+interface TTEntry { remainingDepth: number, score: number, flag: TTFlag }
+
 parentPort?.on("message", async (context: AIContext) => {
     const engine = new GameEngine(null, null);
     const game = SerializationHydrate(JSON.parse(context.game), engine) as Game;
     engine.start(game);
-    expectiminimax(game, context.player_id, 0, -Infinity, Infinity, 0);
+
+    const tt = new Map<number, TTEntry>();
+    expectiminimax(game, context.player_id, 0, -Infinity, Infinity, 0, tt);
 });
 
-const MAX_DEPTH = 8;
-function expectiminimax(game: Game, for_player: number, depth: number, alpha: number, beta: number, actions: number): { score: number } {
+const MAX_DEPTH = 9;
+function expectiminimax(game: Game, for_player: number, depth: number, alpha: number, beta: number, actions: number, tt: Map<number, TTEntry>): { score: number } {
+    const initAlpha = alpha;
+    const initBeta = beta;
+    const remainingDepth = MAX_DEPTH - depth;
+
+    const hash = depth > 0 ? game.hash() : 0;
+    if (depth > 0) {
+        const cached = tt.get(hash);
+        if (cached && cached.remainingDepth >= remainingDepth) {
+            if (cached.flag === TTFlag.Exact) {
+                return { score: cached.score };
+            } else if (cached.flag === TTFlag.LowerBound) {
+                alpha = Math.max(alpha, cached.score);
+            } else if (cached.flag === TTFlag.UpperBound) {
+                beta = Math.min(beta, cached.score);
+            }
+            if (alpha >= beta) {
+                return { score: cached.score };
+            }
+        }
+    }
+
     if (game.winner_id || depth === MAX_DEPTH) {
         const score = AIEvaluator.evaluate(game, for_player);
         return { score: score };
@@ -34,11 +67,7 @@ function expectiminimax(game: Game, for_player: number, depth: number, alpha: nu
     const theirInterrupt = game.getInterrupt(me.opponent.id);
     const myTurn = myInterrupt !== null;
     const interrupt = myInterrupt ?? theirInterrupt!;
-    const choices: (Choice | null)[] = AIPruner.prune([ ...interrupt.choices ].sort((a, b) => {
-        if (a.turnEnding && !b.turnEnding) return -1;
-        if (!a.turnEnding && b.turnEnding) return 1;
-        return 0;
-    }));
+    const choices: (Choice | null)[] = AIPruner.prune([ ...interrupt.choices ].sort((a, b) => b.hint_priority - a.hint_priority));
     if (!interrupt.force) {
         choices.push(null);
     }
@@ -72,7 +101,7 @@ function expectiminimax(game: Game, for_player: number, depth: number, alpha: nu
             cloneActions = 0;
         }
 
-        const result = expectiminimax(clone, for_player, depth + 1, alpha, beta, cloneActions);
+        const result = expectiminimax(clone, for_player, depth + 1, alpha, beta, cloneActions, tt);
         if (choice === null && myTurn) {
             result.score -= 300;
         }
@@ -106,6 +135,16 @@ function expectiminimax(game: Game, for_player: number, depth: number, alpha: nu
         if (beta <= alpha) {
             break;
         }
+    }
+
+    if (depth > 0 && bestChoice !== undefined || !myTurn) {
+        let flag = TTFlag.Exact;
+        if (highScore <= initAlpha) {
+            flag = TTFlag.UpperBound;
+        } else if (highScore >= initBeta) {
+            flag = TTFlag.LowerBound;
+        }
+        tt.set(hash, { remainingDepth: remainingDepth, score: highScore, flag: flag });
     }
 
     if (depth === 0) {

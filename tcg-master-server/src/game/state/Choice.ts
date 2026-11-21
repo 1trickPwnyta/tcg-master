@@ -29,7 +29,7 @@ export class Choice {
     public args?: number[];
 
     @Serialize()
-    public turnEnding: boolean = false;
+    public hint_priority: number = 0;
 
     @Serialize()
     public aiScoreOffset: number = 0;
@@ -45,8 +45,8 @@ export class Choice {
         return this;
     }
 
-    public endsTurn(): Choice {
-        this.turnEnding = true;
+    public withPriority(priority: number): Choice {
+        this.hint_priority = priority;
         return this;
     }
 

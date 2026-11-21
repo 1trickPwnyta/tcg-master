@@ -107,7 +107,7 @@ export class Player extends State {
             this.engine.send(this, "drew", amount, `card${amount > 1 ? "s" : ""}.`)
         } else {
             this.engine.sendTo(this.opponent, this, "drew", amount > 1 ? `${amount} cards` : "a card", ".")
-            this.engine.sendTo(this, "You drew", ...Client.getCardList(cardsDrawn));
+            this.engine.sendTo(this, "You drew", ...Client.getCardList(cardsDrawn), ".");
         }
     }
 
