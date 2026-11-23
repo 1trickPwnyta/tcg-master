@@ -89,7 +89,7 @@ export class Gameplay implements IEventConsumer {
             case "SHOW": this.showcase(event.payload as string); break;
             case "ASK": this.processPrompt(event.payload); break;
             case "WAIT": this.wait(); break;
-            case "ERR": this.processMessage(event.payload); break;
+            case "ERR": this.processError(event.payload); break;
             case "NEW": this.newGame(); break;
             case "END": this.gameOver(); break;
             default:
@@ -135,6 +135,12 @@ export class Gameplay implements IEventConsumer {
                 this.lastLogEntry = entry.id;
             }
         }
+    }
+
+    private processError(tokens: { name: string, type?: string }[]) {
+        const log = $("#console");
+        log.append(this.detokenize(tokens));
+        this.nextLine();
     }
 
     private processPrompt(prompt: { text: any[], choices: { option: string, parts: any[] }[] }) {
