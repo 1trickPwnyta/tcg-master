@@ -15,20 +15,22 @@ export class Client_Human extends Client {
         this.socket.emit("NEW");
 
         socket.on("CMD", (command: string) => {
-            console.log(`> [${this.player!.name}] ${command}`);
-            try {
-                const context = new CommandContext(this, this.player_id!, this.engine!, command);
-                const response = Command.execute(context);
-                if (response !== undefined) {
-                    console.log(`Command ${context.name} responded: ${Client.tokenize(...response).map(t => t.name).join(" ")}`);
-                    socket.emit("INFO", Client.tokenize(...response));
-                }
-            } catch (e) {
-                if (e instanceof CommandNotFoundError) {
-                    console.log(e.message);
-                    this.error(e.message);
-                } else {
-                    throw e;
+            if (this.player) {
+                console.log(`> [${this.player.name}] ${command}`);
+                try {
+                    const context = new CommandContext(this, this.player_id!, this.engine!, command);
+                    const response = Command.execute(context);
+                    if (response !== undefined) {
+                        console.log(`Command ${context.name} responded: ${Client.tokenize(...response).map(t => t.name).join(" ")}`);
+                        socket.emit("INFO", Client.tokenize(...response));
+                    }
+                } catch (e) {
+                    if (e instanceof CommandNotFoundError) {
+                        console.log(e.message);
+                        this.error(e.message);
+                    } else {
+                        throw e;
+                    }
                 }
             }
         });

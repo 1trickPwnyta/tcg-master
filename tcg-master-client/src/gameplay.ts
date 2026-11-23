@@ -84,12 +84,12 @@ export class Gameplay implements IEventConsumer {
                     this.nextLine();
                 }
                 break;
-            case "INFO": this.processMessage(event.payload); break;
+            case "INFO":this.processInfo(event.payload); break;
             case "LOG": this.processMessage(event.payload); break;
             case "SHOW": this.showcase(event.payload as string); break;
             case "ASK": this.processPrompt(event.payload); break;
             case "WAIT": this.wait(); break;
-            case "ERR": this.processError(event.payload); break;
+            case "ERR": this.processInfo(event.payload); break;
             case "NEW": this.newGame(); break;
             case "END": this.gameOver(); break;
             default:
@@ -137,7 +137,7 @@ export class Gameplay implements IEventConsumer {
         }
     }
 
-    private processError(tokens: { name: string, type?: string }[]) {
+    private processInfo(tokens: { name: string, type?: string }[]) {
         const log = $("#console");
         log.append(this.detokenize(tokens));
         this.nextLine();
