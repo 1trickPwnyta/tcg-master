@@ -59,6 +59,7 @@ export class Command_check extends Command {
         
         const def = DefDatabase.get<CardDef>(context.text);
         if (def) {
+            context.client.view(def);
             return def.getDetails();
         }
 

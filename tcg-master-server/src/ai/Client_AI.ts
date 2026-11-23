@@ -27,6 +27,8 @@ export class Client_AI extends Client {
 
     public override showcase(_: CardDef) { }
 
+    public override view(_: CardDef) { }
+
     public override error(message: string) {
         throw new Error(message);
     }

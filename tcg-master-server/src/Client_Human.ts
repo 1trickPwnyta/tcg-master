@@ -74,6 +74,10 @@ export class Client_Human extends Client {
         this.socket.emit("SHOW", def.graphicPath);
     }
 
+    public override view(def: CardDef) {
+        this.socket.emit("VIEW", def.graphicPath);
+    }
+
     public override error(message: string) {
         this.socket.emit("ERR", [ { name: message, type: "error" } ]);
     }

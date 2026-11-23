@@ -87,6 +87,7 @@ export class Gameplay implements IEventConsumer {
             case "INFO":this.processInfo(event.payload); break;
             case "LOG": this.processMessage(event.payload); break;
             case "SHOW": this.showcase(event.payload as string); break;
+            case "VIEW": this.showcase(event.payload as string); break;
             case "ASK": this.processPrompt(event.payload); break;
             case "WAIT": this.wait(); break;
             case "ERR": this.processInfo(event.payload); break;

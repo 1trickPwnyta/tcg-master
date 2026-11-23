@@ -16,6 +16,8 @@ export abstract class Client {
 
     public abstract showcase(def: CardDef): void;
 
+    public abstract view(def: CardDef): void;
+
     public abstract error(message: string): void;
 
     public abstract prompt(interrupt: InterruptSync): void;

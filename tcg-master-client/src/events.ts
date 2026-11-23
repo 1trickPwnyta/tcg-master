@@ -1,6 +1,6 @@
 import type { Socket } from "socket.io-client";
 
-const URGENT_EVENT_CODES = [ "WAIT", "INFO", "LOG", "ERR", "NEW" ];
+const URGENT_EVENT_CODES = [ "WAIT", "INFO", "VIEW", "LOG", "ERR", "NEW" ];
 
 export type GameEvent = {
     code: string;
