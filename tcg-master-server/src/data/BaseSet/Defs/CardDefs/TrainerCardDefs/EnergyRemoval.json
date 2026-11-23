@@ -1,6 +1,7 @@
 {
     "name": "BaseSet.EnergyRemoval",
     "label": "Energy Removal",
+    "cardNumber": 92,
     "text": "Choose 1 Energy card attached to 1 of your opponent's Pokémon and discard it.",
     "workers": [ "TrainerWorker_EnergyRemoval" ]
 }

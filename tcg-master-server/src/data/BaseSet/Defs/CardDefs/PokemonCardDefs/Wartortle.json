@@ -1,6 +1,7 @@
 {
     "name": "BaseSet.Wartortle",
     "label": "Wartortle",
+    "cardNumber": 42,
     "type": "Water",
     "stage": "stage1",
     "hp": 70,

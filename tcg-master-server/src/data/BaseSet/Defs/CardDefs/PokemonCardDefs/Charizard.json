@@ -1,6 +1,7 @@
 {
     "name": "BaseSet.Charizard",
     "label": "Charizard",
+    "cardNumber": 4,
     "type": "Fire",
     "stage": "stage2",
     "hp": 120,

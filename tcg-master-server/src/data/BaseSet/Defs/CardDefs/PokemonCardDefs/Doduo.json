@@ -1,6 +1,7 @@
 {
     "name": "BaseSet.Doduo",
     "label": "Doduo",
+    "cardNumber": 48,
     "type": "Colorless",
     "stage": "basic",
     "hp": 50,
@@ -11,6 +12,7 @@
         {
             "name": "Fury Attack",
             "cost": [ "Colorless" ],
+            "damageLabel": "10x",
             "comps": [ { "class": "AttackComp_CoinDamage", "args": { "amount": 10, "coins": 2 } } ],
             "text": "Flip 2 coins. This attack does 10 damage times the number of heads."
         }

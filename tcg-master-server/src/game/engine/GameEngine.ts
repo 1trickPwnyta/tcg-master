@@ -1,14 +1,14 @@
 import { Client_AI } from "../../ai/Client_AI.js";
 import { Game as Game } from "../state/Game.js";
-import { Interrupt, InterruptSync } from "../state/interrupts/Interrupt.js";
+import { Interrupt, InterruptAsync, InterruptSync } from "../state/interrupts/Interrupt.js";
 import { Player } from "../state/Player.js";
 import { Client } from "../../Client.js";
-import { IToken } from "../../IToken.js";
 import { SetupEngine } from "./SetupEngine.js";
 import { TurnEngine } from "./TurnEngine.js";
 import { InterruptEngine } from "./InterruptEngine.js";
 import { SearchEngine } from "./SearchEngine.js";
 import { IllegalMoveError } from "../state/interrupts/InterruptResolver.js";
+import { Card } from "../state/Card.js";
 
 export class GameEngine {
     public readonly clients: Client[] = [];
@@ -52,18 +52,19 @@ export class GameEngine {
         this.search = new SearchEngine(this);
     }
 
-    public start(state?: Game) {
-        if (state) {
-            this._game = state;
-            this._simulation = true;
-        } else {
-            this._game = new Game(this, { prizes: this.options.prizes ?? 6 });
-            this.game.players.push(new Player(1, this, "Pikachu"));
-            this.game.players.push(new Player(2, this, "COM"));
-        }
-        if (!this.simulation) {
-            this.game.update();
-        }
+    public start(player1name: string, player2name: string) {
+        this._game = new Game(this, { prizes: this.options.prizes ?? 6 });
+        this.game.players.push(new Player(1, this, player1name));
+        this.clients[0].player = this.game.players[0];
+        this.game.players.push(new Player(2, this, player2name));
+        this.clients[1].player = this.game.players[1];
+
+        this.game.update();
+    }
+
+    public startSimulation(state: Game) {
+        this._game = state;
+        this._simulation = true;
     }
 
     public get simulation(): boolean {
@@ -91,11 +92,11 @@ export class GameEngine {
     public sendInterrupt(interrupt: Interrupt) {
         if (this.simulation) return;
 
-        if (interrupt.interrupts?.length) {
+        if (interrupt instanceof InterruptAsync) {
             for (const sub of interrupt.interrupts) {
                 this.sendInterrupt(sub);
             }
-        } else {
+        } else if (interrupt instanceof InterruptSync) {
             const client = this.clients.find(c => c.player_id === interrupt.player);
             client?.prompt(interrupt as InterruptSync);
         }
@@ -103,6 +104,7 @@ export class GameEngine {
 
     public send(...parts: any[]) {
         if (this.simulation) return;
+        this.game.recordMessage(parts);
         for (const player of this.game.players) {
             this.sendTo(player, ...parts);
         }
@@ -116,13 +118,19 @@ export class GameEngine {
         }
     }
 
-    public sendError(player: Player, ...parts: (IToken | string)[]) {
+    public showcase(card: Card) {
+        for (const client of this.clients) {
+            client.showcase(card.def);
+        }
+    }
+
+    public sendError(player: Player, message: string) {
         if (!this.game.winner_id) {
             const client = this.clients.find(c => c.player_id === player.id);
             if (client) {
-                client.error(...parts);
+                client.error(message);
             } else {
-                throw new IllegalMoveError(parts.map(p => typeof p !== "string" ? p.name : p).join(" "));
+                throw new IllegalMoveError(message);
             }
         }
     }

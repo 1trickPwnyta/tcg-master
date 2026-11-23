@@ -56,7 +56,7 @@ export class Player extends State {
     public menus: number = 0;
 
     public get token(): IToken {
-        return { name: this.name, type: "player" };
+        return { name: this.name, type: `player${this.id}` };
     }
 
     public get opponent(): Player {
@@ -107,7 +107,7 @@ export class Player extends State {
             this.engine.send(this, "drew", amount, `card${amount > 1 ? "s" : ""}.`)
         } else {
             this.engine.sendTo(this.opponent, this, "drew", amount > 1 ? `${amount} cards` : "a card", ".")
-            this.engine.sendTo(this, "You drew", ...Client.getCardList(cardsDrawn), ".");
+            this.engine.sendTo(this, "You drew", ...(cardsDrawn.length > 1 ? Client.getCardList(cardsDrawn) : cardsDrawn), ".");
         }
     }
 

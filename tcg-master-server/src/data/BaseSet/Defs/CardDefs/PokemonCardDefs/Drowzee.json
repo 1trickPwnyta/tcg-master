@@ -1,6 +1,7 @@
 {
     "name": "BaseSet.Drowzee",
     "label": "Drowzee",
+    "cardNumber": 49,
     "type": "Psychic",
     "stage": "basic",
     "hp": 50,

@@ -1,6 +1,7 @@
 {
     "name": "BaseSet.Porygon",
     "label": "Porygon",
+    "cardNumber": 39,
     "type": "Colorless",
     "stage": "basic",
     "hp": 30,

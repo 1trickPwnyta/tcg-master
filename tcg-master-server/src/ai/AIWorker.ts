@@ -12,7 +12,7 @@ import { AIContext } from "./Client_AI.js";
 import { SerializationHydrate } from "../game/state/serializer.js";
 import { Game } from "../game/state/Game.js";
 import { AIEvaluator } from "./AIEvaluator.js";
-import { Choice } from "../game/state/Choice.js";
+import { Choice } from "../game/state/interrupts/Choice.js";
 import { AIPruner } from "./AIPruner.js";
 import { IllegalMoveError } from "../game/state/interrupts/InterruptResolver.js";
 
@@ -28,7 +28,7 @@ interface TTEntry { remainingDepth: number, score: number, flag: TTFlag }
 parentPort?.on("message", async (context: AIContext) => {
     const engine = new GameEngine(null, null);
     const game = SerializationHydrate(JSON.parse(context.game), engine) as Game;
-    engine.start(game);
+    engine.startSimulation(game);
 
     const tt = new Map<number, TTEntry>();
     expectiminimax(game, context.player_id, 0, -Infinity, Infinity, 0, tt);
@@ -63,8 +63,8 @@ function expectiminimax(game: Game, for_player: number, depth: number, alpha: nu
     }
 
     const me = game.getPlayer(for_player);
-    const myInterrupt = game.getInterrupt(me.id);
-    const theirInterrupt = game.getInterrupt(me.opponent.id);
+    const myInterrupt = game.interrupt?.getInterruptFor(me.id);
+    const theirInterrupt = game.interrupt?.getInterruptFor(me.opponent.id);
     const myTurn = myInterrupt !== null;
     const interrupt = myInterrupt ?? theirInterrupt!;
     const choices: (Choice | null)[] = AIPruner.prune([ ...interrupt.choices ].sort((a, b) => b.hint_priority - a.hint_priority));
@@ -79,7 +79,7 @@ function expectiminimax(game: Game, for_player: number, depth: number, alpha: nu
     for (const choice of choices) {
         const engine = new GameEngine(null, null);
         const clone = game.clone(engine);
-        engine.start(clone);
+        engine.startSimulation(clone);
 
         const currentTurn = clone.turn?.player;
         try {
@@ -110,7 +110,7 @@ function expectiminimax(game: Game, for_player: number, depth: number, alpha: nu
         }
 
         if (DEBUG && depth === 0) {
-            parentPort?.postMessage(`Choice: ${choice?.label ?? 'CANCEL'} | Actions: ${cloneActions} | Score Received: ${result.score}`);
+            parentPort?.postMessage(`Choice: ${choice?.parts ?? 'CANCEL'} | Actions: ${cloneActions} | Score Received: ${result.score}`);
         }
 
         if (myTurn) {

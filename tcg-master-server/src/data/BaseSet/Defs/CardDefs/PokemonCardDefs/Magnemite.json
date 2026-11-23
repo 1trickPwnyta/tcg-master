@@ -1,6 +1,7 @@
 {
     "name": "BaseSet.Magnemite",
     "label": "Magnemite",
+    "cardNumber": 53,
     "type": "Lightning",
     "stage": "basic",
     "hp": 40,

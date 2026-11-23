@@ -1,5 +1,5 @@
 import { InterruptResolution } from "../state/interrupts/InterruptResolution.js";
-import { Interrupt } from "../state/interrupts/Interrupt.js";
+import { Interrupt, InterruptAsync, InterruptSync } from "../state/interrupts/Interrupt.js";
 import { Player } from "../state/Player.js";
 import { SubEngine } from "./SubEngine.js";
 import { InterruptType } from "../state/interrupts/InterruptType.js";
@@ -8,7 +8,7 @@ import { PokemonCardDef } from "../../defs/PokemonCardDef.js";
 import { EnergyCardDef } from "../../defs/EnergyCardDef.js";
 import { TrainerCardDef } from "../../defs/TrainerCardDef.js";
 import { CardFactory } from "../CardFactory.js";
-import { Choice } from "../state/Choice.js";
+import { Choice } from "../state/interrupts/Choice.js";
 import { PokemonCard } from "../state/PokemonCard.js";
 
 export class SetupEngine extends SubEngine {
@@ -48,49 +48,41 @@ export class SetupEngine extends SubEngine {
             }
             this.engine.game.update();
         } else if (this.state.players.find(p => p.mulligans && !p.opponent.mulliganBonusUsed)) {
-            this.engine.interrupts.interrupt({
-                interrupts: this.state.players.map((p): Interrupt | undefined => {
+            this.engine.interrupts.interrupt(new InterruptAsync(this.engine, 
+                ...this.state.players.map((p): Interrupt | undefined => {
                     const opponent = this.state.players.find(o => o.id !== p.id)!;
                     if (opponent.mulligans) {
-                        return {
-                            player: p.id,
-                            prompt: "Will you draw additional cards?",
-                            choices: Array.from({ length: opponent.mulligans }, (_, i) => new Choice({ text: (i + 1).toString(), id: i + 1 })),
-                            resolution: InterruptResolution.UseMulliganBonus,
-                            cancelResolution: InterruptResolution.SkipMulliganBonus,
-                            args: [ p.id ]
-                        };
+                        return new InterruptSync(p)
+                            .withPrompt("Will you draw additional cards?")
+                            .withChoices(Array.from({ length: opponent.mulligans }, (_, i) => Choice.fromInt(i + 1)))
+                            .withResolution(InterruptResolution.UseMulliganBonus)
+                            .withCancelResolution(InterruptResolution.SkipMulliganBonus)
+                            .withArgs(p.id);
                     } else {
                         return undefined;
                     }
                 }).filter(i => i !== undefined)
-            });
+            ));
         } else if (this.state.players.find(p => !p.activePokemon)) {
-            this.engine.interrupts.interrupt({
-                interrupts: this.state.players.map(p => ({
-                    type: InterruptType.SelectActive,
-                    player: p.id,
-                    prompt: "Select a basic Pokémon as your active Pokémon.",
-                    choices: p.hand.basicPokemon.map(c => new Choice(c)),
-                    resolution: InterruptResolution.MoveCard,
-                    args: [ p.hand.id, p.active.id ],
-                    force: true
-                }))
-            });
+            this.engine.interrupts.interrupt(new InterruptAsync(this.engine,
+                ...this.state.players.map(p => new InterruptSync(p)
+                    .ofType(InterruptType.SelectActive)
+                    .withPrompt("Select a basic Pokémon as your active Pokémon.")
+                    .withChoices(p.hand.basicPokemon.map(c => new Choice(c)))
+                    .withResolution(InterruptResolution.MoveCard)
+                    .withArgs(p.hand.id, p.active.id)
+                    .forced())));
         } else {
             const playersNotReady = this.state.players.filter(p => !p.setupComplete && p.hand.basicPokemon.length && !p.bench.full);
             if (playersNotReady.length) {
-                this.engine.interrupts.interrupt({
-                    interrupts: playersNotReady.map(p => ({
-                        type: InterruptType.Bench,
-                        player: p.id,
-                        prompt: "Choose other basic Pokémon to put on the bench.",
-                        choices: p.hand.basicPokemon.map(c => new Choice(c)),
-                        resolution: InterruptResolution.MoveCard,
-                        cancelResolution: InterruptResolution.SkipBench,
-                        args: [ p.hand.id, p.bench.id ]
-                    }))
-                });
+                this.engine.interrupts.interrupt(new InterruptAsync(this.engine,
+                    ...playersNotReady.map(p => new InterruptSync(p)
+                        .ofType(InterruptType.Bench)
+                        .withPrompt("Choose other basic Pokémon to put on the bench.")
+                        .withChoices(p.hand.basicPokemon.map(c => new Choice(c)))
+                        .withResolution(InterruptResolution.MoveCard)
+                        .withCancelResolution(InterruptResolution.SkipBench)
+                        .withArgs(p.hand.id, p.bench.id))));
             } else {
                 for (const player of this.state.players) {
                     for (let i = 0; i < this.state.rules.prizes; i++) {
@@ -109,14 +101,12 @@ export class SetupEngine extends SubEngine {
         player.draw(7);
         if (player.hand.basicPokemon.length) {
             if (!player.hand.cards.some(c => c instanceof PokemonCard)) {
-                this.engine.interrupts.interrupt({
-                    player: player.id,
-                    prompt: "The only basic Pokémon in your hand are Trainer cards. Do you want to take a mulligan?",
-                    choices: [ Choice.Yes, Choice.No ],
-                    resolution: InterruptResolution.OptionalMulligan,
-                    force: true,
-                    args: [ player.id, mulligans ]
-                });
+                this.engine.interrupts.interrupt(new InterruptSync(player)
+                    .withPrompt("The only basic Pokémon in your hand are Trainer cards. Do you want to take a mulligan?")
+                    .withChoices([ Choice.Yes, Choice.No ])
+                    .withResolution(InterruptResolution.OptionalMulligan)
+                    .withArgs(player.id, mulligans)
+                    .forced());
                 return null;
             }
             return mulligans;

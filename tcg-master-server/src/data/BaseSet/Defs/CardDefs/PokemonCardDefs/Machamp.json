@@ -1,6 +1,7 @@
 {
     "name": "BaseSet.Machamp",
     "label": "Machamp",
+    "cardNumber": 8,
     "type": "Fighting",
     "stage": "stage2",
     "hp": 100,

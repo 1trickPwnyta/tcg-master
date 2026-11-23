@@ -1,5 +1,5 @@
 import { AcceptanceReport } from "../../AcceptanceReport.js";
-import { Choice } from "../state/Choice.js";
+import { Choice } from "../state/interrupts/Choice.js";
 import { Interrupt } from "../state/interrupts/Interrupt.js";
 import { InterruptType } from "../state/interrupts/InterruptType.js";
 import { PokemonCard } from "../state/PokemonCard.js";
@@ -18,11 +18,10 @@ export class TrainerWorker_Switch extends TrainerWorker {
     public override acquireTargets(context: TrainerContext): Interrupt | null {
         const target = context.nextTarget();
         if (!target) {
-            context.interruptType = InterruptType.Switch;
-            return this.generateInterrupt(context,
-                `Switch ${context.player.activePokemon!.name} with which benched Pokémon?`,
-                context.player.bench.cards.map(c => new Choice(c))
-            );
+            return this.generateInterrupt(context)
+                .withPrompt("Switch", context.player.activePokemon, "with which benched Pokémon?")
+                .withChoices(context.player.bench.cards.map(c => new Choice(c)))
+                .ofType(InterruptType.Switch);
         }
 
         return null;

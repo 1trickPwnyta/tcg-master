@@ -1,6 +1,7 @@
 {
     "name": "BaseSet.PsychicEnergy",
     "label": "Psychic Energy",
+    "cardNumber": 101,
     "basic": true,
     "type": "Psychic",
     "amount": 1

@@ -1,6 +1,7 @@
 {
     "name": "BaseSet.Bill",
     "label": "Bill",
+    "cardNumber": 91,
     "text": "Draw 2 cards.",
     "workers": [ { "class": "TrainerWorker_Draw", "args": { "amount": 2 } } ]
 }

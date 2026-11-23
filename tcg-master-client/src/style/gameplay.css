@@ -1,0 +1,74 @@
+#gameplay {
+    display: none;
+}
+
+#stage {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    width: 100%;
+    height: 600px;
+}
+
+#console {
+    color: #dedede;
+    background-color: #212121;
+    font-family: monospace;
+    font-size: 20px;
+    padding: 10px;
+    overflow: scroll;
+    flex: 1;
+}
+
+#console .user-input {
+    color: #828282;
+}
+
+#showcase {
+    background-color: #212121;
+    flex: 0 0 435px;
+    position: relative;
+}
+
+#showcase div {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-size: contain;
+}
+
+#controls {
+    color: #dedede;
+    background-color: #444444;
+    padding: 10px;
+    flex: 1;
+    align-self: stretch;
+}
+
+#controls #commands {
+    margin-bottom: 10px;
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    width: 100%;
+}
+
+#controls #commands .commands-panel {
+    background-color: #333333;
+    padding: 10px;
+    width: 100%;
+    font-size: 0.8em;
+}
+
+#controls #commands button {
+    margin-top: 5px;
+    margin-right: 10px;
+}
+
+#controls #choices {
+    padding-left: 8px;
+}
+
+#controls form {
+    margin-top: 10px;
+}

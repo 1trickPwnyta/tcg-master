@@ -1,6 +1,7 @@
 {
     "name": "BaseSet.Beedrill",
     "label": "Beedrill",
+    "cardNumber": 17,
     "type": "Grass",
     "stage": "stage2",
     "hp": 80,
@@ -11,6 +12,7 @@
         {
             "name": "Twineedle",
             "cost": [ "Colorless", "Colorless", "Colorless" ],
+            "damageLabel": "30x",
             "comps": [ { "class": "AttackComp_CoinDamage", "args": { "amount": 30, "coins": 2 } } ],
             "text": "Flip 2 coins. This attack does 30 damage times the number of heads."
         },

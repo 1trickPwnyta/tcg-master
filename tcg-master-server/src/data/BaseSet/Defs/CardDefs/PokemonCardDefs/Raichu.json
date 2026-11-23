@@ -1,6 +1,7 @@
 {
     "name": "BaseSet.Raichu",
     "label": "Raichu",
+    "cardNumber": 14,
     "type": "Lightning",
     "stage": "stage1",
     "hp": 80,

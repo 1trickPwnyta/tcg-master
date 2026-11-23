@@ -1,5 +1,5 @@
 import $ from "jquery";
-import { Input } from "./input";
+import { Gameplay } from "./gameplay";
 
 const list = {
     "You": [
@@ -20,7 +20,7 @@ const list = {
 };
 
 function execute(command: string) {
-    Input.send(command);
+    Gameplay.instance.send(command);
     $("#input")[0].focus();
 }
 

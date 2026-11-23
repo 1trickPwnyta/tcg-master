@@ -1,5 +1,5 @@
 import { AcceptanceReport } from "../../AcceptanceReport.js";
-import { Choice } from "../state/Choice.js";
+import { Choice } from "../state/interrupts/Choice.js";
 import { Interrupt } from "../state/interrupts/Interrupt.js";
 import { TrainerContext } from "./TrainerContext.js";
 import { TrainerWorker } from "./TrainerWorker.js";
@@ -34,10 +34,9 @@ export class TrainerWorker_SearchDeck extends TrainerWorker {
             if (target === undefined) {
                 const choices = this.getTargetChoices(context);
                 if (choices.length) {
-                    return this.generateInterrupt(context,
-                        "Select a card from your deck.",
-                        choices
-                    );
+                    return this.generateInterrupt(context)
+                        .withPrompt("Select a card from your deck.")
+                        .withChoices(choices);
                 } else {
                     context.addNullTarget();
                 }

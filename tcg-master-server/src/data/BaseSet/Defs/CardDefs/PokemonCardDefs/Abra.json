@@ -1,6 +1,7 @@
 {
     "name": "BaseSet.Abra",
     "label": "Abra",
+    "cardNumber": 43,
     "type": "Psychic",
     "stage": "basic",
     "hp": 30,

@@ -1,6 +1,7 @@
 {
     "name": "BaseSet.Venusaur",
     "label": "Venusaur",
+    "cardNumber": 15,
     "type": "Grass",
     "stage": "stage2",
     "hp": 100,

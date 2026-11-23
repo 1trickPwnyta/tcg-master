@@ -1,6 +1,7 @@
 {
     "name": "BaseSet.Jynx",
     "label": "Jynx",
+    "cardNumber": 31,
     "type": "Psychic",
     "stage": "basic",
     "hp": 70,
@@ -10,6 +11,7 @@
         {
             "name": "Doubleslap",
             "cost": [ "Psychic" ],
+            "damageLabel": "10x",
             "comps": [ { "class": "AttackComp_CoinDamage", "args": { "amount": 10, "coins": 2 } } ],
             "text": "Flip 2 coins. This attack does 10 damage times the number of heads."
         },
@@ -17,6 +19,7 @@
             "name": "Meditate",
             "cost": [ "Psychic", "Psychic", "Colorless" ],
             "damage": 20,
+            "damageLabel": "20+",
             "comps": [ "AttackComp_Meditate" ],
             "text": "Does 20 damage plus 10 more damage for each damage counter on the Defending Pokémon."
         }

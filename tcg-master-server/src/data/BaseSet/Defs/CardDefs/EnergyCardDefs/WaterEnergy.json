@@ -1,6 +1,7 @@
 {
     "name": "BaseSet.WaterEnergy",
     "label": "Water Energy",
+    "cardNumber": 102,
     "basic": true,
     "type": "Water",
     "amount": 1

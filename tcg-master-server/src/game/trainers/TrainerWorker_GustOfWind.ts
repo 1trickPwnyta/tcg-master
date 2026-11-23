@@ -1,5 +1,5 @@
 import { AcceptanceReport } from "../../AcceptanceReport.js";
-import { Choice } from "../state/Choice.js";
+import { Choice } from "../state/interrupts/Choice.js";
 import { Interrupt } from "../state/interrupts/Interrupt.js";
 import { PokemonCard } from "../state/PokemonCard.js";
 import { TrainerContext } from "./TrainerContext.js";
@@ -21,10 +21,9 @@ export class TrainerWorker_GustOfWind extends TrainerWorker {
     public override acquireTargets(context: TrainerContext): Interrupt | null {
         const target = context.nextTarget();
         if (!target) {
-            return this.generateInterrupt(context,
-                "Which of your opponent's Pokémon will switch in?",
-                this.getTargetChoices(context)
-            );
+            return this.generateInterrupt(context)
+                .withPrompt("Which of", context.player.opponent, "'s Pokémon will switch in?")
+                .withChoices(this.getTargetChoices(context));
         }
         
         return null;

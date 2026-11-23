@@ -1,6 +1,7 @@
 {
     "name": "BaseSet.ClefairyDollWrapper",
     "label": "Clefairy Doll",
+    "cardNumber": 70,
     "type": "Colorless",
     "stage": "basic",
     "hp": 10,

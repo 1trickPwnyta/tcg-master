@@ -1,5 +1,5 @@
 import { AcceptanceReport } from "../../AcceptanceReport.js";
-import { Choice } from "../state/Choice.js";
+import { Choice } from "../state/interrupts/Choice.js";
 import { Interrupt } from "../state/interrupts/Interrupt.js";
 import { PokemonCard } from "../state/PokemonCard.js";
 import { TrainerContext } from "./TrainerContext.js";
@@ -23,10 +23,9 @@ export class TrainerWorker_PokemonFlute extends TrainerWorker {
     public override acquireTargets(context: TrainerContext): Interrupt | null {
         const target = context.nextTarget();
         if (!target) {
-            return this.generateInterrupt(context,
-                "Which Pokémon will be sent to your opponent's bench?",
-                this.getTargetChoices(context)
-            );
+            return this.generateInterrupt(context)
+                .withPrompt("Which Pokémon will be sent to", context.player.opponent, "'s bench?")
+                .withChoices(this.getTargetChoices(context));
         }
 
         return null;

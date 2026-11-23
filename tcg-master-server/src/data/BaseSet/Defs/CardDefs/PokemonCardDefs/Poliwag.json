@@ -1,6 +1,7 @@
 {
     "name": "BaseSet.Poliwag",
     "label": "Poliwag",
+    "cardNumber": 59,
     "type": "Water",
     "stage": "basic",
     "hp": 40,
@@ -11,6 +12,7 @@
             "name": "Water Gun",
             "cost": [ "Water" ],
             "damage": 10,
+            "damageLabel": "10+",
             "comps": [ { "class": "AttackComp_WaterGun", "args": { "cost": "Water", "amount": 10, "limit": 2 } } ],
             "text": "Does 10 damage plus 10 more damage for each {Water} Energy attached to Poliwag but not used to pay for this attack's Energy cost. Extra {Water} Energy after the 2nd don't count."
         }

@@ -1,7 +1,10 @@
-import { Input } from "./input";
+import type { Socket } from "socket.io-client";
+
+const URGENT_EVENT_CODES = [ "WAIT", "INFO", "ERR", "NEW" ];
 
 export type GameEvent = {
     code: string;
+    urgent: boolean;
     payload: any;
 };
 
@@ -14,10 +17,10 @@ export class EventQueue {
     private readonly consumer: IEventConsumer;
     private queue: GameEvent[];
 
-    public constructor(consumer: IEventConsumer) {
+    public constructor(consumer: IEventConsumer, socket: Socket) {
         this.consumer = consumer;
         this.queue = [];
-        Input.socket.onAny((code: string, payload: any) => this.notify_socketMessage(code, payload));
+        socket.onAny((code: string, payload: any) => this.notify_socketMessage(code, payload));
     }
 
     public next(): GameEvent | null {
@@ -30,11 +33,11 @@ export class EventQueue {
     }
 
     private notify_socketMessage(code: string, payload: any) {
-        const event = { code: code, payload: payload };
-        if (event.code === "ASK") {
+        const event = { code: code, urgent: URGENT_EVENT_CODES.includes(code), payload: payload };
+        if (event.code === "ASK" || event.code === "WAIT") {
             this.queue = this.queue.filter(q => q.code !== "ASK");
         }
-        if (this.queue.length || this.consumer.busy) {
+        if (!event.urgent && (this.queue.length || this.consumer.busy)) {
             this.queue.push(event);
         } else {
             this.consumer.consumeEvent(event);

@@ -1,6 +1,7 @@
 {
     "name": "BaseSet.Magmar",
     "label": "Magmar",
+    "cardNumber": 36,
     "type": "Fire",
     "stage": "basic",
     "hp": 50,

@@ -30,6 +30,7 @@ export class InterruptWorker_AttachEnergy extends InterruptWorker {
         }
 
         target.attachments.add(energy);
+        context.engine.showcase(energy);
         context.engine.send(context.engine.game.activePlayer, "attached", context.engine.search.getCard(energy_id)!, "to", target, ".");
         if (!override) {
             context.engine.game.turn!.energyPlayed = true;

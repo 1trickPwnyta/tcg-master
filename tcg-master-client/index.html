@@ -4,25 +4,60 @@
         <meta charset="UTF-8" />
         <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
         <link rel="stylesheet" href="/src/style/main.css" />
+        <link rel="stylesheet" href="/src/style/intro.css" />
+        <link rel="stylesheet" href="/src/style/main-menu.css" />
+        <link rel="stylesheet" href="/src/style/waiting.css" />
+        <link rel="stylesheet" href="/src/style/gameplay.css" />
+        <link rel="stylesheet" href="/src/style/text.css" />
         <link rel="stylesheet" href="/src/style/tokens.css" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>TCG Master</title>
     </head>
     <body>
         <div id="app">
-            <div id="console"></div>
-            <div id="controls">
-                <div id="commands">
-                    <div id="commands-you" class="commands-panel">You<div></div></div>
-                    <div id="commands-opponent" class="commands-panel">Opponent<div></div></div>
-                    <div id="commands-debug" class="commands-panel">Debug<div></div></div>
+            <div id="intro" class="app">
+                <div>
+                    <h1><span id="hi">Hi.</span> <span id="thanks">Thanks.</span></h1>
+                    <div id="name-dialog">
+                        What's your name?<br />
+                        <form onsubmit="submitName(event)">
+                            <input id="name-input" type="text" />
+                            <input type="submit" value="Submit" />
+                        </form>
+                    </div>
                 </div>
-                <div id="prompt"></div>
-                <div id="choices"></div>
-                <form onsubmit="formSubmit(event)">
-                    <input id="input" type="text" autocomplete="off" />
-                    <input type="submit" value="Submit" />
-                </form>
+            </div>
+            <div id="main-menu" class="app">
+                <div class="subsection">
+                    <h1>New game</h1>
+                    <div class="button-row">
+                        <button onclick="newGameCom()">vs COM</button>
+                        <button onclick="newGameHuman()">vs Human</button>
+                    </div>
+                </div>
+            </div>
+            <div id="waiting" class="app">
+                <h1>Hold your Horseas.</h1>
+                <marquee id="wait-message"></marquee>
+            </div>
+            <div id="gameplay" class="app">
+                <div id="stage">
+                    <div id="console"></div>
+                    <div id="showcase"></div>
+                </div>
+                <div id="controls">
+                    <div id="commands">
+                        <div id="commands-you" class="commands-panel">You<div></div></div>
+                        <div id="commands-opponent" class="commands-panel">Opponent<div></div></div>
+                        <div id="commands-debug" class="commands-panel">Debug<div></div></div>
+                    </div>
+                    <div id="prompt"></div>
+                    <div id="choices"></div>
+                    <form onsubmit="formSubmit(event)">
+                        <input id="input" type="text" autocomplete="off" />
+                        <input type="submit" value="Submit" />
+                    </form>
+                </div>
             </div>
         </div>
         <script type="module" src="/src/main.ts"></script>

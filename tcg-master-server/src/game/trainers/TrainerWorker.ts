@@ -1,5 +1,5 @@
 import { AcceptanceReport } from "../../AcceptanceReport.js";
-import { Choice } from "../state/Choice.js";
+import { Choice } from "../state/interrupts/Choice.js";
 import { Interrupt, InterruptSync } from "../state/interrupts/Interrupt.js";
 import { InterruptResolution } from "../state/interrupts/InterruptResolution.js";
 import { TrainerContext } from "./TrainerContext.js";
@@ -19,16 +19,10 @@ export abstract class TrainerWorker {
 
     public abstract execute(context: TrainerContext): void;
 
-    protected generateInterrupt(context: TrainerContext, prompt: string, choices: Choice[]): InterruptSync {
-        return {
-            type: context.interruptType,
-            player: context.player.id,
-            prompt: prompt,
-            choices: choices,
-            force: context.forceInterrupt,
-            resolution: InterruptResolution.TrainerTargets,
-            cancelResolution: InterruptResolution.CancelTrainer,
-            args: [ context.card.id, ...context.targets ]
-        };
+    protected generateInterrupt(context: TrainerContext): InterruptSync {
+        return new InterruptSync(context.player)
+            .withResolution(InterruptResolution.TrainerTargets)
+            .withCancelResolution(InterruptResolution.CancelTrainer)
+            .withArgs(context.card.id, ...context.targets);
     }
 };

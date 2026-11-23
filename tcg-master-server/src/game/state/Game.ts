@@ -13,6 +13,9 @@ export class Game extends State {
     public readonly players: Player[] = [];
 
     @Serialize()
+    private readonly messages: any[][] = [];
+
+    @Serialize()
     public turn: Turn | null = null;
 
     @Serialize()
@@ -77,9 +80,9 @@ export class Game extends State {
             this.turn?.energyPlayed,
             this.turn?.player,
             this.winner_id,
-            this.interrupt?.player,
-            this.interrupt?.prompt,
-            this.interrupt?.choices?.map(c => [ c.label ])
+            this.interrupt instanceof InterruptSync ? this.interrupt.player : null,
+            this.interrupt instanceof InterruptSync ? this.interrupt.prompt.map(p => p.toString()).join("") : null,
+            this.interrupt instanceof InterruptSync ? this.interrupt.choices.map(c => [ c.parts.map(p => p?.toString()).join("") ]) : null
         ]);
         let hash = 5381;
         for (let i = 0; i < str.length; i++) {
@@ -100,29 +103,19 @@ export class Game extends State {
         return hash >>> 0;
     }
 
-    public getInterrupt(player_id: number, root?: Interrupt): InterruptSync | null {
-        if (this.interrupt?.player === player_id) {
-            return this.interrupt as InterruptSync;
-        } else if (root?.player === player_id) {
-            return root as InterruptSync;
-        } else {
-            const interrupts = (root ?? this.interrupt)?.interrupts;
-            if (interrupts) {
-                for (const interrupt of interrupts) {
-                    if (this.getInterrupt(player_id, interrupt)) {
-                        return interrupt as InterruptSync;
-                    }
-                }
-            }
-        }
-        return null;
-    }
-
     public clone(engine: GameEngine): Game {
         const json = JSON.stringify(this, SerializationReplace);
         const raw = JSON.parse(json);
         const hydrated = SerializationHydrate(raw, engine);
         return hydrated;
+    }
+
+    public recordMessage(parts: any[]) {
+        this.messages.push(parts);
+    }
+
+    public retrieveMessages(): any[][] {
+        return [ ...this.messages ];
     }
 
     public flipCoin(player?: Player): boolean {

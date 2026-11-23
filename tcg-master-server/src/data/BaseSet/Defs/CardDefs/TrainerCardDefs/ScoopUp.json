@@ -1,6 +1,7 @@
 {
     "name": "BaseSet.ScoopUp",
     "label": "Scoop Up",
+    "cardNumber": 78,
     "text": "Choose 1 of your own Pokémon in play and return its Basic Pokémon card to your hand. <em>(Discard all cards attached to that card.)</em>",
     "workers": [ "TrainerWorker_ScoopUp" ]
 }

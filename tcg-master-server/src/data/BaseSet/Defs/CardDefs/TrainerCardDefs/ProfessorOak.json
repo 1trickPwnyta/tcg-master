@@ -1,6 +1,7 @@
 {
     "name": "BaseSet.ProfessorOak",
     "label": "Professor Oak",
+    "cardNumber": 88,
     "text": "Discard your hand, then draw 7 cards.",
     "workers": [
         {

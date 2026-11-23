@@ -4,9 +4,9 @@ import { CommandContext } from "./commands/CommandContext.js";
 import { Command, CommandNotFoundError } from "./commands/Command.js";
 import { Player } from "./game/state/Player.js";
 import { InterruptSync } from "./game/state/interrupts/Interrupt.js";
+import { CardDef } from "./defs/CardDef.js";
 
 export class Client_Human extends Client {
-    public override name: string = "Pikachu";
     public readonly socket: Socket;
 
     public constructor(socket: Socket) {
@@ -15,13 +15,13 @@ export class Client_Human extends Client {
         this.socket.emit("NEW");
 
         socket.on("CMD", (command: string) => {
-            console.log(`> [${this.name}] ${command}`);
+            console.log(`> [${this.player!.name}] ${command}`);
             try {
                 const context = new CommandContext(this, this.player_id!, this.engine!, command);
                 const response = Command.execute(context);
                 if (response !== undefined) {
                     console.log(`Command ${context.name} responded: ${Client.tokenize(...response).map(t => t.name).join(" ")}`);
-                    socket.emit("MSG", Client.tokenize(...response));
+                    socket.emit("INFO", Client.tokenize(...response));
                 }
             } catch (e) {
                 if (e instanceof CommandNotFoundError) {
@@ -33,27 +33,45 @@ export class Client_Human extends Client {
             }
         });
 
+        socket.on("JOIN", () => {
+            for (const message of this.engine!.game.retrieveMessages()) {
+                this.sendInfo(...message);
+            }
+            const interrupt = this.engine!.interrupts.get(this.player_id!);
+            if (interrupt) {
+                this.prompt(interrupt);
+            }
+        });
+
         socket.on("disconnect", () => {
             console.log(`Client disconnected: ${socket.id}`);
         });
     }
 
-    public send(...parts: any[]) {
+    public override send(...parts: any[]) {
         this.socket.emit("MSG", Client.tokenize(...parts));
     }
 
-    public error(...parts: any[]) {
-        this.socket.emit("ERR", Client.tokenize(...parts));
+    public override sendInfo(...parts: any[]) {
+        this.socket.emit("INFO", Client.tokenize(...parts));
+    }
+
+    public override showcase(def: CardDef) {
+        this.socket.emit("SHOW", def.graphicPath);
+    }
+
+    public override error(message: string) {
+        this.socket.emit("ERR", [ { name: message, type: "error" } ]);
     }
 
     public override prompt(interrupt: InterruptSync) {
-        const userChoices = interrupt.choices!.map((c, i) => `[${i + 1}] ${c.label}`);
+        const userChoices = interrupt.choices!.map((c, i) => ({ option: (i + 1).toString(), parts: Client.tokenize(...c.parts) }));
         if (!interrupt.force) {
-            userChoices.push("[`] (cancel)");
+            userChoices.push({ option: "`", parts: [ { name: "(cancel)" } ] });
         }
         
         this.socket.emit("ASK", {
-            text: interrupt.prompt,
+            text: Client.tokenize(...interrupt.prompt),
             choices: userChoices
         });
     }

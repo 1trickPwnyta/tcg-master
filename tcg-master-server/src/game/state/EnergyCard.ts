@@ -2,7 +2,8 @@ import { DefDatabase } from "../../defs/DefDatabase.js";
 import { EnergyCardDef } from "../../defs/EnergyCardDef.js";
 import { EnergyTypeDef } from "../../defs/EnergyTypeDef.js";
 import { Card } from "./Card.js";
-import { Choice } from "./Choice.js";
+import { Choice } from "./interrupts/Choice.js";
+import { InterruptSync } from "./interrupts/Interrupt.js";
 import { InterruptResolution } from "./interrupts/InterruptResolution.js";
 import { Serializable, Serialize } from "./serializer.js";
 
@@ -28,13 +29,11 @@ export class EnergyCard extends Card {
     }
 
     public override play(): boolean {
-        this.engine.interrupts.interrupt({
-            player: this.owner.id,
-            prompt: `Attach ${this.name} to which Pokémon?`,
-            choices: this.owner.pokemonInPlay.map(c => new Choice(c)),
-            resolution: InterruptResolution.AttachEnergy,
-            args: [ this.id ]
-        });
+        this.engine.interrupts.interrupt(new InterruptSync(this.owner)
+            .withPrompt("Attach", this, "to which Pokémon?")
+            .withChoices(this.owner.pokemonInPlay.map(c => new Choice(c)))
+            .withResolution(InterruptResolution.AttachEnergy)
+            .withArgs(this.id));
         
         return true;
     }

@@ -1,6 +1,7 @@
 {
     "name": "BaseSet.Koffing",
     "label": "Koffing",
+    "cardNumber": 51,
     "type": "Grass",
     "stage": "basic",
     "hp": 50,

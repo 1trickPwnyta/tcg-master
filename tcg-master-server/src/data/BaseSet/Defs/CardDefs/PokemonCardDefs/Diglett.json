@@ -1,6 +1,7 @@
 {
     "name": "BaseSet.Diglett",
     "label": "Diglett",
+    "cardNumber": 47,
     "type": "Fighting",
     "stage": "basic",
     "hp": 30,

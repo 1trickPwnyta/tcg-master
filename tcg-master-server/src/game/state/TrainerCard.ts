@@ -1,5 +1,4 @@
 import { AcceptanceReport } from "../../AcceptanceReport.js";
-import { DefDatabase } from "../../defs/DefDatabase.js";
 import { TrainerCardDef } from "../../defs/TrainerCardDef.js";
 import { TrainerContext } from "../trainers/TrainerContext.js";
 import { Card } from "./Card.js";
@@ -35,6 +34,7 @@ export class TrainerCard extends Card {
             this.engine.send(this.owner, "used", this, ".");
         }
         
+        this.engine.showcase(this);
         this.execute(...targets);
         if (this.location == this.owner.hand) {
             this.discard();

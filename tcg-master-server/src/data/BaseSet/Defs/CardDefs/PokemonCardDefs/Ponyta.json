@@ -1,6 +1,7 @@
 {
     "name": "BaseSet.Ponyta",
     "label": "Ponyta",
+    "cardNumber": 60,
     "type": "Fire",
     "stage": "basic",
     "hp": 40,

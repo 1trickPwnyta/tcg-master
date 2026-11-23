@@ -1,6 +1,7 @@
 {
     "name": "BaseSet.Kakuna",
     "label": "Kakuna",
+    "cardNumber": 33,
     "type": "Grass",
     "stage": "stage1",
     "hp": 80,

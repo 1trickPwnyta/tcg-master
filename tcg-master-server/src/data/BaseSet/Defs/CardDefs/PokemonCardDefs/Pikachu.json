@@ -1,6 +1,7 @@
 {
     "name": "BaseSet.Pikachu",
     "label": "Pikachu",
+    "cardNumber": 58,
     "type": "Lightning",
     "stage": "basic",
     "hp": 40,

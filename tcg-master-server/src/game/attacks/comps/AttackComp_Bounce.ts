@@ -1,6 +1,6 @@
 import { DefDatabase } from "../../../defs/DefDatabase.js";
 import { EffectDef } from "../../../defs/EffectDef.js";
-import { Choice } from "../../state/Choice.js";
+import { Choice } from "../../state/interrupts/Choice.js";
 import { Interrupt } from "../../state/interrupts/Interrupt.js";
 import { AttackContext } from "../AttackContext.js";
 import { AttackComp } from "./AttackComp.js";
@@ -11,9 +11,8 @@ export class AttackComp_Bounce extends AttackComp {
             const target = context.nextTarget();
             if (!target) {
                 return this.generateInterrupt(context,
-                    `Select a Pokémon from ${context.defender.owner.name}'s bench to switch in.`,
-                    context.defender.owner.bench.cards.map(c => new Choice(c))
-                );
+                    context.defender.owner.bench.cards.map(c => new Choice(c)))
+                    .withPrompt("Select a Pokémon from", context.defender.owner, "'s bench to switch in.");
             }
         }
 

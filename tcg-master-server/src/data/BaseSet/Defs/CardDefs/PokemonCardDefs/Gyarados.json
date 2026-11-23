@@ -1,6 +1,7 @@
 {
     "name": "BaseSet.Gyarados",
     "label": "Gyarados",
+    "cardNumber": 6,
     "type": "Water",
     "stage": "stage1",
     "hp": 100,

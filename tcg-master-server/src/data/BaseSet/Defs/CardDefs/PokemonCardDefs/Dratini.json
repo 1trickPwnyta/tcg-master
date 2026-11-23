@@ -1,6 +1,7 @@
 {
     "name": "BaseSet.Dratini",
     "label": "Dratini",
+    "cardNumber": 26,
     "type": "Colorless",
     "stage": "basic",
     "hp": 40,

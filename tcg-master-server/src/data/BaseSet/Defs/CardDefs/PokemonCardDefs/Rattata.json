@@ -1,6 +1,7 @@
 {
     "name": "BaseSet.Rattata",
     "label": "Rattata",
+    "cardNumber": 61,
     "type": "Colorless",
     "stage": "basic",
     "hp": 30,

@@ -1,6 +1,7 @@
 {
     "name": "BaseSet.Gastly",
     "label": "Gastly",
+    "cardNumber": 50,
     "type": "Psychic",
     "stage": "basic",
     "hp": 30,

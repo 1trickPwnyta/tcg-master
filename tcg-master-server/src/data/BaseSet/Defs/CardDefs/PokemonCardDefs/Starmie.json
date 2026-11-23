@@ -1,6 +1,7 @@
 {
     "name": "BaseSet.Starmie",
     "label": "Starmie",
+    "cardNumber": 64,
     "type": "Water",
     "stage": "stage1",
     "hp": 60,

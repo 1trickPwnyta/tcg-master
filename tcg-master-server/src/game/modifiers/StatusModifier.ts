@@ -5,7 +5,7 @@ export abstract class StatusModifier extends Modifier {
     public readonly def: StatusDef;
 
     public override get label(): string {
-        return this.def.label;
+        return this.def.targetName;
     }
 
     public override get canAttack(): boolean {

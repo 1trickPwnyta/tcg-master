@@ -1,4 +1,4 @@
-import { Choice } from "../state/Choice.js";
+import { Choice } from "../state/interrupts/Choice.js";
 import { Interrupt } from "../state/interrupts/Interrupt.js";
 import { PokemonCard } from "../state/PokemonCard.js";
 import { PokemonPowerContext, PokemonPowerWorker } from "./PokemonPowerWorker.js";
@@ -16,22 +16,19 @@ export class PokemonPower_DamageSwap extends PokemonPowerWorker {
 
     public override acquireTargets(context: PokemonPowerContext, source_id: number, amount: number, target_id: number): Interrupt | null {
         if (!source_id) {
-            return this.generateInterrupt(context,
-                "Select a Pokémon to swap damage away from.",
-                context.owner.pokemonInPlay.filter(p => p.damage).map(p => new Choice(p))
-            );
+            return this.generateInterrupt(context)
+                .withPrompt("Select a Pokémon to swap damage away from.")
+                .withChoices(context.owner.pokemonInPlay.filter(p => p.damage).map(p => new Choice(p)));
         } else {
             const source = context.engine.search.getCard(source_id) as PokemonCard;
             if (!amount) {
-                return this.generateInterrupt(context,
-                    `How much damage will you swap away from ${source.name}?`,
-                    Array.from({ length: source.damage / 10 }, (_, i) => new Choice({ text: ((i + 1) * 10).toString(), id: (i + 1) * 10 }))
-                );
+                return this.generateInterrupt(context)
+                    .withPrompt("How much damage will you swap away from", source, "?")
+                    .withChoices(Array.from({ length: source.damage / 10 }, (_, i) => Choice.fromInt((i + 1) * 10)));
             } else if (!target_id) {
-                return this.generateInterrupt(context,
-                    `Which Pokémon will receive the ${amount} damage?`,
-                    context.owner.pokemonInPlay.filter(p => p.id !== source_id && p.remainingHealth > amount).map(p => new Choice(p))
-                );
+                return this.generateInterrupt(context)
+                    .withPrompt("Which Pokémon will receive the", amount, "damage?")
+                    .withChoices(context.owner.pokemonInPlay.filter(p => p.id !== source_id && p.remainingHealth > amount).map(p => new Choice(p)));
             }
         }
 

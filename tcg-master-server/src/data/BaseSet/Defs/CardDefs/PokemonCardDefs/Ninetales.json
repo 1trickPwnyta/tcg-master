@@ -1,6 +1,7 @@
 {
     "name": "BaseSet.Ninetales",
     "label": "Ninetales",
+    "cardNumber": 12,
     "type": "Fire",
     "stage": "stage1",
     "hp": 80,

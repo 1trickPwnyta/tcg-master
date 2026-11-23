@@ -1,4 +1,4 @@
-import { ICardDefData_Energy, IDefData } from "./IDefData.js";
+import { ICardDefData, ICardDefData_Energy, IDefData } from "./IDefData.js";
 import { CardDef } from "./CardDef.js";
 import { IToken } from "../IToken.js";
 import { EnergyTypeDef } from "./EnergyTypeDef.js";
@@ -11,19 +11,23 @@ export class EnergyCardDef extends CardDef {
     public readonly amount: number;
     public readonly text?: string;
 
-    private readonly energyData: IDefData & ICardDefData_Energy;
+    private readonly energyData: ICardDefData_Energy;
 
     public override get token(): IToken {
         let symbol = "";
         for (let i = 0; i < this.amount; i++) {
             symbol += this.type.symbol;
         }
-        return { name: `${symbol}${this.basic ? "Energy" : this.label}`, type: "energy" };
+        return { name: `${symbol}${this.basic ? "Energy" : super.token.name}`, type: super.token.type };
     }
 
-    public constructor(defClass: string, data: IDefData) {
+    protected override get typeAffinity(): EnergyTypeDef | null {
+        return this.type;
+    }
+
+    public constructor(defClass: string, data: ICardDefData_Energy) {
         super(defClass, data);
-        this.energyData = data as IDefData & ICardDefData_Energy;
+        this.energyData = data;
         this.basic = this.energyData.basic;
         this.type = DefDatabase.get<EnergyTypeDef>(this.energyData.type);
         this.amount = this.energyData.amount;
@@ -34,10 +38,10 @@ export class EnergyCardDef extends CardDef {
 
     public override getDetails(): any[] {
         return [
-            this.name,
+            this.token,
             ...(this.basic ? [ "(basic)" ] : []),
             "Provides",
-            Array.from({ length: this.amount }, () => this.type.symbol),
+            Array.from({ length: this.amount }, () => this.type.symbol).join(""),
             ...(this.text ? [ "<br />", this.text ] : [])
         ];
     }

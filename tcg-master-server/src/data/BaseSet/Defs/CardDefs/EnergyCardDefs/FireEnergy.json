@@ -1,6 +1,7 @@
 {
     "name": "BaseSet.FireEnergy",
     "label": "Fire Energy",
+    "cardNumber": 98,
     "basic": true,
     "type": "Fire",
     "amount": 1

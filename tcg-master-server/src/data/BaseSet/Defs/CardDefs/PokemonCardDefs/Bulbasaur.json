@@ -1,6 +1,7 @@
 {
     "name": "BaseSet.Bulbasaur",
     "label": "Bulbasaur",
+    "cardNumber": 44,
     "type": "Grass",
     "stage": "basic",
     "hp": 40,

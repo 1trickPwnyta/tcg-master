@@ -2,7 +2,7 @@ import { CardDef } from "../../defs/CardDef.js";
 import { DefDatabase } from "../../defs/DefDatabase.js";
 import { IToken } from "../../IToken.js";
 import { GameEngine } from "../engine/GameEngine.js";
-import { ITargetable } from "./Choice.js";
+import { ITargetable } from "./interrupts/Choice.js";
 import { Location } from "./Location.js";
 import { Player } from "./Player.js";
 import { Serializable, Serialize } from "./serializer.js";
@@ -28,11 +28,11 @@ export abstract class Card extends State implements ITargetable {
     }
 
     public get name(): string {
-        return this.def.label;
+        return this.def.targetName;
     }
 
-    public get targetName(): string {
-        return this.name;
+    public get targetName(): IToken[] {
+        return [ this.token ];
     }
 
     public get def(): CardDef {

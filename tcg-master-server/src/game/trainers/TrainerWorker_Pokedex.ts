@@ -1,5 +1,5 @@
 import { AcceptanceReport } from "../../AcceptanceReport.js";
-import { Choice } from "../state/Choice.js";
+import { Choice } from "../state/interrupts/Choice.js";
 import { Interrupt } from "../state/interrupts/Interrupt.js";
 import { TrainerContext } from "./TrainerContext.js";
 import { TrainerWorker } from "./TrainerWorker.js";
@@ -23,11 +23,10 @@ export class TrainerWorker_Pokedex extends TrainerWorker {
             if (target === undefined) {
                 const choices = this.getTargetChoices(context);
                 if (choices.length) {
-                    context.forceInterrupt = true;
-                    return this.generateInterrupt(context,
-                        i ? `Which card will go in position ${i + 1}?` : "Which card will go in position 1 (the top)?",
-                        choices
-                    );
+                    return this.generateInterrupt(context)
+                        .withPrompt(i ? `Which card will go in position ${i + 1}?` : "Which card will go in position 1 (the top)?")
+                        .withChoices(choices)
+                        .forced();
                 } else {
                     context.addNullTarget();
                 }

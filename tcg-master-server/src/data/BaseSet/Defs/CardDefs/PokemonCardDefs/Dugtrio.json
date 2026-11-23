@@ -1,6 +1,7 @@
 {
     "name": "BaseSet.Dugtrio",
     "label": "Dugtrio",
+    "cardNumber": 19,
     "type": "Fighting",
     "stage": "stage1",
     "hp": 70,

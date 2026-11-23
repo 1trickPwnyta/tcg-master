@@ -15,15 +15,18 @@ export interface IAttackData {
     name: string;
     cost: string[];
     damage?: number;
+    damageLabel?: string;
     text?: string;
     comps?: (string | { class: string, args: any })[];
 };
 
-export interface ICardDefData {
+export type ICardDefData = IDefData & {
+    expansion: string;
+    cardNumber: number;
     modifiers?: (string | { class: string, args: any })[];
 };
 
-export interface ICardDefData_Pokemon {
+export type ICardDefData_Pokemon = ICardDefData & {
     type: string;
     stage: "basic" | "stage1" | "stage2";
     hp: number;
@@ -35,14 +38,14 @@ export interface ICardDefData_Pokemon {
     prizes?: number;
 };
 
-export interface ICardDefData_Trainer {
+export type ICardDefData_Trainer = ICardDefData & {
     text: string;
     workers: (string | { class: string, args: any })[];
     preannounce?: boolean;
     wrapper?: string;
 };
 
-export interface ICardDefData_Energy {
+export type ICardDefData_Energy = ICardDefData & {
     basic: boolean;
     type: string;
     amount: number;

@@ -1,9 +1,8 @@
 import { StatusDefOf } from "../../defs/defof/StatusDefOf.js";
 import { GameEngine } from "../engine/GameEngine.js";
-import { Choice } from "../state/Choice.js";
+import { Choice } from "../state/interrupts/Choice.js";
 import { Interrupt, InterruptSync } from "../state/interrupts/Interrupt.js";
 import { InterruptResolution } from "../state/interrupts/InterruptResolution.js";
-import { InterruptType } from "../state/interrupts/InterruptType.js";
 import { Player } from "../state/Player.js";
 import { PokemonCard } from "../state/PokemonCard.js";
 
@@ -11,8 +10,6 @@ export type PokemonPowerContext = {
     engine: GameEngine;
     owner: Player;
     card: PokemonCard;
-    interruptType?: InterruptType;
-    forceInterrupt?: boolean;
     args?: any;
 };
 
@@ -50,16 +47,10 @@ export abstract class PokemonPowerWorker {
         }
     }
 
-    protected generateInterrupt(context: PokemonPowerContext, prompt: string, choices: Choice[]): InterruptSync {
-        return {
-            type: context.interruptType,
-            player: context.owner.id,
-            prompt: prompt,
-            choices: choices,
-            force: context.forceInterrupt,
-            resolution: InterruptResolution.UsePokemonPower,
-            args: [ context.card.id, `${this.targetsKey}.next` ],
-            compoundArgs: context.args
-        };
+    protected generateInterrupt(context: PokemonPowerContext): InterruptSync {
+        return new InterruptSync(context.owner)
+            .withResolution(InterruptResolution.UsePokemonPower)
+            .withArgs(context.card.id, `${this.targetsKey}.next`)
+            .withCompoundArgs(context.args);
     }
 };

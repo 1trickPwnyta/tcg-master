@@ -10,7 +10,7 @@ export abstract class AttachmentModifier extends Modifier {
     }
 
     public override get label(): string {
-        return this.def.label;
+        return this.def.targetName;
     }
 
     public override get canAttack(): boolean {

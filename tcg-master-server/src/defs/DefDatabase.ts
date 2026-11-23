@@ -11,7 +11,8 @@ const database = new Map<string, Def>();
 
 const priority = [
     "EnergyTypeDef",
-    "EvolutionDef"
+    "EvolutionDef",
+    "ExpansionDef"
 ];
 
 async function loadDefs(directory: string, priority?: string, context?: "Defs" | string) {

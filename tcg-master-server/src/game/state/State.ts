@@ -5,7 +5,7 @@ export abstract class State {
     @Serialize()
     public readonly id: number;
 
-    protected readonly engine: GameEngine;
+    public readonly engine: GameEngine;
 
     public constructor(id: number, engine: GameEngine) {
         this.id = id;

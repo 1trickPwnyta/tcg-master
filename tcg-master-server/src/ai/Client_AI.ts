@@ -3,7 +3,8 @@ import path from "path";
 import { Worker } from "worker_threads";
 import { InterruptSync } from "../game/state/interrupts/Interrupt.js";
 import { SerializationReplace } from "../game/state/serializer.js";
-import { Choice } from "../game/state/Choice.js";
+import { Choice } from "../game/state/interrupts/Choice.js";
+import { CardDef } from "../defs/CardDef.js";
 
 export type AIContext = {
     player_id: number;
@@ -11,7 +12,6 @@ export type AIContext = {
 };
 
 export class Client_AI extends Client {
-    public override name: string = "COM";
     public invalid: boolean = false;
     protected interrupt_id: number | null = null;
 
@@ -19,12 +19,16 @@ export class Client_AI extends Client {
         super();
     }
 
-    public override send(...parts: any[]): void {
+    public override send(...parts: any[]) {
         console.log(Client.tokenize(...parts).map(t => t.name).join(" "));
     }
 
-    public override error(...parts: any[]): void {
-        throw new Error(Client.tokenize(...parts).map(t => t.name).join(" "));
+    public override sendInfo(_: any[]) { }
+
+    public override showcase(_: CardDef) { }
+
+    public override error(message: string) {
+        throw new Error(message);
     }
 
     public override prompt(interrupt: InterruptSync) {
@@ -32,7 +36,7 @@ export class Client_AI extends Client {
             return;
         }
 
-        console.log(`${interrupt.prompt} [ ${interrupt.choices!.map(c => c.label).join(", ")}${!interrupt.force ? ", (cancel)" : ""} ]`);
+        console.log(`${interrupt.prompt.join(" ")} [ ${interrupt.choices!.map(c => c.parts.map(p => p?.name)).join(", ")}${!interrupt.force ? ", (cancel)" : ""} ]`);
         this.interrupt_id = this.engine!.interrupts.get(this.player_id!)!.id!;
 
         const worker = new Worker(path.join(import.meta.dirname, "AIWorker.js"));
@@ -45,9 +49,9 @@ export class Client_AI extends Client {
             worker.terminate();
             if (this.interrupt_id === this.engine!.interrupts.get(this.player_id!)?.id) {
                 const choice = message as Choice | null;
-                console.log(`> ${choice ? interrupt.choices.findIndex(c => (c.id ?? c.label) === (choice.id ?? choice.label)) : "(cancel)"}`);
+                console.log(`> ${choice ? interrupt.choices.findIndex(c => c.id === choice.id) : "(cancel)"}`);
                 this.interrupt_id = null;
-                this.engine!.interrupts.resolve(this.player_id!, choice ? interrupt.choices.findIndex(c => (c.id ?? c.label) === (choice.id ?? choice.label)) : null);
+                this.engine!.interrupts.resolve(this.player_id!, choice ? interrupt.choices.findIndex(c => c.id === choice.id) : null);
             } else {
                 throw new Error(`Attempted to respond to interrupt ${this.interrupt_id} but it wasn't available.`);
             }

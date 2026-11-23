@@ -1,6 +1,7 @@
 {
     "name": "BaseSet.Pidgeotto",
     "label": "Pidgeotto",
+    "cardNumber": 22,
     "type": "Colorless",
     "stage": "stage1",
     "hp": 60,

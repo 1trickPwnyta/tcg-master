@@ -1,6 +1,7 @@
 {
     "name": "BaseSet.Zapdos",
     "label": "Zapdos",
+    "cardNumber": 16,
     "type": "Lightning",
     "stage": "basic",
     "hp": 90,

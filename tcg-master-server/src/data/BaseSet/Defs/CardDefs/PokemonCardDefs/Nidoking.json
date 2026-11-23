@@ -1,6 +1,7 @@
 {
     "name": "BaseSet.Nidoking",
     "label": "Nidoking",
+    "cardNumber": 11,
     "type": "Grass",
     "stage": "stage2",
     "hp": 90,
@@ -11,6 +12,7 @@
             "name": "Thrash",
             "cost": [ "Grass", "Colorless", "Colorless" ],
             "damage": 30,
+            "damageLabel": "30+",
             "comps": [ { "class": "AttackComp_CoinDamage", "args": { "amount": 10, "coins": 1, "selfDamage": 10 } } ],
             "text": "Flip a coin. If heads, this attack does 30 damage plus 10 more damage; if tails, this attack does 30 damage plus Nidoking does 10 damage to itself."
         },

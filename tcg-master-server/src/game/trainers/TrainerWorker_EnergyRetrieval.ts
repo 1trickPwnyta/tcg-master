@@ -1,5 +1,5 @@
 import { AcceptanceReport } from "../../AcceptanceReport.js";
-import { Choice } from "../state/Choice.js";
+import { Choice } from "../state/interrupts/Choice.js";
 import { EnergyCard } from "../state/EnergyCard.js";
 import { Interrupt } from "../state/interrupts/Interrupt.js";
 import { TrainerContext } from "./TrainerContext.js";
@@ -29,10 +29,9 @@ export class TrainerWorker_EnergyRetrieval extends TrainerWorker {
         const choices = this.getTargetChoices(context);
         for (let i = 0; i < this.amount; i++) {
             if (choices.length) {
-                return this.generateInterrupt(context,
-                    "Select a basic energy card from your discard pile.",
-                    choices
-                );
+                return this.generateInterrupt(context)
+                    .withPrompt("Select a basic energy card from your discard pile.")
+                    .withChoices(choices);
             } else {
                 context.addNullTarget();
             }

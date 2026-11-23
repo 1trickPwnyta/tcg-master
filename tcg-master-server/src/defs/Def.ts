@@ -1,13 +1,12 @@
-import { ITargetable } from "../game/state/Choice.js";
+import { ITargetable } from "../game/state/interrupts/Choice.js";
 import { DefDatabase } from "./DefDatabase.js";
 import { IDefData } from "./IDefData.js";
 
 export abstract class Def implements ITargetable {
     public static populatePlaceholders(original: string): string {
-        return original.replaceAll(/\{[^\}]+\}/g, match => {
-            const defName = match.split(":")[1];
-            const def = DefDatabase.get(defName);
-            return def.toString();
+        return original.replaceAll(/\{([^\}]+)\}/g, (_, match) => {
+            const def = DefDatabase.get(match);
+            return def?.toString() ?? "{unknown def}";
         });
     }
 
@@ -15,12 +14,12 @@ export abstract class Def implements ITargetable {
     public readonly name: string;
     public readonly label: string;
 
-    public get targetName(): string {
-        return this.label;
-    }
-
     public get id(): string {
         return this.name;
+    }
+
+    public get targetName(): string {
+        return this.label;
     }
 
     public constructor(defClass: string, data: IDefData) {

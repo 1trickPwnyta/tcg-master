@@ -6,6 +6,7 @@ import { EnergyTypeDefOf } from "./defof/EnergyTypeDefOf.js";
 import { EvolutionDef } from "./EvolutionDef.js";
 import { PokemonPower } from "../game/powers/PokemonPower.js";
 import { Attack } from "../game/attacks/Attack.js";
+import { IToken } from "../IToken.js";
 
 export class PokemonCardDef extends CardDef {
     public override readonly kind = "pokemon";
@@ -19,15 +20,19 @@ export class PokemonCardDef extends CardDef {
     public readonly attacks: Attack[];
     public readonly prizes: number;
 
-    private readonly pokemonData: IDefData & ICardDefData_Pokemon;
+    private readonly pokemonData: ICardDefData_Pokemon;
 
     public get evolution(): EvolutionDef {
         return DefDatabase.get<EvolutionDef>(this.label);
     }
 
-    public constructor(defClass: string, data: IDefData) {
+    protected override get typeAffinity(): EnergyTypeDef | null {
+        return this.type;
+    }
+
+    public constructor(defClass: string, data: ICardDefData_Pokemon) {
         super(defClass, data);
-        this.pokemonData = data as IDefData & ICardDefData_Pokemon;
+        this.pokemonData = data;
         this.type = DefDatabase.get<EnergyTypeDef>(this.pokemonData.type);
         this.stage = this.pokemonData.stage;
         this.hp = this.pokemonData.hp;
@@ -53,18 +58,19 @@ export class PokemonCardDef extends CardDef {
 
     public override getDetails(): any[] {
         return [
-            this.label,
+            this.token,
             `(${this.stage})`,
-            this.type.symbol,
             "<br />",
+            ...(this.power?.getDetails() ?? []),
+            this.power ? "<br />" : null,
             ...this.attacks.flatMap(a => [ ...a.getDetails(), ...(this.attacks.indexOf(a) !== this.attacks.length - 1 ? [ "<br />" ] : []) ]),
             "<br />",
             "Weakness:",
-            this.weakness?.symbol,
+            this.weakness?.symbol ?? "_",
             "Resistance:",
-            this.resistance ? `${this.resistance}-30` : "",
+            this.resistance ? `${this.resistance}-30` : "_",
             "Retreat:",
-            ...Array.from({ length: this.retreat }, () => EnergyTypeDefOf.Colorless.symbol)
+            Array.from({ length: this.retreat }, () => EnergyTypeDefOf.Colorless.symbol).join("") || "_"
         ];
     }
 };

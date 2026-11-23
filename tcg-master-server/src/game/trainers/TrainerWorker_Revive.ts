@@ -1,5 +1,5 @@
 import { AcceptanceReport } from "../../AcceptanceReport.js";
-import { Choice } from "../state/Choice.js";
+import { Choice } from "../state/interrupts/Choice.js";
 import { Interrupt } from "../state/interrupts/Interrupt.js";
 import { PokemonCard } from "../state/PokemonCard.js";
 import { TrainerContext } from "./TrainerContext.js";
@@ -23,10 +23,9 @@ export class TrainerWorker_Revive extends TrainerWorker {
     public override acquireTargets(context: TrainerContext): Interrupt | null {
         const target = context.nextTarget();
         if (!target) {
-            return this.generateInterrupt(context,
-                "Select a basic Pokémon card from your discard pile.",
-                this.getTargetChoices(context)
-            );
+            return this.generateInterrupt(context)
+                .withPrompt("Select a basic Pokémon card from your discard pile.")
+                .withChoices(this.getTargetChoices(context));
         }
 
         return null;

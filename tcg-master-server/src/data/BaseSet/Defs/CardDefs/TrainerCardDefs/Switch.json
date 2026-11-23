@@ -1,6 +1,7 @@
 {
     "name": "BaseSet.Switch",
     "label": "Switch",
+    "cardNumber": 95,
     "text": "Switch 1 of your own Benched Pokémon with your Active Pokémon.",
     "workers": [ "TrainerWorker_Switch" ]
 }

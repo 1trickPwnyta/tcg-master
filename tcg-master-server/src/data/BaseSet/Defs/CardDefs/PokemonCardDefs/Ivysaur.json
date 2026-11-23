@@ -1,6 +1,7 @@
 {
     "name": "BaseSet.Ivysaur",
     "label": "Ivysaur",
+    "cardNumber": 30,
     "type": "Grass",
     "stage": "stage1",
     "hp": 60,

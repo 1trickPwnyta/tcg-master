@@ -3,7 +3,7 @@ import { DefDatabase } from "../../../defs/DefDatabase.js";
 import { EnergyTypeDefOf } from "../../../defs/defof/EnergyTypeDefOf.js";
 import { EnergyTypeDef } from "../../../defs/EnergyTypeDef.js";
 import { GameEngine } from "../../engine/GameEngine.js";
-import { Choice } from "../../state/Choice.js";
+import { Choice } from "../../state/interrupts/Choice.js";
 import { Interrupt } from "../../state/interrupts/Interrupt.js";
 import { AttackContext } from "../AttackContext.js";
 import { EnergyCost } from "../EnergyCost.js";
@@ -32,9 +32,8 @@ export class AttackComp_PayEnergy extends AttackComp {
                 const energy = context.nextTarget();
                 if (!energy) {
                     return this.generateInterrupt(context,
-                        `Select a${def === EnergyTypeDefOf.Colorless ? "n" : ` ${def.symbol}`} energy card to discard from ${context.attacker.name}.`,
-                        context.attacker.attachments.energyCards.filter(c => c.type.satisfies(def)).map(c => new Choice(c.card))
-                    )
+                        context.attacker.attachments.energyCards.filter(c => c.type.satisfies(def)).map(c => new Choice(c.card)))
+                        .withPrompt("Select", ...(def === EnergyTypeDefOf.Colorless ? [ "an" ] : [ "a", def ]), "energy card to discard from", context.attacker, ".");
                 }
             }
         }

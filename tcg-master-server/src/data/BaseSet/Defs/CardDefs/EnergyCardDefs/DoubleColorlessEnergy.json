@@ -1,6 +1,7 @@
 {
     "name": "BaseSet.DoubleColorlessEnergy",
     "label": "Double Colorless Energy",
+    "cardNumber": 96,
     "basic": false,
     "type": "Colorless",
     "amount": 2

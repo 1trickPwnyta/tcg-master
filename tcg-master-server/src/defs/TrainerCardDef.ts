@@ -15,7 +15,7 @@ export class TrainerCardDef extends CardDef {
     public readonly preannounce: boolean;
     public readonly wrapper_def?: string;
 
-    private readonly trainerData: IDefData & ICardDefData_Trainer;
+    private readonly trainerData: ICardDefData_Trainer;
 
     public get wrapper(): PokemonCardDef | undefined {
         if (this.wrapper_def) {
@@ -25,9 +25,9 @@ export class TrainerCardDef extends CardDef {
         return undefined;
     }
 
-    public constructor(defClass: string, data: IDefData) {
+    public constructor(defClass: string, data: ICardDefData_Trainer) {
         super(defClass, data);
-        this.trainerData = data as IDefData & ICardDefData_Trainer;
+        this.trainerData = data;
         this.text = this.trainerData.text;
         this.workers = [];
         this.preannounce = this.trainerData.preannounce ?? false;
@@ -49,7 +49,7 @@ export class TrainerCardDef extends CardDef {
 
     public override getDetails(): any[] {
         return [
-            this.name,
+            this.token,
             "<br />",
             this.text
         ];

@@ -1,6 +1,7 @@
 {
     "name": "BaseSet.Alakazam",
     "label": "Alakazam",
+    "cardNumber": 1,
     "type": "Psychic",
     "stage": "stage2",
     "hp": 80,

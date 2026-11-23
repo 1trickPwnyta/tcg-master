@@ -1,4 +1,4 @@
-import { Choice } from "../state/Choice.js";
+import { Choice } from "../state/interrupts/Choice.js";
 import { Interrupt } from "../state/interrupts/Interrupt.js";
 import { PokemonCard } from "../state/PokemonCard.js";
 import { TrainerContext } from "./TrainerContext.js";
@@ -16,10 +16,9 @@ export class TrainerWorker_Attach extends TrainerWorker {
         if (this.target === "any") {
             const target = context.nextTarget();
             if (!target) {
-                return this.generateInterrupt(context,
-                    `Attach ${context.card.name} to which Pokémon?`,
-                    context.player.pokemonInPlay.map(p => new Choice(p))
-                )
+                return this.generateInterrupt(context)
+                    .withPrompt("Attach", context.card, "to which Pokémon?")
+                    .withChoices(context.player.pokemonInPlay.map(p => new Choice(p)));
             }
         }
 

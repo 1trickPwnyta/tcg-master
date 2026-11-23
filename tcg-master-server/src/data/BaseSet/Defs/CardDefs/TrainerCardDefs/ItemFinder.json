@@ -1,6 +1,7 @@
 {
     "name": "BaseSet.ItemFinder",
     "label": "Item Finder",
+    "cardNumber": 74,
     "text": "Discard 2 of the other cards from your hand in order to put a Trainer card from your discard pile into your hand.",
     "workers": [
         { "class": "TrainerWorker_Discard", "args": { "amount": 2 } },

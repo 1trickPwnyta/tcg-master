@@ -1,6 +1,7 @@
 {
     "name": "BaseSet.Kadabra",
     "label": "Kadabra",
+    "cardNumber": 32,
     "type": "Psychic",
     "stage": "stage1",
     "hp": 60,

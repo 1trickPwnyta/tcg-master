@@ -1,6 +1,7 @@
 {
     "name": "BaseSet.FightingEnergy",
     "label": "Fighting Energy",
+    "cardNumber": 97,
     "basic": true,
     "type": "Fighting",
     "amount": 1

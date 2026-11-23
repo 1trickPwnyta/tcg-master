@@ -1,6 +1,7 @@
 {
     "name": "BaseSet.GrassEnergy",
     "label": "Grass Energy",
+    "cardNumber": 99,
     "basic": true,
     "type": "Grass",
     "amount": 1

@@ -1,6 +1,7 @@
 {
     "name": "BaseSet.Dewgong",
     "label": "Dewgong",
+    "cardNumber": 25,
     "type": "Water",
     "stage": "stage1",
     "hp": 80,

@@ -1,6 +1,7 @@
 {
     "name": "BaseSet.Farfetchd",
     "label": "Farfetch'd",
+    "cardNumber": 27,
     "type": "Colorless",
     "stage": "basic",
     "hp": 50,

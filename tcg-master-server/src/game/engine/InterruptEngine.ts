@@ -1,5 +1,5 @@
 import { InterruptResolver } from "../state/interrupts/InterruptResolver.js";
-import { Interrupt, InterruptSync } from "../state/interrupts/Interrupt.js";
+import { Interrupt, InterruptAsync, InterruptSync } from "../state/interrupts/Interrupt.js";
 import { SubEngine } from "./SubEngine.js";
 
 export class InterruptEngine extends SubEngine {
@@ -7,59 +7,23 @@ export class InterruptEngine extends SubEngine {
         if (this.state.interrupt && this.state.interrupt.id != interrupt.id) {
             this.state.interruptQueue.push(interrupt);
         } else {
-            this.assignId(interrupt);
             this.state.interrupt = interrupt;
             this.engine.sendInterrupt(interrupt);
         }
     }
 
-    private assignId(interrupt: Interrupt) {
-        if (!interrupt.id) {
-            interrupt.id = this.state.nextInterrupt_id++;
-        }
-        if (interrupt.interrupts) {
-            for (const sub of interrupt.interrupts) {
-                this.assignId(sub);
-            }
-        }
-    }
-
     public get(player_id: number): InterruptSync | null {
-        return this.state.getInterrupt(player_id);
+        return this.state.interrupt?.getInterruptFor(player_id) ?? null;
     }
 
     private close(interrupt_id: number) {
         if (this.state.interrupt?.id === interrupt_id) {
             this.state.interrupt = null;
             return;
-        }
-        this.closeRecursive(interrupt_id, this.state.interrupt);
-        this.clean(this.state.interrupt);
-    }
-
-    private closeRecursive(interrupt_id: number, root: Interrupt | null) {
-        if (root?.interrupts) {
-            for (let i = 0; i < root.interrupts.length; i++) {
-                if (root.interrupts[i].id === interrupt_id) {
-                    root.interrupts.splice(i, 1);
-                    return;
-                }
-                this.closeRecursive(interrupt_id, root.interrupts[i]);
-            }
-        }
-    }
-
-    private clean(root: Interrupt | null) {
-        if (this.state.interrupt?.interrupts && !this.state.interrupt.interrupts.length) {
-            this.state.interrupt = null;
-            return;
-        }
-        if (root?.interrupts) {
-            for (let i = 0; i < root.interrupts.length; i++) {
-                if (root.interrupts[i].interrupts && !root.interrupts[i].interrupts?.length) {
-                    root.interrupts.splice(i, 1);
-                }
-                this.clean(root.interrupts[i]);
+        } else if (this.state.interrupt instanceof InterruptAsync) {
+            this.state.interrupt.close(interrupt_id);
+            if (!this.state.interrupt.interrupts.length) {
+                this.state.interrupt = null;
             }
         }
     }

@@ -1,6 +1,7 @@
 {
     "name": "BaseSet.Vulpix",
     "label": "Vulpix",
+    "cardNumber": 68,
     "type": "Fire",
     "stage": "basic",
     "hp": 50,

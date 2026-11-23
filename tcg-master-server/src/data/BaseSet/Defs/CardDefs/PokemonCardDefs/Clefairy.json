@@ -1,6 +1,7 @@
 {
     "name": "BaseSet.Clefairy",
     "label": "Clefairy",
+    "cardNumber": 5,
     "type": "Colorless",
     "stage": "basic",
     "hp": 40,

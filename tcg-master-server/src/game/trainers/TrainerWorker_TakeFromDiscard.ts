@@ -1,5 +1,5 @@
 import { AcceptanceReport } from "../../AcceptanceReport.js";
-import { Choice } from "../state/Choice.js";
+import { Choice } from "../state/interrupts/Choice.js";
 import { Interrupt } from "../state/interrupts/Interrupt.js";
 import { TrainerContext } from "./TrainerContext.js";
 import { TrainerWorker } from "./TrainerWorker.js";
@@ -32,10 +32,9 @@ export class TrainerWorker_TakeFromDiscard extends TrainerWorker {
             const target = context.nextTarget();
             if (target === undefined) {
                 if (choices.length) {
-                    return this.generateInterrupt(context,
-                        "Select a card from your discard pile.",
-                        choices
-                    );
+                    return this.generateInterrupt(context)
+                        .withPrompt("Select a card from your discard pile.")
+                        .withChoices(choices);
                 } else {
                     context.addNullTarget();
                 }

@@ -2,7 +2,7 @@ import { DefDatabase } from "../../defs/DefDatabase.js";
 import { StatusDefOf } from "../../defs/defof/StatusDefOf.js";
 import { EnergyTypeDef } from "../../defs/EnergyTypeDef.js";
 import { Modifier_Energy } from "../modifiers/Modifier_Energy.js";
-import { Choice } from "../state/Choice.js";
+import { Choice } from "../state/interrupts/Choice.js";
 import { Interrupt } from "../state/interrupts/Interrupt.js";
 import { PokemonCard } from "../state/PokemonCard.js";
 import { PokemonPowerContext, PokemonPowerWorker } from "./PokemonPowerWorker.js";
@@ -20,15 +20,13 @@ export class PokemonPower_Buzzap extends PokemonPowerWorker {
 
     public override acquireTargets(context: PokemonPowerContext, pokemon: number, type: string): Interrupt | null {
         if (!pokemon) {
-            return this.generateInterrupt(context,
-                `Which Pokémon will ${context.card.name} attach to?`,
-                context.owner.pokemonInPlay.filter(p => p != context.card).map(p => new Choice(p))
-            );
+            return this.generateInterrupt(context)
+                .withPrompt("Which Pokémon will", context.card.name, "attach to?")
+                .withChoices(context.owner.pokemonInPlay.filter(p => p != context.card).map(p => new Choice(p)));
         } else if (!type) {
-            return this.generateInterrupt(context,
-                `Which type of energy will ${context.card.name} provide?`,
-                DefDatabase.getAll<EnergyTypeDef>("EnergyTypeDef").map(e => new Choice(e))
-            );
+            return this.generateInterrupt(context)
+                .withPrompt("Which type of energy will", context.card, "provide?")
+                .withChoices(DefDatabase.getAll<EnergyTypeDef>("EnergyTypeDef").map(e => new Choice(e)));
         }
 
         return null;

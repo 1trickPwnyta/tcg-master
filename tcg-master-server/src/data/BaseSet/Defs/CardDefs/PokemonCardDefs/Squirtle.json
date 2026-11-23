@@ -1,6 +1,7 @@
 {
     "name": "BaseSet.Squirtle",
     "label": "Squirtle",
+    "cardNumber": 63,
     "type": "Water",
     "stage": "basic",
     "hp": 40,

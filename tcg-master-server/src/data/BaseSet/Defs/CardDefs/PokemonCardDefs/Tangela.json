@@ -1,6 +1,7 @@
 {
     "name": "BaseSet.Tangela",
     "label": "Tangela",
+    "cardNumber": 66,
     "type": "Grass",
     "stage": "basic",
     "hp": 50,

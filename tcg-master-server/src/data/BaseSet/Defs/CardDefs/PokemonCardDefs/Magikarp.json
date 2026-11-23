@@ -1,6 +1,7 @@
 {
     "name": "BaseSet.Magikarp",
     "label": "Magikarp",
+    "cardNumber": 35,
     "type": "Water",
     "stage": "basic",
     "hp": 30,
@@ -15,6 +16,7 @@
         {
             "name": "Flail",
             "cost": [ "Water" ],
+            "damageLabel": "10x",
             "comps": [ "AttackComp_Flail" ],
             "text": "Does 10 damage times the number of damage counters on Magikarp."
         }

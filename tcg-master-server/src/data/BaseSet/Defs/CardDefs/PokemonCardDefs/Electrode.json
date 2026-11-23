@@ -1,6 +1,7 @@
 {
     "name": "BaseSet.Electrode",
     "label": "Electrode",
+    "cardNumber": 21,
     "type": "Lightning",
     "stage": "stage1",
     "hp": 80,

@@ -1,5 +1,5 @@
 import { AcceptanceReport } from "../../AcceptanceReport.js";
-import { Choice } from "../state/Choice.js";
+import { Choice } from "../state/interrupts/Choice.js";
 import { Interrupt } from "../state/interrupts/Interrupt.js";
 import { PokemonCard } from "../state/PokemonCard.js";
 import { TrainerContext } from "./TrainerContext.js";
@@ -32,10 +32,9 @@ export class TrainerWorker_EnergyRemoval extends TrainerWorker {
     public override acquireTargets(context: TrainerContext): Interrupt | null {
         const target_pokemon = context.nextTargetCard() as PokemonCard | null;
         if (!target_pokemon) {
-            return this.generateInterrupt(context,
-                "Select one of your opponent's Pokémon to target.",
-                this.getPokemonChoices(context),
-            );
+            return this.generateInterrupt(context)
+                .withPrompt("Select one of", context.player.opponent, "'s Pokémon to target.")
+                .withChoices(this.getPokemonChoices(context));
         }
         
         for (let i = 0; i < this.amount; i++) {
@@ -43,10 +42,9 @@ export class TrainerWorker_EnergyRemoval extends TrainerWorker {
             if (energy === undefined) {
                 const energyChoices = this.getEnergyChoices(context, target_pokemon);
                 if (energyChoices.length) {
-                    return this.generateInterrupt(context,
-                        "Select an energy card to discard.",
-                        energyChoices,
-                    );
+                    return this.generateInterrupt(context)
+                        .withPrompt("Select an energy card to discard.")
+                        .withChoices(energyChoices);
                 } else {
                     context.addNullTarget();
                 }

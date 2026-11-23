@@ -1,6 +1,7 @@
 {
     "name": "BaseSet.Arcanine",
     "label": "Arcanine",
+    "cardNumber": 23,
     "type": "Fire",
     "stage": "stage1",
     "hp": 100,

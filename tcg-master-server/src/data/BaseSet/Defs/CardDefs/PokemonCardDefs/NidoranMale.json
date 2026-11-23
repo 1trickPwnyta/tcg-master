@@ -1,6 +1,7 @@
 {
     "name": "BaseSet.NidoranMale",
     "label": "Nidoran ♂",
+    "cardNumber": 55,
     "type": "Grass",
     "stage": "basic",
     "hp": 40,

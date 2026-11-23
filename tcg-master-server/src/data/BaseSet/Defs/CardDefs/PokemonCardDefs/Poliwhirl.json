@@ -1,6 +1,7 @@
 {
     "name": "BaseSet.Poliwhirl",
     "label": "Poliwhirl",
+    "cardNumber": 38,
     "type": "Water",
     "stage": "stage1",
     "hp": 60,
@@ -16,6 +17,7 @@
         {
             "name": "Doubleslap",
             "cost": [ "Water", "Water", "Colorless" ],
+            "damageLabel": "30x",
             "comps": [ { "class": "AttackComp_CoinDamage", "args": { "amount": 30, "coins": 2 } } ],
             "text": "Flip 2 coins. This attack does 30 damage times the number of heads."
         }

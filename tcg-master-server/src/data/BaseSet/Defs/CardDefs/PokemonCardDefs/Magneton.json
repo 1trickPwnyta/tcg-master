@@ -1,6 +1,7 @@
 {
     "name": "BaseSet.Magneton",
     "label": "Magneton",
+    "cardNumber": 9,
     "type": "Lightning",
     "stage": "stage1",
     "hp": 60,

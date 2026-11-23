@@ -1,6 +1,7 @@
 {
     "name": "BaseSet.Haunter",
     "label": "Haunter",
+    "cardNumber": 29,
     "type": "Psychic",
     "stage": "stage1",
     "hp": 60,

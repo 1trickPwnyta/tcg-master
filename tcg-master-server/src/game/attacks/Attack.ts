@@ -1,6 +1,6 @@
 import { pathToFileURL } from "url";
 import path from "path";
-import { ITargetable } from "../state/Choice.js";
+import { ITargetable } from "../state/interrupts/Choice.js";
 import { EnergyTypeDef } from "../../defs/EnergyTypeDef.js";
 import { AttackComp } from "./comps/AttackComp.js";
 import { IAttackData } from "../../defs/IDefData.js";
@@ -11,7 +11,7 @@ import { EnergyCost } from "./EnergyCost.js";
 import { AttackContext, AttackResult } from "./AttackContext.js";
 import { Interrupt } from "../state/interrupts/Interrupt.js";
 import { IToken } from "../../IToken.js";
-import { parentPort } from "worker_threads";
+import { Def } from "../../defs/Def.js";
 
 const __dirname = import.meta.dirname;
 
@@ -19,6 +19,7 @@ export class Attack implements ITargetable {
     public readonly name: string;
     public readonly cost: EnergyTypeDef[];
     public readonly damage: number;
+    public readonly damageLabel?: string;
     public readonly text?: string;
     public readonly comps: AttackComp[];
 
@@ -28,8 +29,8 @@ export class Attack implements ITargetable {
         return this.name;
     }
 
-    public get targetName(): string {
-        return `${this.name} [${this.cost.map(c => c.symbol).join("")}] ${this.damage ? this.damage : ""} ${this.comps.length ? "..." : ""}`;
+    public get targetName(): any[] {
+        return [ this.name, this.cost.map(c => c.symbol).join(""), this.damage || this.damageLabel, this.comps.length ? "..." : null ];
     }
 
     public get token(): IToken {
@@ -41,6 +42,7 @@ export class Attack implements ITargetable {
         this.name = this.attackData.name;
         this.cost = this.attackData.cost.map(c => DefDatabase.get<EnergyTypeDef>(c));
         this.damage = this.attackData.damage ?? 0;
+        this.damageLabel = this.attackData.damageLabel ?? (this.damage ? this.damage.toString() : undefined);
         this.text = this.attackData.text;
         this.comps = [];
     }
@@ -98,6 +100,7 @@ export class Attack implements ITargetable {
     public execute(engine: GameEngine, ...targets: (number | string)[]): AttackResult | undefined {
         const pokemon = engine.game.activePokemon;
         engine.game.turn!.phase = "attack";
+        engine.showcase(pokemon);
         engine.send(...pokemon.fullTokens, "used", this, "!");
 
         const context = new AttackContext(engine, this, this.damage, ...targets);
@@ -140,11 +143,10 @@ export class Attack implements ITargetable {
 
     public getDetails(): any[] {
         return [
-            `[${this.cost.map(e => e.symbol).join("")}]`,
+            this.cost.map(e => e.symbol).join(""),
             this.name,
-            this.damage || "",
-            "<br />",
-            this.text
+            { name: this.damageLabel, type: "damage" },
+            this.text ? "<br />" + Def.populatePlaceholders(this.text) : null
         ];
     }
 };

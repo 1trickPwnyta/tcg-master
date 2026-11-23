@@ -1,6 +1,7 @@
 {
     "name": "BaseSet.Machoke",
     "label": "Machoke",
+    "cardNumber": 34,
     "type": "Fighting",
     "stage": "stage1",
     "hp": 80,
@@ -11,6 +12,7 @@
             "name": "Karate Chop",
             "cost": [ "Fighting", "Fighting", "Colorless" ],
             "damage": 50,
+            "damageLabel": "50-",
             "comps": [ "AttackComp_KarateChop" ],
             "text": "Does 50 damage minus 10 damage for each damage counter on Machoke."
         },

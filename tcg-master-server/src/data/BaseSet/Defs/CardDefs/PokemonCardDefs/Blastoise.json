@@ -1,6 +1,7 @@
 {
     "name": "BaseSet.Blastoise",
     "label": "Blastoise",
+    "cardNumber": 2,
     "type": "Water",
     "stage": "stage2",
     "hp": 100,
@@ -11,6 +12,7 @@
             "name": "Hydro Pump",
             "cost": [ "Water", "Water", "Water" ],
             "damage": 40,
+            "damageLabel": "40+",
             "comps": [ { "class": "AttackComp_WaterGun", "args": { "cost": "Water", "amount": 10, "limit": 2 } } ],
             "text": "Does 40 damage plus 10 more damage for each {Water} Energy attached to Blastoise but not used to pay for this attack's Energy cost. Extra {Water} Energy after the 2nd doesn't count."
         }

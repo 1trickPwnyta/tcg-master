@@ -1,6 +1,7 @@
 {
     "name": "BaseSet.Seel",
     "label": "Seel",
+    "cardNumber": 41,
     "type": "Water",
     "stage": "basic",
     "hp": 60,

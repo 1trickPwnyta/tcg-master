@@ -1,6 +1,7 @@
 {
     "name": "BaseSet.Hitmonchan",
     "label": "Hitmonchan",
+    "cardNumber": 7,
     "type": "Fighting",
     "stage": "basic",
     "hp": 70,

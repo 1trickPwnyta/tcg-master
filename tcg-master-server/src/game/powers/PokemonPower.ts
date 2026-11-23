@@ -5,6 +5,7 @@ import { pathToFileURL } from "url";
 import { IToken } from "../../IToken.js";
 import { Interrupt } from "../state/interrupts/Interrupt.js";
 import { PokemonPowerModifier } from "../modifiers/PokemonPowerModifier.js";
+import { Def } from "../../defs/Def.js";
 
 const __dirname = import.meta.dirname;
 
@@ -99,4 +100,11 @@ export class PokemonPower {
 
         return null;
     }
+
+    public getDetails(): any[] {
+        return [
+            { name: `Pokémon Power: ${this.name}`, type: "power" },
+            Def.populatePlaceholders(this.text)
+        ];
+    };
 };

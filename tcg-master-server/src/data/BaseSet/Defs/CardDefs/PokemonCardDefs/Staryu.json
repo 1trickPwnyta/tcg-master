@@ -1,6 +1,7 @@
 {
     "name": "BaseSet.Staryu",
     "label": "Staryu",
+    "cardNumber": 65,
     "type": "Water",
     "stage": "basic",
     "hp": 40,

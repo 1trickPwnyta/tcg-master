@@ -1,6 +1,7 @@
 {
     "name": "BaseSet.Mewtwo",
     "label": "Mewtwo",
+    "cardNumber": 10,
     "type": "Psychic",
     "stage": "basic",
     "hp": 60,
@@ -11,6 +12,7 @@
             "name": "Psychic",
             "cost": [ "Psychic", "Colorless" ],
             "damage": 10,
+            "damageLabel": "10+",
             "comps": [ "AttackComp_Psychic" ],
             "text": "Does 10 damage plus 10 more damage for each Energy card attached to the Defending Pokémon."
         },

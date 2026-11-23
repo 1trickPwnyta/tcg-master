@@ -1,6 +1,5 @@
 import { EnergyTypeDefOf } from "../../defs/defof/EnergyTypeDefOf.js";
-import { StatusDefOf } from "../../defs/defof/StatusDefOf.js";
-import { Choice } from "../state/Choice.js";
+import { Choice } from "../state/interrupts/Choice.js";
 import { Interrupt } from "../state/interrupts/Interrupt.js";
 import { PokemonCard } from "../state/PokemonCard.js";
 import { PokemonPowerContext, PokemonPowerWorker } from "./PokemonPowerWorker.js";
@@ -18,21 +17,18 @@ export class PokemonPower_EnergyTrans extends PokemonPowerWorker {
 
     public override acquireTargets(context: PokemonPowerContext, source: number, energy: number | "all", target: number): Interrupt | null {
         if (!source) {
-            return this.generateInterrupt(context,
-                `Move ${EnergyTypeDefOf.Grass} energy from which Pokémon?`,
-                context.owner.pokemonInPlay.filter(p => p.energy.includes(EnergyTypeDefOf.Grass)).map(p => new Choice(p))
-            );
+            return this.generateInterrupt(context)
+                .withPrompt("Move", EnergyTypeDefOf.Grass, "energy from which Pokémon?")
+                .withChoices(context.owner.pokemonInPlay.filter(p => p.energy.includes(EnergyTypeDefOf.Grass)).map(p => new Choice(p)));
         } else if (!energy) {
             const card = context.engine.search.getCard(source) as PokemonCard;
-            return this.generateInterrupt(context,
-                `Move which ${EnergyTypeDefOf.Grass} energy from ${card.name}?`,
-                [ new Choice({ text: "(all)", id: "all" }), ...card.attachments.energyCards.map(c => new Choice(c.card)) ]
-            );
+            return this.generateInterrupt(context)
+                .withPrompt("Move which", EnergyTypeDefOf.Grass, "energy from", card, "?")
+                .withChoices([ Choice.fromText("(all)", "all"), ...card.attachments.energyCards.map(c => new Choice(c.card)) ]);
         } else if (!target) {
-            return this.generateInterrupt(context,
-                `Move ${EnergyTypeDefOf.Grass} energy to which Pokémon?`,
-                context.owner.pokemonInPlay.filter(p => p.id !== source).map(p => new Choice(p))
-            );
+            return this.generateInterrupt(context)
+                .withPrompt("Move", EnergyTypeDefOf.Grass, "energy to which Pokémon?")
+                .withChoices(context.owner.pokemonInPlay.filter(p => p.id !== source).map(p => new Choice(p)));
         }
 
         return null;

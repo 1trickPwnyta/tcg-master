@@ -1,0 +1,11 @@
+#intro h1 span {
+    opacity: 0;
+}
+
+#name-dialog {
+    opacity: 0;
+}
+
+#name-dialog input {
+    margin-top: 10px;
+}

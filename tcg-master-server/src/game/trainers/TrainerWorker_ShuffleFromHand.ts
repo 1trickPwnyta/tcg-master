@@ -1,5 +1,5 @@
 import { AcceptanceReport } from "../../AcceptanceReport.js";
-import { Choice } from "../state/Choice.js";
+import { Choice } from "../state/interrupts/Choice.js";
 import { Interrupt } from "../state/interrupts/Interrupt.js";
 import { TrainerContext } from "./TrainerContext.js";
 import { TrainerWorker } from "./TrainerWorker.js";
@@ -38,10 +38,9 @@ export class TrainerWorker_ShuffleFromHand extends TrainerWorker {
             if (!target) {
                 const choices = this.getTargetChoices(context);
                 if (choices.length) {
-                    return this.generateInterrupt(context,
-                        "Pick a card to shuffle into your deck.",
-                        choices
-                    );
+                    return this.generateInterrupt(context)
+                        .withPrompt("Pick a card to shuffle into your deck.")
+                        .withChoices(choices);
                 } else {
                     context.addNullTarget();
                 }

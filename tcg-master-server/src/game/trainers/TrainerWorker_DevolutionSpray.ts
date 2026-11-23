@@ -1,5 +1,5 @@
 import { AcceptanceReport } from "../../AcceptanceReport.js";
-import { Choice } from "../state/Choice.js";
+import { Choice } from "../state/interrupts/Choice.js";
 import { Interrupt } from "../state/interrupts/Interrupt.js";
 import { PokemonCard } from "../state/PokemonCard.js";
 import { TrainerContext } from "./TrainerContext.js";
@@ -25,18 +25,16 @@ export class TrainerWorker_DevolutionSpray extends TrainerWorker {
     public override acquireTargets(context: TrainerContext): Interrupt | null {
         const target = context.nextTargetCard() as PokemonCard | null;
         if (!target) {
-            return this.generateInterrupt(context,
-                "Select a Pokémon to devolve.",
-                this.getTargetChoices(context)
-            );
+            return this.generateInterrupt(context)
+                .withPrompt("Select a Pokémon to devolve.")
+                .withChoices(this.getTargetChoices(context));
         }
 
         const devolution = context.nextTarget();
         if (!devolution) {
-            return this.generateInterrupt(context,
-                "Select a previous stage to devolve to.",
-                this.getDevolutionChoices(context, target)
-            );
+            return this.generateInterrupt(context)
+                .withPrompt("Select a previous stage of", target, "to devolve to.")
+                .withChoices(this.getDevolutionChoices(context, target));
         }
 
         return null;

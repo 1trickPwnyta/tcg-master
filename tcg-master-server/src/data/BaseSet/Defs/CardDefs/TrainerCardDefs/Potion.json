@@ -1,6 +1,7 @@
 {
     "name": "BaseSet.Potion",
     "label": "Potion",
+    "cardNumber": 94,
     "text": "Remove 2 damage counters from 1 of your Pokémon (1 if that Pokémon has only 1).",
     "workers": [
         {

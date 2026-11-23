@@ -1,6 +1,7 @@
 {
     "name": "BaseSet.Sandshrew",
     "label": "Sandshrew",
+    "cardNumber": 62,
     "type": "Fighting",
     "stage": "basic",
     "hp": 40,

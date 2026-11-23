@@ -1,6 +1,7 @@
 {
     "name": "BaseSet.Caterpie",
     "label": "Caterpie",
+    "cardNumber": 45,
     "type": "Grass",
     "stage": "basic",
     "hp": 40,

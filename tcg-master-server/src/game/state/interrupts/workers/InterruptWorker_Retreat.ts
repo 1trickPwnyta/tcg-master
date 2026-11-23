@@ -1,11 +1,13 @@
-import { Choice } from "../../Choice.js";
+import { Choice } from "../Choice.js";
+import { InterruptSync } from "../Interrupt.js";
 import { InterruptResolution } from "../InterruptResolution.js";
 import { ResolvesInterrupt } from "../InterruptResolver.js";
+import { MenuOption } from "../MenuOption.js";
 import { InterruptContext, InterruptWorker } from "./InterruptWorker.js";
 
 @ResolvesInterrupt(InterruptResolution.Retreat)
 export class InterruptWorker_Retreat extends InterruptWorker {
-    public override execute(context: InterruptContext, replacement_id: number): boolean {
+    public override execute(context: InterruptContext, replacement_id: number | MenuOption.Retreat): boolean {
         const player = context.engine.game.activePlayer;
         if (context.engine.simulation && context.engine.game.turn!.retreats >= 2) {
             context.engine.sendError(player, "You can't retreat more than twice per turn in a simulation.");
@@ -20,7 +22,7 @@ export class InterruptWorker_Retreat extends InterruptWorker {
         const card = player.activePokemon!;
         const cantRetreatReason = card.cantRetreatReason();
         if (cantRetreatReason) {
-            context.engine.sendError(player, card, "can't retreat due to", cantRetreatReason, ".");
+            context.engine.sendError(player, `${card.name} can't retreat due to ${cantRetreatReason}.`);
             return false;
         }
         const energy = card.attachments.energyCards;
@@ -32,9 +34,9 @@ export class InterruptWorker_Retreat extends InterruptWorker {
             paid.push(next.card.id);
         }
         if (amount < card.def.retreat) {
-            context.engine.sendError(player, card, "doesn't have enough energy to retreat.");
+            context.engine.sendError(player, `${card.name} doesn't have enough energy to retreat.`);
             return false;
-        } else if (replacement_id) {
+        } else if (replacement_id !== MenuOption.Retreat) {
             while (paid.length) {
                 const card = context.engine.search.getCard(paid.pop()!)!;
                 card.discard();
@@ -60,12 +62,10 @@ export class InterruptWorker_Retreat extends InterruptWorker {
             }
             return true;
         } else {
-            context.engine.interrupts.interrupt({
-                player: player.id,
-                prompt: `Which Pokémon on your bench will replace ${card.name}?`,
-                choices: player.bench.cards.map(c => new Choice(c)),
-                resolution: InterruptResolution.Retreat
-            });
+            context.engine.interrupts.interrupt(new InterruptSync(player)
+                .withPrompt("Which Pokémon on your bench will replace", card, "?")
+                .withChoices(player.bench.cards.map(c => new Choice(c)))
+                .withResolution(InterruptResolution.Retreat));
             return true;
         }
     }

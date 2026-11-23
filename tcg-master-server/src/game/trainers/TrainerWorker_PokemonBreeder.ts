@@ -1,5 +1,5 @@
 import { AcceptanceReport } from "../../AcceptanceReport.js";
-import { Choice } from "../state/Choice.js";
+import { Choice } from "../state/interrupts/Choice.js";
 import { Interrupt } from "../state/interrupts/Interrupt.js";
 import { PokemonCard } from "../state/PokemonCard.js";
 import { TrainerContext } from "./TrainerContext.js";
@@ -27,18 +27,16 @@ export class TrainerWorker_PokemonBreeder extends TrainerWorker {
     public override acquireTargets(context: TrainerContext): Interrupt | null {
         const evolution = context.nextTargetCard() as PokemonCard | null;
         if (!evolution) {
-            return this.generateInterrupt(context,
-                "Select a Stage 2 evolution card to play.",
-                this.getEvolutionChoices(context)
-            );
+            return this.generateInterrupt(context)
+                .withPrompt("Select a Stage 2 evolution card to play.")
+                .withChoices(this.getEvolutionChoices(context));
         }
 
         const basic = context.nextTarget();
         if (!basic) {
-            return this.generateInterrupt(context,
-                `Choose a basic Pokémon to evolve into ${evolution.name}.`,
-                this.getBasicChoices(context, evolution)
-            );
+            return this.generateInterrupt(context)
+                .withPrompt("Choose a basic Pokémon to evolve into", evolution, ".")
+                .withChoices(this.getBasicChoices(context, evolution));
         }
 
         return null;

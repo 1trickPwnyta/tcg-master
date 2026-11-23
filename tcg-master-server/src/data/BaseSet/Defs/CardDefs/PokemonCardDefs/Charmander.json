@@ -1,6 +1,7 @@
 {
     "name": "BaseSet.Charmander",
     "label": "Charmander",
+    "cardNumber": 46,
     "type": "Fire",
     "stage": "basic",
     "hp": 50,

@@ -1,21 +1,62 @@
-.token_player {
-    color: #c981c3;
+:root {
+    --colorless-color: #F0EDE2;
+    --colorless-color-text: var(--colorless-color);
+    --grass-color: #21A34B;
+    --grass-color-text: color-mix(in srgb, var(--grass-color), white 40%);
+    --fire-color: #ED4529;
+    --fire-color-text: color-mix(in srgb, var(--fire-color), white 40%);
+    --water-color: #248CCC;
+    --water-color-text: color-mix(in srgb, var(--water-color), white 40%);
+    --lightning-color: #F4E411;
+    --lightning-color-text: color-mix(in srgb, var(--lightning-color), white 40%);
+    --psychic-color: #9153A0;
+    --psychic-color-text: color-mix(in srgb, var(--psychic-color), white 40%);
+    --fighting-color: #E15A28;
+    --fighting-color-text: color-mix(in srgb, var(--fighting-color), white 40%);
 }
 
-.token_player::before {
-    content: "👤"
+.token_player1 {
+    color: #bb5353;
 }
 
-.token_pokemon {
-    color: #e4d12c;
+.token_player2 {
+    color: #5da3ce;
+}
+
+.token_player1::before, .token_player2::before {
+    content: "♟️"
+}
+
+.token_card_colorless {
+    color: var(--colorless-color-text);
+}
+
+.token_card_grass {
+    color: var(--grass-color-text);
+}
+
+.token_card_fire {
+    color: var(--fire-color-text);
+}
+
+.token_card_water {
+    color: var(--water-color-text);
+}
+
+.token_card_lightning {
+    color: var(--lightning-color-text);
+}
+
+.token_card_psychic {
+    color: var(--psychic-color-text);
+}
+
+.token_card_fighting {
+    color: var(--fighting-color-text);
 }
 
 .token_trainer {
     color: #87a8a8;
-}
-
-.token_energy {
-    color: #33cc33;
 }
 
 .token_attack {

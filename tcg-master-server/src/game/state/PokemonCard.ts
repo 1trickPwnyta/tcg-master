@@ -8,11 +8,13 @@ import { GameEngine } from "../engine/GameEngine.js";
 import { Modifier } from "../modifiers/Modifier.js";
 import { Attachments } from "./Attachments.js";
 import { Card } from "./Card.js";
-import { Choice } from "./Choice.js";
+import { Choice } from "./interrupts/Choice.js";
 import { InterruptResolution } from "./interrupts/InterruptResolution.js";
 import { Location } from "./Location.js";
 import { Player } from "./Player.js";
 import { Serializable, Serialize } from "./serializer.js";
+import { IToken } from "../../IToken.js";
+import { InterruptSync } from "./interrupts/Interrupt.js";
 
 export type DamageContext = {
     amount: number;
@@ -42,12 +44,12 @@ export class PokemonCard extends Card {
         return [ this.owner, "'s", this ];
     }
 
-    public override get targetName(): string {
+    public override get targetName(): IToken[] {
         return [
-            super.targetName,
-            this.owner.activePokemon == this ? "(active)" : "",
-            this.attachments.energyString
-        ].filter(s => s.length).join(" ");
+            this.token,
+            { name: this.owner.activePokemon == this ? "(active)" : "" },
+            { name: this.attachments.energyString }
+        ].filter(s => s.name.length);
     }
 
     public get def(): PokemonCardDef {
@@ -122,22 +124,21 @@ export class PokemonCard extends Card {
                 return false;
             } else {
                 this.owner.bench.add(this);
+                this.engine.showcase(this);
                 this.engine.send(this.owner, "placed", this, "on", this.owner.pronouns.possessive, "bench.");
                 return true;
             }
         } else {
             const cards = this.owner.pokemonInPlay.filter(c => c.evolutionEligible && c.def.evolution?.evolvesDirect(this.name));
             if (cards.length) {
-                this.engine.interrupts.interrupt({
-                    player: this.owner.id,
-                    prompt: `Which Pokémon will evolve into ${this.name}?`,
-                    choices: cards.map(c => new Choice(c)),
-                    resolution: InterruptResolution.Evolve,
-                    args: [ this.id ]
-                });
+                this.engine.interrupts.interrupt(new InterruptSync(this.owner)
+                    .withPrompt("Which Pokémon will evolve into", this, "?")
+                    .withChoices(cards.map(c => new Choice(c)))
+                    .withResolution(InterruptResolution.Evolve)
+                    .withArgs(this.id));
                 return true;
             } else {
-                this.engine.sendError(this.owner, "None of your Pokémon can evolve into", this, ".");
+                this.engine.sendError(this.owner, `None of your Pokémon can evolve into ${this.name}.`);
                 return false;
             }
         }
@@ -148,6 +149,7 @@ export class PokemonCard extends Card {
         evolution.damage = this.damage;
         this.attachments.transfer(evolution.attachments);
         evolution.attachments.add(this);
+        this.engine.showcase(evolution);
         this.engine.send(...this.fullTokens, "evolved into", evolution, "!");
     }
 

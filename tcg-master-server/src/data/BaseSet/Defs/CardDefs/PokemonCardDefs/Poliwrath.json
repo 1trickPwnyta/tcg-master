@@ -1,6 +1,7 @@
 {
     "name": "BaseSet.Poliwrath",
     "label": "Poliwrath",
+    "cardNumber": 13,
     "type": "Water",
     "stage": "stage2",
     "hp": 90,
@@ -11,6 +12,7 @@
             "name": "Water Gun",
             "cost": [ "Water", "Water", "Colorless" ],
             "damage": 30,
+            "damageLabel": "30+",
             "comps": [ { "class": "AttackComp_WaterGun", "args": { "cost": "Water", "amount": 10, "limit": 2 } } ],
             "text": "Does 30 damage plus 10 more damage for each {Water} Energy attached to Poliwrath but not used to pay for this attack's Energy cost. Extra {Water} Energy after the 2nd doesn't count."
         },

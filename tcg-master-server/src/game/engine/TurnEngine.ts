@@ -1,10 +1,11 @@
 import { InterruptResolution } from "../state/interrupts/InterruptResolution.js";
-import { Interrupt } from "../state/interrupts/Interrupt.js";
+import { Interrupt, InterruptAsync, InterruptSync } from "../state/interrupts/Interrupt.js";
 import { Turn } from "../state/Turn.js";
 import { SubEngine } from "./SubEngine.js";
-import { Choice } from "../state/Choice.js";
+import { Choice } from "../state/interrupts/Choice.js";
 import { EnergyCard } from "../state/EnergyCard.js";
 import { PokemonCardWrapper } from "../state/PokemonCardWrapper.js";
+import { MenuOption } from "../state/interrupts/MenuOption.js";
 
 export class TurnEngine extends SubEngine {
     private get turn(): Turn {
@@ -15,20 +16,20 @@ export class TurnEngine extends SubEngine {
         const player = this.engine.game.getPlayer(this.turn.player);
 
         const choices = [
-            new Choice({ text: "play a card" }).withResolution(InterruptResolution.PlayCard),
-            new Choice({ text: "attack" }).withResolution(InterruptResolution.Attack),
-            new Choice({ text: "retreat" }).withResolution(InterruptResolution.Retreat).withAiScoreOffset(-50)
+            Choice.fromText(MenuOption.PlayCard).withResolution(InterruptResolution.PlayCard),
+            Choice.fromText(MenuOption.Attack).withResolution(InterruptResolution.Attack),
+            Choice.fromText(MenuOption.Retreat).withResolution(InterruptResolution.Retreat).withAiScoreOffset(-50)
         ];
 
         if (player.pokemonInPlay.some(p => p.def.power?.workers.length)) {
-            choices.push(new Choice({ text: "use a Pokémon power" }).withResolution(InterruptResolution.UsePokemonPower));
+            choices.push(Choice.fromText(MenuOption.PokemonPower).withResolution(InterruptResolution.UsePokemonPower));
         }
 
         if (player.pokemonInPlay.some(p => p instanceof PokemonCardWrapper)) {
-            choices.push(new Choice({ text: "discard trainer card Pokémon" }).withResolution(InterruptResolution.DiscardWrapper));
+            choices.push(Choice.fromText(MenuOption.DiscardTrainerPokemon).withResolution(InterruptResolution.DiscardWrapper));
         }
 
-        return [ ...choices, new Choice({ text: "end turn" }).withResolution(InterruptResolution.EndTurn).withPriority(-1000) ];
+        return [ ...choices, Choice.fromText(MenuOption.EndTurn).withResolution(InterruptResolution.EndTurn).withPriority(-1000) ];
     }
 
     public begin(player_id: number) {
@@ -117,12 +118,10 @@ export class TurnEngine extends SubEngine {
         }
 
         if (this.turn.phase === "preattack") {
-            this.engine.interrupts.interrupt({
-                player: this.turn.player,
-                prompt: "Your turn.",
-                choices: this.mainMenu,
-                force: true
-            });
+            this.engine.interrupts.interrupt(new InterruptSync(this.state.activePlayer)
+                .withPrompt("Your turn.")
+                .withChoices(this.mainMenu)
+                .forced());
         } else {
             this.end();
             this.engine.game.update();
@@ -132,16 +131,15 @@ export class TurnEngine extends SubEngine {
     public checkActivePokemon(): Interrupt | null {
         const playersWithNoActive = this.state.players.filter(p => !p.activePokemon && p.bench.count);
         if (playersWithNoActive.length) {
-            return {
-                interrupts: playersWithNoActive.map(p => ({
-                    player: p.id,
-                    prompt: "Select a Pokémon from your bench to be your active Pokémon.",
-                    choices: p.bench.cards.map(c => new Choice(c)),
-                    resolution: InterruptResolution.Promote,
-                    force: true,
-                    args: [ p.id ]
-                }))
-            };
+            return new InterruptAsync(this.engine, 
+                ...playersWithNoActive.map(p => new InterruptSync(p)
+                    .withPrompt("Select a Pokémon from your bench to be your active Pokémon.")
+                    .withChoices(p.bench.cards.map(c => new Choice(c)))
+                    .withResolution(InterruptResolution.Promote)
+                    .withArgs(p.id)
+                    .forced()
+                )
+            );
         } else {
             return null;
         }

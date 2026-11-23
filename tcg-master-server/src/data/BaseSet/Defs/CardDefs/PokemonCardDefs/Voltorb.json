@@ -1,6 +1,7 @@
 {
     "name": "BaseSet.Voltorb",
     "label": "Voltorb",
+    "cardNumber": 67,
     "type": "Lightning",
     "stage": "basic",
     "hp": 40,

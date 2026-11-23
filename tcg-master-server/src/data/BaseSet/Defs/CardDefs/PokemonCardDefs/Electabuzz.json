@@ -1,6 +1,7 @@
 {
     "name": "BaseSet.Electabuzz",
     "label": "Electabuzz",
+    "cardNumber": 20,
     "type": "Lightning",
     "stage": "basic",
     "hp": 70,
@@ -18,6 +19,7 @@
             "name": "Thunderpunch",
             "cost": [ "Lightning", "Colorless" ],
             "damage": 30,
+            "damageLabel": "30+",
             "comps": [ { "class": "AttackComp_CoinDamage", "args": { "amount": 10, "coins": 1, "selfDamage": 10 } } ],
             "text": "Flip a coin. If heads, this attack does 30 damage plus 10 more damage; if tails, this attack does 30 damage plus Electabuzz does 10 damage to itself."
         }

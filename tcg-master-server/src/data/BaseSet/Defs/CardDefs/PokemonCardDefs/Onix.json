@@ -1,6 +1,7 @@
 {
     "name": "BaseSet.Onix",
     "label": "Onix",
+    "cardNumber": 56,
     "type": "Fighting",
     "stage": "basic",
     "hp": 90,
