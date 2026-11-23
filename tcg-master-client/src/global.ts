@@ -33,7 +33,7 @@ globalThis.newGameHuman = () => {
 
 globalThis.formSubmit = (e: Event) => {
     e.preventDefault();
-    const form = $("form");
+    const form = $("#input-form");
     const input = form.find("input[type=\"text\"]").val() as string;
     form.trigger("reset");
     Gameplay.instance.send(input.trim());
