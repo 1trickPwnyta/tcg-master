@@ -28,11 +28,13 @@ export class Input {
                 } else if (args.opponent === "human") {
                     if (matchQueue.length) {
                         const match = matchQueue.splice(0, 1)[0];
+                        console.log(`Matched ${args.name} with ${match.name}. Queue: ${matchQueue.map(q => q.name).join(", ")}`);
                         match.socket.emit("MATCH");
                         socket.emit("MATCH");
                         Input.startGame(match.name, new Client_Human(match.socket), args.name, new Client_Human(socket));
                     } else {
                         matchQueue.push({ name: args.name, socket: socket });
+                        console.log(`Added ${args.name} to match queue. Queue: ${matchQueue.map(q => q.name).join(", ")}`);
                     }
                 }
             });
