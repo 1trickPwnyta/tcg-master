@@ -10,7 +10,7 @@ export abstract class Client {
     public player_id: number | undefined;
     public player?: Player;
 
-    public abstract send(...parts: any[]): void;
+    public abstract send(id: number, ...parts: any[]): void;
 
     public abstract sendInfo(...parts: any[]): void;
 

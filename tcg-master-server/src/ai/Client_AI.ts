@@ -19,7 +19,7 @@ export class Client_AI extends Client {
         super();
     }
 
-    public override send(...parts: any[]) {
+    public override send(id: number, ...parts: any[]) {
         console.log(Client.tokenize(...parts).map(t => t.name).join(" "));
     }
 

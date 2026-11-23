@@ -34,12 +34,14 @@ export class Client_Human extends Client {
         });
 
         socket.on("JOIN", () => {
-            for (const message of this.engine!.game.retrieveMessages()) {
-                this.sendInfo(...message);
-            }
-            const interrupt = this.engine!.interrupts.get(this.player_id!);
-            if (interrupt) {
-                this.prompt(interrupt);
+            if (this.engine?.game) {
+                for (const message of this.engine!.game.retrieveMessages()) {
+                    this.sendBacklog(message.id, ...message.parts);
+                }
+                const interrupt = this.engine!.interrupts.get(this.player_id!);
+                if (interrupt) {
+                    this.prompt(interrupt);
+                }
             }
         });
 
@@ -48,12 +50,22 @@ export class Client_Human extends Client {
         });
     }
 
-    public override send(...parts: any[]) {
-        this.socket.emit("MSG", Client.tokenize(...parts));
+    public override send(id: number, ...parts: any[]) {
+        this.socket.emit("MSG", {
+            id: id,
+            tokens: Client.tokenize(...parts)
+        });
     }
 
     public override sendInfo(...parts: any[]) {
         this.socket.emit("INFO", Client.tokenize(...parts));
+    }
+
+    private sendBacklog(id: number, ...parts: any[]) {
+        this.socket.emit("LOG", {
+            id: id,
+            tokens: Client.tokenize(...parts)
+        });
     }
 
     public override showcase(def: CardDef) {

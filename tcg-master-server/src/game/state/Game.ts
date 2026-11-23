@@ -110,12 +110,13 @@ export class Game extends State {
         return hydrated;
     }
 
-    public recordMessage(parts: any[]) {
+    public recordMessage(parts: any[]): number {
         this.messages.push(parts);
+        return this.messages.length - 1;
     }
 
-    public retrieveMessages(): any[][] {
-        return [ ...this.messages ];
+    public retrieveMessages(): { id: number, parts: any[] }[] {
+        return this.messages.map((m, i) => ({ id: i, parts: m }));
     }
 
     public flipCoin(player?: Player): boolean {

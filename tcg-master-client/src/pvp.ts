@@ -1,9 +1,10 @@
 import { io, Socket } from "socket.io-client";
 import { Storage } from "./storage";
+import config from "../config.json" with { type: "json" };
 
 export class PvP {
     public static match(callback: (socket: Socket) => void) {
-        const socket = io("http://localhost:3000", {
+        const socket = io(config.server, {
             timeout: 600000,
             reconnection: true,
             reconnectionAttempts: Infinity,

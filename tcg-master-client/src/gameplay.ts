@@ -3,6 +3,8 @@ import { EventQueue, type GameEvent, type IEventConsumer } from "./events";
 import { io, Socket } from "socket.io-client";
 import { UI } from "./ui";
 import { PvP } from "./pvp";
+import config from "../config.json" with { type: "json" };
+import { Storage } from "./storage";
 
 export class Gameplay implements IEventConsumer {
     private static _instance?: Gameplay;
@@ -13,14 +15,14 @@ export class Gameplay implements IEventConsumer {
 
     public static startVsCom() {
         UI.switchToApp($("#gameplay"), () => {
-            const socket = io("http://localhost:3000", {
+            const socket = io(config.server, {
                 timeout: 600000,
                 reconnection: true,
                 reconnectionAttempts: Infinity,
                 reconnectionDelay: 1000
             });
             socket.emit("START", {
-                name: localStorage.user.name,
+                name: Storage.User!.name,
                 opponent: "com"
             });
             Gameplay.start(socket);
@@ -44,6 +46,7 @@ export class Gameplay implements IEventConsumer {
     private readonly socket;
     private readonly events: EventQueue;
     private _busy: boolean = false;
+    private lastLogEntry: number = -1;
 
     public get busy(): boolean {
         return this._busy;
@@ -73,15 +76,16 @@ export class Gameplay implements IEventConsumer {
 
         switch (event.code) {
             case "MSG":
-                if (event.payload.length) {
+                if (event.payload.tokens.length) {
                     this._busy = true;
                     this.processMessage(event.payload);
                     setTimeout(() => this.update(), 1000);
                 } else {
-                    this.processMessage([]); // Blank line
+                    this.nextLine();
                 }
                 break;
             case "INFO": this.processMessage(event.payload); break;
+            case "LOG": this.processMessage(event.payload); break;
             case "SHOW": this.showcase(event.payload as string); break;
             case "ASK": this.processPrompt(event.payload); break;
             case "WAIT": this.wait(); break;
@@ -116,11 +120,21 @@ export class Gameplay implements IEventConsumer {
         }).join(" ").replaceAll(/\s([\.!\?,;:'])/g, "$1");
     }
 
-    private processMessage(tokens: { name: string, type?: string }[]) {
+    private nextLine() {
         const log = $("#console");
-        log.append(this.detokenize(tokens));
         log.append("<br />");
         log.scrollTop(log[0].scrollHeight);
+    }
+
+    private processMessage(entry: { id: number, tokens: { name: string, type?: string }[] }) {
+        if (entry.id < 0 || this.lastLogEntry < entry.id) {
+            const log = $("#console");
+            log.append(this.detokenize(entry.tokens));
+            this.nextLine();
+            if (entry.id >= 0) {
+                this.lastLogEntry = entry.id;
+            }
+        }
     }
 
     private processPrompt(prompt: { text: any[], choices: { option: string, parts: any[] }[] }) {

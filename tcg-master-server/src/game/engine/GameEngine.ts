@@ -104,17 +104,21 @@ export class GameEngine {
 
     public send(...parts: any[]) {
         if (this.simulation) return;
-        this.game.recordMessage(parts);
+        const id = this.game.recordMessage(parts);
         for (const player of this.game.players) {
-            this.sendTo(player, ...parts);
+            this.sendToWithId(player, id, ...parts);
         }
     }
 
     public sendTo(player: Player, ...parts: any[]) {
+        this.sendToWithId(player, -1, ...parts);
+    }
+
+    public sendToWithId(player: Player, id: number, ...parts: any[]) {
         if (this.simulation) return;
         if (!this.game.winner_id) {
             const client = this.clients.find(c => c.player_id === player.id);
-            client?.send(...parts);
+            client?.send(id, ...parts);
         }
     }
 

@@ -6,6 +6,7 @@ import { Command_check } from "./commands/Command_check.js";
 import { Command_select } from "./commands/Command_select.js";
 import { Client_Human } from "./Client_Human.js";
 import { Command_debug } from "./commands/Command_debug.js";
+import { Client } from "./Client.js";
 
 export class Input {
     static {
@@ -23,22 +24,25 @@ export class Input {
             console.log(`Client connected: ${socket.id}`);
             socket.on("START", (args: { name: string, opponent: "com" | "human" }) => {
                 if (args.opponent === "com") {
-                    const engine = new GameEngine(new Client_Human(socket));
-                    engine.start(args.name, "COM");
+                    Input.startGame(args.name, new Client_Human(socket), "COM");
                 } else if (args.opponent === "human") {
                     if (matchQueue.length) {
                         const match = matchQueue.splice(0, 1)[0];
                         match.socket.emit("MATCH");
                         socket.emit("MATCH");
-                        setTimeout(() => {
-                            const engine = new GameEngine(new Client_Human(match.socket), new Client_Human(socket));
-                            engine.start(match.name , args.name);
-                        }, 1000); // Wait a second to allow clients to join before the game begins, if they don't nbd
+                        Input.startGame(match.name, new Client_Human(match.socket), args.name, new Client_Human(socket));
                     } else {
                         matchQueue.push({ name: args.name, socket: socket });
                     }
                 }
             });
         });
+    }
+
+    private static startGame(name1: string, client1: Client, name2: string, client2?: Client) {
+        setTimeout(() => {
+            const engine = new GameEngine(client1, client2);
+            engine.start(name1, name2);
+        }, 1000); // Wait a second to allow clients to join before the game begins, if they don't nbd
     }
 };
