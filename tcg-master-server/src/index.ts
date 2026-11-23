@@ -2,6 +2,7 @@ import express from "express";
 import { createServer } from "http";
 import cors from "cors";
 import "./extensions.js";
+import config from "../config.json" with { type: "json" };
 
 const { Input } = await import("./Input.js");
 const { DefDatabase } = await import("./defs/DefDatabase.js");
@@ -9,7 +10,7 @@ await DefDatabase.init();
 await import("./loader.js");
 
 const corsConfig = {
-    origin: "http://localhost:5173",
+    origin: config.client,
     methods: [ "GET", "POST" ],
     credentials: true
 };
