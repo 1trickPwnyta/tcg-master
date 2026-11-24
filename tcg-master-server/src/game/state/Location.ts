@@ -1,9 +1,7 @@
-import { parentPort } from "worker_threads";
 import { GameEngine } from "../engine/GameEngine.js";
 import { Card } from "./Card.js";
 import { Player } from "./Player.js";
-import { PokemonCard } from "./PokemonCard.js";
-import { Serializable, Serialize } from "./serializer.js";
+import { ClientSerialize, Serializable, Serialize } from "./serializer.js";
 import { State } from "./State.js";
 
 @Serializable()
@@ -11,7 +9,7 @@ export class Location extends State {
     @Serialize()
     private readonly owner_id: number;
 
-    @Serialize()
+    @Serialize() @ClientSerialize()
     public readonly cards: Card[] = [];
 
     public readonly inPlay: boolean = false;

@@ -5,6 +5,7 @@ import { Command, CommandNotFoundError } from "./commands/Command.js";
 import { Player } from "./game/state/Player.js";
 import { InterruptSync } from "./game/state/interrupts/Interrupt.js";
 import { CardDef } from "./defs/CardDef.js";
+import { ClientSerializationReplace } from "./game/state/serializer.js";
 
 export class Client_Human extends Client {
     public readonly socket: Socket;
@@ -40,6 +41,7 @@ export class Client_Human extends Client {
                 for (const message of this.engine!.game.retrieveMessages()) {
                     this.sendBacklog(message.id, ...message.parts);
                 }
+                this.sync();
                 const interrupt = this.engine!.interrupts.get(this.player_id!);
                 if (interrupt) {
                     this.prompt(interrupt);
@@ -47,9 +49,19 @@ export class Client_Human extends Client {
             }
         });
 
+        socket.on("SYNC", () => this.sync());
+
         socket.on("disconnect", () => {
             console.log(`Client disconnected: ${socket.id}`);
         });
+    }
+
+    private sync() {
+        if (this.player) {
+            const view = this.player.view;
+            const payload = JSON.stringify(view, ClientSerializationReplace);
+            this.socket.emit("SYNC", payload);
+        }
     }
 
     public override send(id: number, ...parts: any[]) {

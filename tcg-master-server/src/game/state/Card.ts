@@ -5,7 +5,7 @@ import { GameEngine } from "../engine/GameEngine.js";
 import { ITargetable } from "./interrupts/Choice.js";
 import { Location } from "./Location.js";
 import { Player } from "./Player.js";
-import { Serializable, Serialize } from "./serializer.js";
+import { ClientSerialize, Serializable, Serialize } from "./serializer.js";
 import { State } from "./State.js";
 
 @Serializable()
@@ -19,16 +19,18 @@ export abstract class Card extends State implements ITargetable {
     @Serialize()
     private location_id?: number;
 
+    @ClientSerialize()
+    public name: string;
+
+    @ClientSerialize()
+    private graphicPath: string;
+
     private _def?: CardDef;
     private _owner?: Player;
     private _location?: Location;
 
     public get token(): IToken {
         return this.def.token;
-    }
-
-    public get name(): string {
-        return this.def.targetName;
     }
 
     public get targetName(): IToken[] {
@@ -69,6 +71,8 @@ export abstract class Card extends State implements ITargetable {
         super(id, engine);
         this.def_name = def.name;
         this.owner_id = owner.id;
+        this.name = def.label;
+        this.graphicPath = def.graphicPath;
     }
 
     public abstract play(...targets: number[]): boolean;

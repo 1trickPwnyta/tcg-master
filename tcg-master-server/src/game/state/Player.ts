@@ -3,6 +3,7 @@ import { IToken } from "../../IToken.js";
 import { GameEngine } from "../engine/GameEngine.js";
 import { Active } from "./Active.js";
 import { Bench } from "./Bench.js";
+import { Card } from "./Card.js";
 import { Deck } from "./Deck.js";
 import { Hand } from "./Hand.js";
 import { Limbo } from "./Limbo.js";
@@ -10,6 +11,27 @@ import { Location } from "./Location.js";
 import { PokemonCard } from "./PokemonCard.js";
 import { Serializable, Serialize } from "./serializer.js";
 import { State } from "./State.js";
+
+export type PlayerView = {
+    self: {
+        name: string,
+        active?: PokemonCard,
+        bench: PokemonCard[],
+        hand: Card[],
+        discard: Card[],
+        deck: number,
+        prizes: number
+    };
+    opponent: {
+        name: string,
+        active?: PokemonCard,
+        bench: PokemonCard[],
+        hand: number,
+        discard: Card[],
+        deck: number,
+        prizes: number
+    };
+};
 
 @Serializable()
 export class Player extends State {
@@ -73,6 +95,29 @@ export class Player extends State {
 
     public get locations(): Location[] {
         return [ this.active, this.bench, this.limbo, this.hand, this.discard, this.prizes, this.deck ];
+    }
+
+    public get view(): PlayerView {
+        return {
+            self: {
+                name: this.name,
+                active: this.activePokemon,
+                bench: this.bench.cards,
+                hand: this.hand.cards,
+                discard: this.discard.cards,
+                deck: this.deck.count,
+                prizes: this.prizes.count
+            },
+            opponent: {
+                name: this.opponent.name,
+                active: this.opponent.activePokemon,
+                bench: this.opponent.bench.cards,
+                hand: this.opponent.hand.count,
+                discard: this.opponent.discard.cards,
+                deck: this.opponent.deck.count,
+                prizes: this.opponent.prizes.count
+            }
+        };
     }
 
     public constructor(id: number, engine: GameEngine, name: string) {

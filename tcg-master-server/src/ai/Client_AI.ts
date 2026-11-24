@@ -38,7 +38,7 @@ export class Client_AI extends Client {
             return;
         }
 
-        console.log(`${interrupt.prompt.join(" ")} [ ${interrupt.choices!.map(c => c.parts.map(p => p?.name)).join(", ")}${!interrupt.force ? ", (cancel)" : ""} ]`);
+        console.log(`${Client.tokenize(...interrupt.prompt).map(t => t.name).join(" ")} [ ${interrupt.choices!.map(c => c.parts.map(p => p?.name)).join(", ")}${!interrupt.force ? ", (cancel)" : ""} ]`);
         this.interrupt_id = this.engine!.interrupts.get(this.player_id!)!.id!;
 
         const worker = new Worker(path.join(import.meta.dirname, "AIWorker.js"));

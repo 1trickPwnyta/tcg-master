@@ -30,7 +30,7 @@
             <div id="main-menu" class="app">
                 <div class="subsection">
                     <h1>New game</h1>
-                    <div class="button-row">
+                    <div class="flex-row">
                         <button onclick="newGameCom()">vs COM</button>
                         <button onclick="newGameHuman()">vs Human</button>
                     </div>
@@ -41,22 +41,25 @@
                 <marquee id="wait-message"></marquee>
             </div>
             <div id="gameplay" class="app">
-                <div id="stage">
-                    <div id="console"></div>
-                    <div id="showcase"></div>
-                </div>
-                <div id="controls">
-                    <div id="commands">
-                        <div id="commands-you" class="commands-panel">You<div></div></div>
-                        <div id="commands-opponent" class="commands-panel">Opponent<div></div></div>
-                        <div id="commands-debug" class="commands-panel">Debug<div></div></div>
+                <div class="flex-col">
+                    <div id="stage"></div>
+                    <div id="controls">
+                        <div id="commands">
+                            <div id="commands-you" class="commands-panel">You<div></div></div>
+                            <div id="commands-opponent" class="commands-panel">Opponent<div></div></div>
+                            <div id="commands-debug" class="commands-panel">Debug<div></div></div>
+                        </div>
+                        <div id="prompt"></div>
+                        <div id="choices"></div>
+                        <form id="input-form" onsubmit="formSubmit(event)">
+                            <input id="input" type="text" autocomplete="off" />
+                            <input type="submit" value="Submit" />
+                        </form>
                     </div>
-                    <div id="prompt"></div>
-                    <div id="choices"></div>
-                    <form id="input-form" onsubmit="formSubmit(event)">
-                        <input id="input" type="text" autocomplete="off" />
-                        <input type="submit" value="Submit" />
-                    </form>
+                </div>
+                <div class="flex-col">
+                    <div id="showcase"></div>
+                    <div id="console"></div>
                 </div>
             </div>
         </div>

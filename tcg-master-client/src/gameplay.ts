@@ -5,6 +5,8 @@ import { UI } from "./ui";
 import { PvP } from "./pvp";
 import config from "../config.json" with { type: "json" };
 import { Storage } from "./storage";
+import { Stage } from "./stage/stage";
+import type { State } from "./stage/state";
 
 export class Gameplay implements IEventConsumer {
     private static _instance?: Gameplay;
@@ -47,6 +49,8 @@ export class Gameplay implements IEventConsumer {
     private readonly events: EventQueue;
     private _busy: boolean = false;
     private lastLogEntry: number = -1;
+    private syncInterval: any;
+    private stage: Stage;
 
     public get busy(): boolean {
         return this._busy;
@@ -54,10 +58,12 @@ export class Gameplay implements IEventConsumer {
 
     private constructor(socket: Socket) {
         this.socket = socket;
+        this.stage = new Stage();
         this.events = new EventQueue(this, this.socket);
     }
 
     private start() {
+        this.syncInterval = setInterval(() => this.socket.emit("SYNC"), 5000);
         this.update();
     }
 
@@ -90,6 +96,7 @@ export class Gameplay implements IEventConsumer {
             case "VIEW": this.showcase(event.payload as string); break;
             case "ASK": this.processPrompt(event.payload); break;
             case "WAIT": this.wait(); break;
+            case "SYNC": this.sync(JSON.parse(event.payload) as State); break;
             case "ERR": this.processInfo(event.payload); break;
             case "NEW": this.newGame(); break;
             case "END": this.gameOver(); break;
@@ -109,6 +116,10 @@ export class Gameplay implements IEventConsumer {
         if (next) {
             this.consumeEvent(next);
         }
+    }
+
+    private sync(state: State) {
+        this.stage.update(state);
     }
 
     private detokenize(tokens: { name: string, type?: string }[]): string {
@@ -162,11 +173,12 @@ export class Gameplay implements IEventConsumer {
     }
 
     private gameOver() {
+        clearInterval(this.syncInterval);
         $("#prompt").text("Game over!");
         $("#choices").html("");
     }
 
-    private showcase(path: string) {
+    public showcase(path: string) {
         const showcase = $("#showcase");
         const currentImage = showcase.find("div");
         if (currentImage.length) {

@@ -1,6 +1,7 @@
 import { GameEngine } from "../engine/GameEngine.js";
 
 const SERIALIZER_KEY = Symbol("state_serialization");
+const CLIENT_SERIALIZER_KEY = Symbol("client_state_serialization");
 
 export const ClassRegistry = new Map<string, any>();
 
@@ -14,6 +15,11 @@ export function Serializable() {
             const fields = context.metadata![SERIALIZER_KEY] as string[] | undefined;
             if (fields) {
                 target[SERIALIZER_KEY] = fields;
+            }
+
+            const clientFields = context.metadata![CLIENT_SERIALIZER_KEY] as string[] | undefined;
+            if (clientFields) {
+                target[CLIENT_SERIALIZER_KEY] = clientFields;
             }
         });
     };
@@ -81,5 +87,38 @@ export function SerializationHydrate(state: any, engine?: GameEngine): any {
             obj[key] = SerializationHydrate(state[key], engine);
         }
         return obj;
+    }
+};
+
+export function ClientSerialize() {
+    return (_value: any, context: ClassFieldDecoratorContext) => {
+        const key = context.name as string;
+        if (!context.metadata![CLIENT_SERIALIZER_KEY]) {
+            context.metadata![CLIENT_SERIALIZER_KEY] = [];
+        } else if (!Object.prototype.hasOwnProperty.call(context.metadata, CLIENT_SERIALIZER_KEY)) {
+            context.metadata![CLIENT_SERIALIZER_KEY] = [ ...(context.metadata![CLIENT_SERIALIZER_KEY] as string[]) ];
+        }
+        const metadata = context.metadata![CLIENT_SERIALIZER_KEY] as string[];
+        metadata.push(key);
+    };
+};
+
+export function ClientSerializationReplace(_key: string, value: any) {
+    if (value === null || typeof value !== "object") {
+        return value;
+    }
+
+    const fields = value.constructor?.[CLIENT_SERIALIZER_KEY];
+
+    if (fields) {
+        const obj: Record<string, any> = { __type: value.constructor.name };
+        for (const field of fields) {
+            obj[field] = value[field];
+        }
+        return obj;
+    } else if (value.constructor.name === "Object" || Array.isArray(value)) {
+        return value;
+    } else {
+        return null;
     }
 };

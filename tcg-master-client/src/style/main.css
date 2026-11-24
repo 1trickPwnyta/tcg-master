@@ -31,8 +31,18 @@ body {
     gap: 10px;
 }
 
-.button-row {
+.flex-row {
     display: flex;
     flex-direction: row;
     gap: 10px;
+    width: 100%;
+    flex: 1;
+}
+
+.flex-col {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    height: 100%;
+    flex: 1;
 }

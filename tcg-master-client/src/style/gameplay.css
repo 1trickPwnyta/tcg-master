@@ -1,13 +1,34 @@
 #gameplay {
     display: none;
+    flex-direction: row;
+    width: 100%;
+    height: 100%;
 }
 
 #stage {
-    display: flex;
-    flex-direction: row;
-    gap: 10px;
-    width: 100%;
+    background-color: #212121;
+    width: 600px;
     height: 600px;
+}
+
+#stage .card {
+    position: absolute;
+    width: 72px;
+    height: 99px;
+    translate: -50% -50%;
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+#stage .damage-counters {
+    position: absolute;
+    width: 24px;
+    height: 24px;
+    background-color: rgba(0, 0, 0, 0.8);
+    color: white;
+    border-radius: 100%;
+    text-align: center;
 }
 
 #console {
@@ -26,15 +47,21 @@
 
 #showcase {
     background-color: #212121;
-    flex: 0 0 435px;
+    width: 100%;
+    height: 400px;
     position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 #showcase div {
     position: absolute;
-    width: 100%;
-    height: 100%;
+    width: 90%;
+    height: 90%;
     background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
 }
 
 #controls {

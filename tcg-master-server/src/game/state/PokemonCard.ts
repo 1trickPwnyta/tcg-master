@@ -12,7 +12,7 @@ import { Choice } from "./interrupts/Choice.js";
 import { InterruptResolution } from "./interrupts/InterruptResolution.js";
 import { Location } from "./Location.js";
 import { Player } from "./Player.js";
-import { Serializable, Serialize } from "./serializer.js";
+import { ClientSerialize, Serializable, Serialize } from "./serializer.js";
 import { IToken } from "../../IToken.js";
 import { InterruptSync } from "./interrupts/Interrupt.js";
 
@@ -25,16 +25,16 @@ export type DamageContext = {
 
 @Serializable()
 export class PokemonCard extends Card {
-    @Serialize()
+    @Serialize() @ClientSerialize()
     public damage: number = 0;
 
-    @Serialize()
+    @Serialize() @ClientSerialize()
     public orientation: "normal" | "asleep" | "confused" | "paralyzed" = "normal";
 
-    @Serialize()
+    @Serialize() @ClientSerialize()
     public readonly attachments: Attachments;
 
-    @Serialize()
+    @Serialize() @ClientSerialize()
     public readonly statuses: { def: string, args: any }[] = [];
 
     @Serialize()
