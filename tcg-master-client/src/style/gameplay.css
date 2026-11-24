@@ -13,8 +13,6 @@
 
 #stage .card {
     position: absolute;
-    width: 72px;
-    height: 99px;
     translate: -50% -50%;
     background-size: contain;
     background-position: center;

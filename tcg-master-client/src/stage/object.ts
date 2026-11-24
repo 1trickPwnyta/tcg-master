@@ -1,6 +1,6 @@
 import $ from "jquery";
 import { Vector } from "./math";
-import { STAGE_HEIGHT, STAGE_WIDTH } from "./stage";
+import { Perspective, STAGE_SIZE } from "./stage";
 
 export class StageObject {
     public readonly element: JQuery<HTMLElement>;
@@ -9,18 +9,15 @@ export class StageObject {
         this.element = $("<div>", { class: className });
     }
 
-    public draw(stage: JQuery<HTMLElement>, position: Vector) {
+    public draw(stage: JQuery<HTMLElement>, position: Vector, perspective: Perspective) {
+        const x = perspective === Perspective.Favoring ? position.x : STAGE_SIZE.x - position.x;
+        const y = perspective === Perspective.Favoring ? position.y : STAGE_SIZE.y - position.y;
+        const scale = perspective === Perspective.Favoring ? 1 : -1;
         this.element.css({
-            left: `${position.x}px`,
-            top: `${position.y}px`
+            left: `${x}px`,
+            top: `${y}px`,
+            scale: `${scale} ${scale}`
         });
         stage.append(this.element);
-    }
-
-    public drawOpposing(stage: JQuery<HTMLElement>, position: Vector) {
-        this.element.css({
-            scale: "-1 -1"
-        });
-        this.draw(stage, new Vector(STAGE_WIDTH - position.x, STAGE_HEIGHT - position.y));
     }
 };
