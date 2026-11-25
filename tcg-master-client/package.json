@@ -18,6 +18,7 @@
   },
   "dependencies": {
     "jquery": "^4.0.0",
+    "jquery.easing": "^1.4.1",
     "socket.io-client": "^4.8.4"
   }
 }

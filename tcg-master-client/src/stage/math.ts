@@ -1,3 +1,5 @@
+import { STAGE_SIZE } from "./stage";
+
 export class Vector {
     public x: number;
     public y: number;
@@ -9,5 +11,9 @@ export class Vector {
 
     public translate(x: number, y: number): Vector {
         return new Vector(this.x + x, this.y + y);
+    }
+
+    public invert(): Vector {
+        return new Vector(STAGE_SIZE.x - this.x, STAGE_SIZE.y - this.y);
     }
 };

@@ -68,6 +68,10 @@ export class Attachments extends Location {
         }
     }
 
+    protected override get clientTag(): string | number | undefined {
+        return this.pokemon.id;
+    }
+
     public constructor(id: number, engine: GameEngine, owner: Player, pokemon: PokemonCard) {
         super(id, engine, owner);
         this.pokemon_id = pokemon.id;

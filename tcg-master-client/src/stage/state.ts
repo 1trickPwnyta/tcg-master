@@ -13,6 +13,7 @@ export type PokemonCardState = CardState & {
 
 export type State = {
     self: {
+        id: number,
         name: string,
         active?: PokemonCardState,
         bench: PokemonCardState[],
@@ -22,6 +23,7 @@ export type State = {
         prizes: number
     };
     opponent: {
+        id: number,
         name: string,
         active?: PokemonCardState,
         bench: PokemonCardState[],

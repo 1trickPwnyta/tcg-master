@@ -72,7 +72,7 @@ export class Client_Human extends Client {
     }
 
     public override sendEvent(event: ClientEvent) {
-        this.socket.emit("EVENT", event);
+        this.socket.emit("EVENT", JSON.stringify(event, ClientSerializationReplace));
     }
 
     public override sendInfo(...parts: any[]) {

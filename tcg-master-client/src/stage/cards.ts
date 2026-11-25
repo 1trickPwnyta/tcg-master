@@ -8,10 +8,16 @@ const CARD_ZINDEX = 100;
 
 export class Card extends StageObject {
     public readonly id: number;
+    private readonly _state: CardState;
+
+    public get state(): CardState {
+        return this._state;
+    }
 
     public constructor(stage: Stage, state: CardState) {
         super(stage, "card");
         this.id = state.id;
+        this._state = state;
         this.element.css({
             width: `${CARD_SIZE.x}px`,
             height: `${CARD_SIZE.y}px`,
@@ -23,6 +29,7 @@ export class Card extends StageObject {
     }
 
     public override remove() {
+        super.remove();
         this.stage.removeCard(this);
     }
 }
@@ -31,6 +38,10 @@ export class PokemonCard extends Card {
     public damage: number;
     private attachments: Card[];
     private damageCounters: StageObject;
+
+    public override get state(): PokemonCardState {
+        return super.state as PokemonCardState;
+    }
 
     public constructor(stage: Stage, state: PokemonCardState) {
         super(stage, state);

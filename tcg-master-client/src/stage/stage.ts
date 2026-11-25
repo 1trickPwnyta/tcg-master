@@ -2,14 +2,15 @@ import $ from "jquery";
 import { Vector } from "./math";
 import type { PokemonCardState, State } from "./state";
 import { Card, PokemonCard } from "./cards";
-import { StageObject } from "./object";
+import { EventHandler } from "./events/EventHandler";
+import { EventHandler_CardMove } from "./events/EventHandler_CardMove";
+import { EventHandler_Damage } from "./events/EventHandler_Damage";
 
 export const STAGE_SIZE = new Vector(600, 600);
 export const CARD_SIZE = new Vector(72, 99);
-
-const ACTIVE_POSITION = new Vector(STAGE_SIZE.x / 2, STAGE_SIZE.y * 2 / 3);
-const BENCH_POSITION = new Vector(STAGE_SIZE.x / 2, STAGE_SIZE.y * 9 / 10);
-const BENCH_OFFSET = STAGE_SIZE.x / 7;
+export const ACTIVE_POSITION = new Vector(STAGE_SIZE.x / 2, STAGE_SIZE.y * 2 / 3);
+export const BENCH_POSITION = new Vector(STAGE_SIZE.x / 2, STAGE_SIZE.y * 9 / 10);
+export const BENCH_OFFSET = STAGE_SIZE.x / 7;
 
 export enum Perspective {
     Favoring,
@@ -19,6 +20,7 @@ export enum Perspective {
 export type StageEvent = { type: string, args: any };
 
 export class Stage {
+    private handlers: Map<string, EventHandler>;
     private _state?: State;
     private cards: Card[] = [];
     private freeze: boolean = false;
@@ -31,8 +33,28 @@ export class Stage {
         return $("#stage");
     }
 
-    public getCard(id: number): Card {
-        return this.cards.find(c => c.id === id)!;
+    public constructor() {
+        this.handlers = new Map<string, EventHandler>();
+        this.handlers.set("card_move", new EventHandler_CardMove(this));
+        this.handlers.set("damage", new EventHandler_Damage(this));
+    }
+
+    public isMe(id: number): boolean {
+        return id === this.state?.self.id;
+    }
+
+    public getPlayer(id: number): any {
+        if (id === this.state?.self.id) {
+            return this.state.self;
+        } else if (id === this.state?.opponent.id) {
+            return this.state.opponent;
+        }
+
+        return null;
+    }
+
+    public getCard(id: number): Card | undefined {
+        return this.cards.find(c => c.id === id);
     }
 
     public addCard(card: Card) {
@@ -49,37 +71,15 @@ export class Stage {
     }
 
     public handleEvent(event: StageEvent, callback: () => void) {
-        switch (event.type) {
-            case "damage": this.handleDamageEvent(event.args, callback); break;
-            default: console.error(`Attempted to process unknown event type: ${event.type}`);
+        const handler = this.handlers.get(event.type);
+        if (handler) {
+            handler.onEvent(event.args, callback);
+        } else {
+            console.error(`Attempted to process unknown event type: ${event.type}`);
         }
     }
 
-    private handleDamageEvent(args: any, callback: () => void) {
-        const card = this.getCard(args.receiver) as PokemonCard;
-        const effect = new StageObject(this, "damage");
-        effect.position = card.position;
-        effect.perspective = card.perspective;
-        effect.neverFlip = true;
-        effect.draw();
-        effect.element.on("animationend", () => effect.remove());
-        setTimeout(() => {
-            const number = new StageObject(this, "damage-number");
-            number.element.text(args.amount.toString());
-            number.position = card.position;
-            number.perspective = card.perspective;
-            number.neverFlip = true;
-            number.draw();
-            setTimeout(() => {
-                card.damage += args.amount;
-                card.draw();
-                number.element.fadeOut(500, function() { number.remove(); });
-                callback();
-            }, 1500);
-        }, 200);
-    }
-
-    private draw() {
+    public draw() {
         if (this.freeze) return;
 
         const stage = $("#stage");
@@ -87,12 +87,12 @@ export class Stage {
         this.cards = [];
         
         if (this.state) {
-            this.drawPlayer(stage, Perspective.Favoring, this.state.self.active, this.state.self.bench);
-            this.drawPlayer(stage, Perspective.Opposing, this.state.opponent.active, this.state.opponent.bench);
+            this.drawPlayer(Perspective.Favoring, this.state.self.active, this.state.self.bench);
+            this.drawPlayer(Perspective.Opposing, this.state.opponent.active, this.state.opponent.bench);
         }
     }
 
-    private drawPlayer(stage: JQuery<HTMLElement>, perspective: Perspective, active: PokemonCardState | undefined, bench: PokemonCardState[]) {
+    private drawPlayer(perspective: Perspective, active: PokemonCardState | undefined, bench: PokemonCardState[]) {
         if (active) {
             const card = new PokemonCard(this, active);
             card.position = ACTIVE_POSITION;

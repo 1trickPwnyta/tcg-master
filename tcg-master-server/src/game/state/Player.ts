@@ -14,6 +14,7 @@ import { State } from "./State.js";
 
 export type PlayerView = {
     self: {
+        id: number,
         name: string,
         active?: PokemonCard,
         bench: PokemonCard[],
@@ -23,6 +24,7 @@ export type PlayerView = {
         prizes: number
     };
     opponent: {
+        id: number,
         name: string,
         active?: PokemonCard,
         bench: PokemonCard[],
@@ -100,6 +102,7 @@ export class Player extends State {
     public get view(): PlayerView {
         return {
             self: {
+                id: this.id,
                 name: this.name,
                 active: this.activePokemon,
                 bench: this.bench.cards,
@@ -109,6 +112,7 @@ export class Player extends State {
                 prizes: this.prizes.count
             },
             opponent: {
+                id: this.opponent.id,
                 name: this.opponent.name,
                 active: this.opponent.activePokemon,
                 bench: this.opponent.bench.cards,

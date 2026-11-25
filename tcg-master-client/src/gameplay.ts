@@ -91,7 +91,7 @@ export class Gameplay implements IEventConsumer {
                 break;
             case "EVENT":
                 this._busy = true;
-                this.processEvent(event.payload);
+                this.processEvent(JSON.parse(event.payload) as StageEvent);
                 break;
             case "INFO":this.processInfo(event.payload); break;
             case "LOG": this.processMessage(event.payload); break;

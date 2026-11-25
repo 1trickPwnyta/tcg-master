@@ -27,8 +27,8 @@
 
 #stage .damage {
     --frames: 10;
-    --width: 100px;
-    --height: 100px;
+    --width: 200px;
+    --height: 200px;
     width: var(--width);
     height: var(--height);
     background-image: url("/effect-graphics/damage.png");
