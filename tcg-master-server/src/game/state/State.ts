@@ -1,8 +1,8 @@
 import { GameEngine } from "../engine/GameEngine.js";
-import { Serialize } from "./serializer.js";
+import { ClientSerialize, Serialize } from "./serializer.js";
 
 export abstract class State {
-    @Serialize()
+    @Serialize() @ClientSerialize()
     public readonly id: number;
 
     public readonly engine: GameEngine;

@@ -20,6 +20,7 @@ const { DefDatabase } = await import("../defs/DefDatabase.js");
 await DefDatabase.init();
 await import("../loader.js");
 
+const MAX_DEPTH: number = 8;
 const DEBUG: boolean = false;
 
 const enum TTFlag { Exact, LowerBound, UpperBound }
@@ -34,7 +35,6 @@ parentPort?.on("message", async (context: AIContext) => {
     expectiminimax(game, context.player_id, 0, -Infinity, Infinity, 0, tt);
 });
 
-const MAX_DEPTH = 9;
 function expectiminimax(game: Game, for_player: number, depth: number, alpha: number, beta: number, actions: number, tt: Map<number, TTEntry>): { score: number } {
     const initAlpha = alpha;
     const initBeta = beta;

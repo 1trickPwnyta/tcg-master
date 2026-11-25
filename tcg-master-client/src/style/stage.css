@@ -1,0 +1,55 @@
+#stage {
+    background-color: #212121;
+    width: 600px;
+    height: 600px;
+}
+
+#stage .object {
+    position: absolute;
+    translate: -50% -50%;
+    z-index: 1000;
+}
+
+#stage .card {
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+#stage .damage-counters {
+    width: 24px;
+    height: 24px;
+    background-color: rgba(0, 0, 0, 0.6);
+    color: white;
+    border-radius: 100%;
+    text-align: center;
+}
+
+#stage .damage {
+    --frames: 10;
+    --width: 100px;
+    --height: 100px;
+    width: var(--width);
+    height: var(--height);
+    background-image: url("/effect-graphics/damage.png");
+    background-position: 0 0;
+    background-repeat: no-repeat;
+    background-size: calc(var(--width) * var(--frames)) var(--height);
+    animation: spritesheet 0.5s steps(var(--frames)) forwards;
+}
+
+#stage .damage-number {
+    font-size: 3em;
+    color: white;
+    font-weight: bold;
+    text-shadow: 0 0 4px black;
+}
+
+@keyframes spritesheet {
+    0% {
+        background-position: 0 0;
+    }
+    100% {
+        background-position: calc(var(--width) * var(--frames) * -1) 0;
+    }
+}

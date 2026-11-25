@@ -1,4 +1,5 @@
 export type CardState = {
+    id: number;
     name: string;
     graphicPath: string;
 };

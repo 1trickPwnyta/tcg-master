@@ -5,12 +5,23 @@ import { InterruptSync } from "./game/state/interrupts/Interrupt.js";
 import { Player } from "./game/state/Player.js";
 import { IToken } from "./IToken.js";
 
+export enum ClientEventType {
+    Damage = "damage"
+};
+
+export type ClientEvent = {
+    type: ClientEventType,
+    args: any
+};
+
 export abstract class Client {
     public engine: GameEngine | undefined;
     public player_id: number | undefined;
     public player?: Player;
 
     public abstract send(id: number, ...parts: any[]): void;
+
+    public abstract sendEvent(event: ClientEvent): void;
 
     public abstract sendInfo(...parts: any[]): void;
 

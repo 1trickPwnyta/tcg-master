@@ -1,4 +1,4 @@
-import { Client } from "../Client.js";
+import { Client, ClientEvent } from "../Client.js";
 import path from "path";
 import { Worker } from "worker_threads";
 import { InterruptSync } from "../game/state/interrupts/Interrupt.js";
@@ -19,9 +19,11 @@ export class Client_AI extends Client {
         super();
     }
 
-    public override send(id: number, ...parts: any[]) {
+    public override send(_: number, ...parts: any[]) {
         console.log(Client.tokenize(...parts).map(t => t.name).join(" "));
     }
+
+    public override sendEvent(_: ClientEvent) { }
 
     public override sendInfo(_: any[]) { }
 
@@ -38,7 +40,7 @@ export class Client_AI extends Client {
             return;
         }
 
-        console.log(`${Client.tokenize(...interrupt.prompt).map(t => t.name).join(" ")} [ ${interrupt.choices!.map(c => c.parts.map(p => p?.name)).join(", ")}${!interrupt.force ? ", (cancel)" : ""} ]`);
+        console.log(`${Client.tokenize(...interrupt.prompt).map(t => t.name).join(" ")} [ ${interrupt.choices!.map(c => Client.tokenize(...c.parts).map(t => t.name).join(" ")).join(", ")}${!interrupt.force ? ", (cancel)" : ""} ]`);
         this.interrupt_id = this.engine!.interrupts.get(this.player_id!)!.id!;
 
         const worker = new Worker(path.join(import.meta.dirname, "AIWorker.js"));

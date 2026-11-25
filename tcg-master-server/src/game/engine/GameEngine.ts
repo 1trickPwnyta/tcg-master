@@ -2,7 +2,7 @@ import { Client_AI } from "../../ai/Client_AI.js";
 import { Game as Game } from "../state/Game.js";
 import { Interrupt, InterruptAsync, InterruptSync } from "../state/interrupts/Interrupt.js";
 import { Player } from "../state/Player.js";
-import { Client } from "../../Client.js";
+import { Client, ClientEvent } from "../../Client.js";
 import { SetupEngine } from "./SetupEngine.js";
 import { TurnEngine } from "./TurnEngine.js";
 import { InterruptEngine } from "./InterruptEngine.js";
@@ -116,11 +116,21 @@ export class GameEngine {
 
     public sendToWithId(player: Player, id: number, ...parts: any[]) {
         if (this.simulation) return;
-        if (!this.game.winner_id) {
-            const client = this.clients.find(c => c.player_id === player.id);
-            client?.send(id, ...parts);
-        }
+        if (this.game.winner_id) return;
+        const client = this.clients.find(c => c.player_id === player.id);
+        client?.send(id, ...parts);
     }
+
+    public sendEvent(event: ClientEvent, ...message: any[]) {
+        if (this.simulation) return;
+        if (this.game.winner_id) return;
+        if (message.length) {
+            this.send(...message);
+        }
+        for (const client of this.clients) {
+            client.sendEvent(event);
+        }
+    };
 
     public showcase(card: Card) {
         for (const client of this.clients) {

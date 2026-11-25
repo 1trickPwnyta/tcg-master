@@ -5,7 +5,7 @@ import { UI } from "./ui";
 import { PvP } from "./pvp";
 import config from "../config.json" with { type: "json" };
 import { Storage } from "./storage";
-import { Stage } from "./stage/stage";
+import { Stage, type StageEvent } from "./stage/stage";
 import type { State } from "./stage/state";
 
 export class Gameplay implements IEventConsumer {
@@ -85,10 +85,13 @@ export class Gameplay implements IEventConsumer {
                 if (event.payload.tokens.length) {
                     this._busy = true;
                     this.processMessage(event.payload);
-                    setTimeout(() => this.update(), 1000);
                 } else {
                     this.nextLine();
                 }
+                break;
+            case "EVENT":
+                this._busy = true;
+                this.processEvent(event.payload);
                 break;
             case "INFO":this.processInfo(event.payload); break;
             case "LOG": this.processMessage(event.payload); break;
@@ -138,6 +141,10 @@ export class Gameplay implements IEventConsumer {
         log.scrollTop(log[0].scrollHeight);
     }
 
+    private processEvent(event: StageEvent) {
+        this.stage.handleEvent(event, () => this.update());
+    }
+
     private processMessage(entry: { id: number, tokens: { name: string, type?: string }[] }) {
         if (entry.id < 0 || this.lastLogEntry < entry.id) {
             const log = $("#console");
@@ -147,6 +154,7 @@ export class Gameplay implements IEventConsumer {
                 this.lastLogEntry = entry.id;
             }
         }
+        setTimeout(() => this.update(), 1000);
     }
 
     private processInfo(tokens: { name: string, type?: string }[]) {

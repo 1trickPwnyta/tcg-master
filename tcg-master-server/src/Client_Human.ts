@@ -1,5 +1,5 @@
 import { Socket } from "socket.io";
-import { Client } from "./Client.js";
+import { Client, ClientEvent } from "./Client.js";
 import { CommandContext } from "./commands/CommandContext.js";
 import { Command, CommandNotFoundError } from "./commands/Command.js";
 import { Player } from "./game/state/Player.js";
@@ -69,6 +69,10 @@ export class Client_Human extends Client {
             id: id,
             tokens: Client.tokenize(...parts)
         });
+    }
+
+    public override sendEvent(event: ClientEvent) {
+        this.socket.emit("EVENT", event);
     }
 
     public override sendInfo(...parts: any[]) {

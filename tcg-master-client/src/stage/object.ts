@@ -1,23 +1,32 @@
 import $ from "jquery";
 import { Vector } from "./math";
-import { Perspective, STAGE_SIZE } from "./stage";
+import { Perspective, Stage, STAGE_SIZE } from "./stage";
 
 export class StageObject {
+    public readonly stage: Stage;
     public readonly element: JQuery<HTMLElement>;
+    public position: Vector = new Vector();
+    public perspective: Perspective = Perspective.Favoring;
+    public neverFlip: boolean = false;
 
-    public constructor(className: string) {
-        this.element = $("<div>", { class: className });
+    public constructor(stage: Stage, className: string) {
+        this.stage= stage;
+        this.element = $("<div>", { class: `object ${className}` });
+        this.stage.element.append(this.element);
     }
 
-    public draw(stage: JQuery<HTMLElement>, position: Vector, perspective: Perspective) {
-        const x = perspective === Perspective.Favoring ? position.x : STAGE_SIZE.x - position.x;
-        const y = perspective === Perspective.Favoring ? position.y : STAGE_SIZE.y - position.y;
-        const scale = perspective === Perspective.Favoring ? 1 : -1;
+    public draw() {
+        const x = this.perspective === Perspective.Favoring ? this.position.x : STAGE_SIZE.x - this.position.x;
+        const y = this.perspective === Perspective.Favoring ? this.position.y : STAGE_SIZE.y - this.position.y;
+        const scale = this.perspective === Perspective.Favoring || this.neverFlip ? 1 : -1;
         this.element.css({
             left: `${x}px`,
             top: `${y}px`,
             scale: `${scale} ${scale}`
         });
-        stage.append(this.element);
+    }
+
+    public remove() {
+        this.element.remove();
     }
 };

@@ -15,6 +15,7 @@ import { Player } from "./Player.js";
 import { ClientSerialize, Serializable, Serialize } from "./serializer.js";
 import { IToken } from "../../IToken.js";
 import { InterruptSync } from "./interrupts/Interrupt.js";
+import { ClientEventType } from "../../Client.js";
 
 export type DamageContext = {
     amount: number;
@@ -206,10 +207,17 @@ export class PokemonCard extends Card {
 
         if (context.amount > 0) {
             this.damage += context.amount;
-            this.engine.send(...this.fullTokens, "took", {
-                name: context.amount.toString(),
-                type: "damage"
-            }, `damage${context.source && context.source !== "attack" ? ` due to ${context.source}` : ""}!`);
+            this.engine.sendEvent({
+                type: ClientEventType.Damage,
+                args: {
+                    receiver: this.id,
+                    amount: context.amount
+                }},
+                ...this.fullTokens, "took", {
+                    name: context.amount.toString(),
+                    type: "damage"
+                }, `damage${context.source && context.source !== "attack" ? ` due to ${context.source}` : ""}!`
+            );
 
             for (const status of this.modifiers) {
                 status.modifier.notify_damageTaken({
