@@ -189,7 +189,7 @@ export class PokemonCard extends Card {
     @ClientSerializeProxy()
     public proxy(player_id: number): any {
         if (!this.engine.game.started && player_id !== this.owner_id) {
-            return { id: this.id, name: "Face-down card", graphicPath: "back.png", damage: 0, attachments: { cards: [] } };
+            return { id: this.id, owner: this.owner_id, name: "Face-down card", graphicPath: "back.png", damage: 0, attachments: { cards: [] } };
         } else {
             return undefined;
         }

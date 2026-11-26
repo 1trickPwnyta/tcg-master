@@ -2,6 +2,8 @@
     background-color: #212121;
     width: 600px;
     height: 600px;
+    overflow: hidden;
+    position: relative;
 }
 
 #stage .object {
@@ -46,11 +48,49 @@
     background: radial-gradient(circle closest-side, black, transparent);
 }
 
+#stage .coin {
+    width: 40px;
+    height: 40px;
+    background-position: center;
+    background-size: contain;
+}
+
+#stage .coin-flip {
+    background-image: url("/coin-images/front.png");
+    animation: coin-flip 0.1s linear infinite, coin-height 0.7s;
+}
+
 @keyframes spritesheet {
     0% {
         background-position: 0 0;
     }
     100% {
         background-position: calc(var(--width) * var(--frames) * -1) 0;
+    }
+}
+
+@keyframes coin-flip {
+    0% {
+        scale: 1 0;
+    }
+    50% {
+        scale: 1 1;
+    }
+    100% {
+        scale: 1 0;
+    }
+}
+
+@keyframes coin-height {
+    0% {
+        transform: translate(0px, 60px) scale(4, 4);
+        opacity: 0;
+    }
+    50% {
+        transform: translate(0px, -60px) scale(6, 6);
+        opacity: 1;
+    }
+    100% {
+        transform: translate(0px, 0px) scale(1, 1);
     }
 }

@@ -42,9 +42,11 @@ export class Input {
     }
 
     private static startGame(name1: string, client1: Client, name2: string, client2?: Client) {
+        const engine = new GameEngine(client1, client2);
         setTimeout(() => {
-            const engine = new GameEngine(client1, client2);
             engine.start(name1, name2);
+            client1.start();
+            client2?.start();
         }, 1000); // Wait a second to allow clients to join before the game begins, if they don't nbd
     }
 };

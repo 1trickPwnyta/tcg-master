@@ -6,6 +6,7 @@ import { EventHandler } from "./events/EventHandler";
 import { EventHandler_CardMove } from "./events/EventHandler_CardMove";
 import { EventHandler_Damage } from "./events/EventHandler_Damage";
 import { EventHandler_Attack } from "./events/EventHandler_Attack";
+import { EventHandler_CoinFlip } from "./events/EventHandler_CoinFlip";
 
 export const STAGE_SIZE = new Vector(600, 600);
 export const CARD_SIZE = new Vector(72, 99);
@@ -24,7 +25,7 @@ export class Stage {
     private handlers: Map<string, EventHandler>;
     private _state?: State;
     private cards: Card[] = [];
-    private freeze: boolean = false;
+    public freeze: boolean = false;
 
     public get state(): State | undefined {
         return this._state;
@@ -39,6 +40,7 @@ export class Stage {
         this.handlers.set("card_move", new EventHandler_CardMove(this));
         this.handlers.set("attack", new EventHandler_Attack(this));
         this.handlers.set("damage", new EventHandler_Damage(this));
+        this.handlers.set("coin", new EventHandler_CoinFlip(this));
     }
 
     public isMe(id: number): boolean {

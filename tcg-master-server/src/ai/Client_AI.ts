@@ -19,6 +19,8 @@ export class Client_AI extends Client {
         super();
     }
 
+    public override start() { }
+
     public override send(_: number, ...parts: any[]) {
         console.log(Client.tokenize(...parts).map(t => t.name).join(" "));
     }

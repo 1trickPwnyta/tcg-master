@@ -37,12 +37,12 @@ export class Client_Human extends Client {
         });
 
         socket.on("JOIN", () => {
-            if (this.engine?.game) {
-                for (const message of this.engine!.game.retrieveMessages()) {
+            if (this.engine?.game && this.player_id) {
+                for (const message of this.engine.game.retrieveMessages()) {
                     this.sendBacklog(message.id, ...message.parts);
                 }
                 this.sync();
-                const interrupt = this.engine!.interrupts.get(this.player_id!);
+                const interrupt = this.engine.interrupts.get(this.player_id);
                 if (interrupt) {
                     this.prompt(interrupt);
                 }
@@ -54,6 +54,10 @@ export class Client_Human extends Client {
         socket.on("disconnect", () => {
             console.log(`Client disconnected: ${socket.id}`);
         });
+    }
+
+    public override start() {
+        this.socket.emit("START");
     }
 
     public override sync() {

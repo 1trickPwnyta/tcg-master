@@ -23,11 +23,11 @@ export class Gameplay implements IEventConsumer {
                 reconnectionAttempts: Infinity,
                 reconnectionDelay: 1000
             });
+            socket.on("START", () => Gameplay.start(socket));
             socket.emit("START", {
                 name: Storage.User!.name,
                 opponent: "com"
             });
-            Gameplay.start(socket);
         });
     }
 

@@ -9,6 +9,7 @@ export enum ClientEventType {
      CardMove = "card_move"
     ,Attack = "attack"
     ,Damage = "damage"
+    ,CoinFlip = "coin"
 };
 
 export type ClientEvent = {
@@ -20,6 +21,8 @@ export abstract class Client {
     public engine: GameEngine | undefined;
     public player_id: number | undefined;
     public player?: Player;
+
+    public abstract start(): void;
 
     public abstract send(id: number, ...parts: any[]): void;
 

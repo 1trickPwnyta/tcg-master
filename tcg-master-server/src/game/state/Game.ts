@@ -1,3 +1,4 @@
+import { ClientEventType } from "../../Client.js";
 import { AttackResult } from "../attacks/AttackContext.js";
 import { GameEngine } from "../engine/GameEngine.js";
 import { Interrupt, InterruptSync } from "./interrupts/Interrupt.js";
@@ -126,11 +127,16 @@ export class Game extends State {
         const heads = { name: "heads", type: "heads" };
         const tails = { name: "tails", type: "tails" };
         const result = Math.random() < 0.5;
+        let message;
         if (player) {
-            this.engine.send(player, "flipped a coin... It was", result ? heads : tails, "!");
+            message = [ player, "flipped a coin... It was", result ? heads : tails, "!" ];
         } else {
-            this.engine.send("A coin was flipped... It was", result ? heads : tails, "!");
+            message = [ "A coin was flipped... It was", result ? heads : tails, "!" ];
         }
+        this.engine.sendEvent({
+            type: ClientEventType.CoinFlip,
+            args: { result: result }
+        }, ...message);
         return result;
     }
 
