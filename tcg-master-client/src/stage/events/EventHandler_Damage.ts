@@ -8,6 +8,7 @@ export class EventHandler_Damage extends EventHandler {
     public onEvent(args: { receiver: number, amount: number }, callback: () => void) {
         const card = this.stage.getCard(args.receiver) as PokemonCard;
         const effect = new StageObject(this.stage, "damage");
+        effect.persistent = true;
         effect.position = card.position;
         effect.perspective = card.perspective;
         effect.neverFlip = true;
@@ -15,6 +16,7 @@ export class EventHandler_Damage extends EventHandler {
         effect.element.on("animationend", () => effect.remove());
         setTimeout(() => {
             const number = new StageObject(this.stage, "damage-number");
+            number.persistent = true;
             number.element.text(args.amount.toString());
             number.position = card.position;
             number.perspective = card.perspective;

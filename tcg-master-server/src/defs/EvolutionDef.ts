@@ -25,7 +25,7 @@ export class EvolutionDef extends Def {
         }
 
         for (const evolution of this.next) {
-            if (DefDatabase.get<EvolutionDef>(evolution).evolvesEver(next)) {
+            if (DefDatabase.get<EvolutionDef>(evolution)?.evolvesEver(next)) {
                 return true;
             }
         }

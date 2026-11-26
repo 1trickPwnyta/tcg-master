@@ -11,25 +11,18 @@ export type PokemonCardState = CardState & {
     };
 };
 
+export type Player = {
+    id: number,
+    name: string,
+    active?: PokemonCardState,
+    bench: PokemonCardState[],
+    hand: CardState[] | number,
+    discard: CardState[],
+    deck: number,
+    prizes: number
+};
+
 export type State = {
-    self: {
-        id: number,
-        name: string,
-        active?: PokemonCardState,
-        bench: PokemonCardState[],
-        hand: CardState[],
-        discard: CardState[],
-        deck: number,
-        prizes: number
-    };
-    opponent: {
-        id: number,
-        name: string,
-        active?: PokemonCardState,
-        bench: PokemonCardState[],
-        hand: number,
-        discard: CardState[],
-        deck: number,
-        prizes: number
-    };
+    self: Player;
+    opponent: Player;
 };

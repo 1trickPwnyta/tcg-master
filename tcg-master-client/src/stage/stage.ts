@@ -1,6 +1,6 @@
 import $ from "jquery";
 import { Vector } from "./math";
-import type { PokemonCardState, State } from "./state";
+import type { Player, State } from "./state";
 import { Card, PokemonCard } from "./cards";
 import { EventHandler } from "./events/EventHandler";
 import { EventHandler_CardMove } from "./events/EventHandler_CardMove";
@@ -8,13 +8,15 @@ import { EventHandler_Damage } from "./events/EventHandler_Damage";
 import { EventHandler_Attack } from "./events/EventHandler_Attack";
 import { EventHandler_CoinFlip } from "./events/EventHandler_CoinFlip";
 import { EventHandler_Banner } from "./events/EventHandler_Banner";
-import type { StageObject } from "./object";
+import { StageObject } from "./object";
 
 export const STAGE_SIZE = new Vector(600, 600);
 export const CARD_SIZE = new Vector(72, 99);
 export const ACTIVE_POSITION = new Vector(STAGE_SIZE.x / 2, STAGE_SIZE.y * 2 / 3);
 export const BENCH_POSITION = new Vector(STAGE_SIZE.x / 2, STAGE_SIZE.y * 9 / 10);
 export const BENCH_OFFSET = STAGE_SIZE.x / 7;
+export const DECK_POSITION = new Vector(STAGE_SIZE.x * 31 / 40, STAGE_SIZE.y * 7 / 11);
+export const DISCARD_POSITION = new Vector(STAGE_SIZE.x * 11 / 12, STAGE_SIZE.y * 31 / 44);
 
 export enum Perspective {
     Favoring,
@@ -104,26 +106,48 @@ export class Stage {
         this.cards = [];
         
         if (this.state) {
-            this.drawPlayer(Perspective.Favoring, this.state.self.active, this.state.self.bench);
-            this.drawPlayer(Perspective.Opposing, this.state.opponent.active, this.state.opponent.bench);
+            this.drawPlayer(Perspective.Favoring, this.state.self);
+            this.drawPlayer(Perspective.Opposing, this.state.opponent);
         }
     }
 
-    private drawPlayer(perspective: Perspective, active: PokemonCardState | undefined, bench: PokemonCardState[]) {
-        if (active) {
-            const card = new PokemonCard(this, active);
+    private drawPlayer(perspective: Perspective, player: Player) {
+        if (player.active) {
+            const card = new PokemonCard(this, player.active);
             card.position = ACTIVE_POSITION;
             card.perspective = perspective;
             card.draw();
         }
 
-        let benchPosition = BENCH_POSITION.translate(-(bench.length - 1) * BENCH_OFFSET / 2, 0);
-        for (let i = 0; i < bench.length; i++) {
-            const card = new PokemonCard(this, bench[i]);
+        let benchPosition = BENCH_POSITION.translate(-(player.bench.length - 1) * BENCH_OFFSET / 2, 0);
+        for (let i = 0; i < player.bench.length; i++) {
+            const card = new PokemonCard(this, player.bench[i]);
             card.position = benchPosition;
             card.perspective = perspective;
             card.draw();
             benchPosition = benchPosition.translate(BENCH_OFFSET, 0);
+        }
+
+        if (player.deck) {
+            const deck = new StageObject(this, "deck");
+            deck.element.css({
+                width: `${CARD_SIZE.x}px`,
+                height: `${CARD_SIZE.y}px`,
+                boxShadow: `-${player.deck / 10}px ${player.deck / 5}px 0px #373455`
+            });
+            deck.position = DECK_POSITION;
+            deck.perspective = perspective;
+            deck.draw();
+        }
+
+        if (player.discard.length) {
+            const card = new Card(this, player.discard[player.discard.length - 1]);
+            card.element.css({
+                boxShadow: `-${player.discard.length / 10}px ${player.discard.length / 5}px 0px #555228`
+            });
+            card.position = DISCARD_POSITION;
+            card.perspective = perspective;
+            card.draw();
         }
     }
 };

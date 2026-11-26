@@ -18,12 +18,15 @@ export class EventHandler_CoinFlip extends EventHandler {
         coin.element.addClass("coin-flip");
         coin.position = position;
         let front = true;
+        let flipping = true;
         coin.element.on("animationiteration", function() {
+            if (!flipping) return;
             front = !front;
             coin.element.css("background-image", `url("/coin-images/${front ? "front" : "back"}.png")`);
         });
         coin.draw();
         setTimeout(() => {
+            flipping = false;
             coin.element.removeClass("coin-flip");
             coin.element.css("background-image", `url("/coin-images/${result ? "front" : "back"}.png")`);
             setTimeout(() => coin.element.fadeOut(1000), 1000);

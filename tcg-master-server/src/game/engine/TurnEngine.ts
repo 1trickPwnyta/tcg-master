@@ -6,6 +6,7 @@ import { Choice } from "../state/interrupts/Choice.js";
 import { EnergyCard } from "../state/EnergyCard.js";
 import { PokemonCardWrapper } from "../state/PokemonCardWrapper.js";
 import { MenuOption } from "../state/interrupts/MenuOption.js";
+import { ClientEventType } from "../../Client.js";
 
 export class TurnEngine extends SubEngine {
     private get turn(): Turn {
@@ -44,6 +45,14 @@ export class TurnEngine extends SubEngine {
         this.state.betweenTurns = false;
         this.engine.send();
         this.engine.send("Beginning of", this.engine.game.activePlayer, "'s turn.");
+        this.engine.sendEventTo(this.engine.game.inactivePlayer, {
+            type: ClientEventType.Banner,
+            args: { message: `${this.engine.game.activePlayer.name}'s turn` }
+        });
+        this.engine.sendEventTo(this.engine.game.activePlayer, {
+            type: ClientEventType.Banner,
+            args: { message: "Your turn" }
+        });
         player.draw();
         this.engine.game.update();
     }

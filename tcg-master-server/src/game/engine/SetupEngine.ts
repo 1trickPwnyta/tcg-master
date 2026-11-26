@@ -4,29 +4,55 @@ import { Player } from "../state/Player.js";
 import { SubEngine } from "./SubEngine.js";
 import { InterruptType } from "../state/interrupts/InterruptType.js";
 import { DefDatabase } from "../../defs/DefDatabase.js";
-import { PokemonCardDef } from "../../defs/PokemonCardDef.js";
-import { EnergyCardDef } from "../../defs/EnergyCardDef.js";
-import { TrainerCardDef } from "../../defs/TrainerCardDef.js";
 import { CardFactory } from "../CardFactory.js";
 import { Choice } from "../state/interrupts/Choice.js";
 import { PokemonCard } from "../state/PokemonCard.js";
 import { ClientEventType } from "../../Client.js";
+import { CardDef } from "../../defs/CardDef.js";
 
 export class SetupEngine extends SubEngine {
     public update() {
         if (this.state.players.find(p => p.deck.count === 0)) {
             this.engine.send("Starting game between", this.state.players[0], "and", this.state.players[1], ".");
             const deck1 = [
-                { def: DefDatabase.get<PokemonCardDef>("BaseSet.Poliwag"), count: 0 },
-                { def: DefDatabase.get<PokemonCardDef>("BaseSet.Poliwhirl"), count: 0 },
-                { def: DefDatabase.get<PokemonCardDef>("BaseSet.Magikarp"), count: 36 },
-                { def: DefDatabase.get<EnergyCardDef>("BaseSet.WaterEnergy"), count: 24 },
-                { def: DefDatabase.get<EnergyCardDef>("BaseSet.DoubleColorlessEnergy"), count: 0 },
-                { def: DefDatabase.get<PokemonCardDef>("BaseSet.Bill"), count: 0 }
+                { def: DefDatabase.get<CardDef>("BaseSet.Hitmonchan"), count: 4 },
+                { def: DefDatabase.get<CardDef>("BaseSet.Electabuzz"), count: 3 },
+                { def: DefDatabase.get<CardDef>("BaseSet.Farfetchd"), count: 2 },
+                { def: DefDatabase.get<CardDef>("BaseSet.Doduo"), count: 2 },
+                { def: DefDatabase.get<CardDef>("BaseSet.Chansey"), count: 1 },
+                { def: DefDatabase.get<CardDef>("BaseSet.Bill"), count: 4 },
+                { def: DefDatabase.get<CardDef>("BaseSet.ProfessorOak"), count: 4 },
+                { def: DefDatabase.get<CardDef>("BaseSet.EnergyRemoval"), count: 4 },
+                { def: DefDatabase.get<CardDef>("BaseSet.GustOfWind"), count: 3 },
+                { def: DefDatabase.get<CardDef>("BaseSet.ScoopUp"), count: 3 },
+                { def: DefDatabase.get<CardDef>("BaseSet.EnergyRetrieval"), count: 3 },
+                { def: DefDatabase.get<CardDef>("BaseSet.ItemFinder"), count: 3 },
+                { def: DefDatabase.get<CardDef>("BaseSet.SuperEnergyRemoval"), count: 2 },
+                { def: DefDatabase.get<CardDef>("BaseSet.PlusPower"), count: 2 },
+                { def: DefDatabase.get<CardDef>("BaseSet.Lass"), count: 1 },
+                { def: DefDatabase.get<CardDef>("BaseSet.FightingEnergy"), count: 9 },
+                { def: DefDatabase.get<CardDef>("BaseSet.LightningEnergy"), count: 7 },
+                { def: DefDatabase.get<CardDef>("BaseSet.DoubleColorlessEnergy"), count: 2 }
             ];
             const deck2 = [
-                { def: DefDatabase.get<EnergyCardDef>("BaseSet.PsychicEnergy"), count: 30 },
-                { def: DefDatabase.get<TrainerCardDef>("BaseSet.Doduo"), count: 30 }
+                { def: DefDatabase.get<CardDef>("BaseSet.Squirtle"), count: 4 },
+                { def: DefDatabase.get<CardDef>("BaseSet.Wartortle"), count: 1 },
+                { def: DefDatabase.get<CardDef>("BaseSet.Blastoise"), count: 3 },
+                { def: DefDatabase.get<CardDef>("BaseSet.Magikarp"), count: 4 },
+                { def: DefDatabase.get<CardDef>("BaseSet.Gyarados"), count: 3 },
+                { def: DefDatabase.get<CardDef>("BaseSet.Chansey"), count: 1 },
+                { def: DefDatabase.get<CardDef>("BaseSet.ProfessorOak"), count: 4 },
+                { def: DefDatabase.get<CardDef>("BaseSet.ComputerSearch"), count: 4 },
+                { def: DefDatabase.get<CardDef>("BaseSet.EnergyRetrieval"), count: 4 },
+                { def: DefDatabase.get<CardDef>("BaseSet.PokemonBreeder"), count: 4 },
+                { def: DefDatabase.get<CardDef>("BaseSet.Bill"), count: 3 },
+                { def: DefDatabase.get<CardDef>("BaseSet.SuperPotion"), count: 3 },
+                { def: DefDatabase.get<CardDef>("BaseSet.Switch"), count: 3 },
+                { def: DefDatabase.get<CardDef>("BaseSet.ItemFinder"), count: 2 },
+                { def: DefDatabase.get<CardDef>("BaseSet.Maintenance"), count: 1 },
+                { def: DefDatabase.get<CardDef>("BaseSet.SuperEnergyRemoval"), count: 1 },
+                { def: DefDatabase.get<CardDef>("BaseSet.Lass"), count: 1 },
+                { def: DefDatabase.get<CardDef>("BaseSet.WaterEnergy"), count: 14 }
             ];
             for (const blueprint of deck1) {
                 for (let i = 0; i < blueprint.count; i++) {

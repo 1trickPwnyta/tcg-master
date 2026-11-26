@@ -127,10 +127,20 @@ export class GameEngine {
         if (message.length) {
             this.send(...message);
         }
-        for (const client of this.clients) {
-            client.sendEvent(event);
+        for (const player of this.game.players) {
+            this.sendEventTo(player, event);
         }
     };
+
+    public sendEventTo(player: Player, event: ClientEvent, ...message: any[]) {
+        if (this.simulation) return;
+        if (this.game.winner_id) return;
+        if (message.length) {
+            this.sendTo(player, ...message);
+        }
+        const client = this.clients.find(c => c.player_id === player.id);
+        client?.sendEvent(event);
+    }
 
     public sendSync() {
         for (const client of this.clients) {

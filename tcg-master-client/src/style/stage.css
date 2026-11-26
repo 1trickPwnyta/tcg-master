@@ -29,6 +29,13 @@
     background-repeat: no-repeat;
 }
 
+#stage .deck {
+    background-image: url("/card-images/back.png");
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
 #stage .damage-counters {
     width: 24px;
     height: 24px;
