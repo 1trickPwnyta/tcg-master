@@ -4,6 +4,7 @@ import { Perspective, Stage } from "./stage";
 
 export class StageObject {
     public readonly stage: Stage;
+    public persistent: boolean = false;
     public readonly element: JQuery<HTMLElement>;
     public position: Vector = new Vector();
     public perspective: Perspective = Perspective.Favoring;
@@ -14,7 +15,8 @@ export class StageObject {
     }
 
     public constructor(stage: Stage, className: string) {
-        this.stage= stage;
+        this.stage = stage;
+        this.stage.addObject(this);
         this.element = $("<div>", { class: `object ${className}` });
         this.stage.element.append(this.element);
     }
@@ -34,6 +36,7 @@ export class StageObject {
     }
 
     public remove() {
+        this.stage.removeObject(this);
         this.element.remove();
     }
 };

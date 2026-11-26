@@ -7,6 +7,8 @@ import { EventHandler_CardMove } from "./events/EventHandler_CardMove";
 import { EventHandler_Damage } from "./events/EventHandler_Damage";
 import { EventHandler_Attack } from "./events/EventHandler_Attack";
 import { EventHandler_CoinFlip } from "./events/EventHandler_CoinFlip";
+import { EventHandler_Banner } from "./events/EventHandler_Banner";
+import type { StageObject } from "./object";
 
 export const STAGE_SIZE = new Vector(600, 600);
 export const CARD_SIZE = new Vector(72, 99);
@@ -24,6 +26,7 @@ export type StageEvent = { type: string, args: any };
 export class Stage {
     private handlers: Map<string, EventHandler>;
     private _state?: State;
+    private readonly objects: StageObject[] = [];
     private cards: Card[] = [];
     public freeze: boolean = false;
 
@@ -37,6 +40,7 @@ export class Stage {
 
     public constructor() {
         this.handlers = new Map<string, EventHandler>();
+        this.handlers.set("banner", new EventHandler_Banner(this));
         this.handlers.set("card_move", new EventHandler_CardMove(this));
         this.handlers.set("attack", new EventHandler_Attack(this));
         this.handlers.set("damage", new EventHandler_Damage(this));
@@ -55,6 +59,14 @@ export class Stage {
         }
 
         return null;
+    }
+
+    public addObject(object: StageObject) {
+        this.objects.push(object);
+    }
+
+    public removeObject(object: StageObject) {
+        this.objects.splice(this.objects.indexOf(object), 1);
     }
 
     public getCard(id: number): Card | undefined {
@@ -86,8 +98,9 @@ export class Stage {
     public draw() {
         if (this.freeze) return;
 
-        const stage = $("#stage");
-        stage.html("");
+        for (const object of this.objects.filter(o => !o.persistent)) {
+            object.remove();
+        }
         this.cards = [];
         
         if (this.state) {

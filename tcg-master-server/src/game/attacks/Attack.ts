@@ -102,7 +102,10 @@ export class Attack implements ITargetable {
         const pokemon = engine.game.activePokemon;
         engine.game.turn!.phase = "attack";
         engine.showcase(pokemon);
-        engine.send(...pokemon.fullTokens, "used", this, "!");
+        engine.sendEvent({
+            type: ClientEventType.Banner,
+            args: { message: this.name }
+        }, ...pokemon.fullTokens, "used", this, "!");
 
         const context = new AttackContext(engine, this, this.damage, ...targets);
         const modifierContext = {

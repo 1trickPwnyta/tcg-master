@@ -12,6 +12,17 @@
     z-index: 1000;
 }
 
+#stage .banner {
+    background: linear-gradient(to bottom, transparent 0%, #1a1a1add 10%, #1a1a1add 80%, transparent 100%);
+    width: 100%;
+    height: 15%;
+    font-size: 5cqh;
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
 #stage .card {
     background-size: contain;
     background-position: center;
@@ -72,12 +83,15 @@
 @keyframes coin-flip {
     0% {
         scale: 1 0;
+        filter: brightness(25%);
     }
     50% {
         scale: 1 1;
+        filter: brightness(100%);
     }
     100% {
         scale: 1 0;
+        filter: brightness(25%);
     }
 }
 

@@ -10,6 +10,7 @@ import { TrainerCardDef } from "../../defs/TrainerCardDef.js";
 import { CardFactory } from "../CardFactory.js";
 import { Choice } from "../state/interrupts/Choice.js";
 import { PokemonCard } from "../state/PokemonCard.js";
+import { ClientEventType } from "../../Client.js";
 
 export class SetupEngine extends SubEngine {
     public update() {
@@ -91,6 +92,10 @@ export class SetupEngine extends SubEngine {
                 }
                 this.state.started = true;
                 this.engine.sendSync();
+                this.engine.sendEvent({
+                    type: ClientEventType.Banner,
+                    args: { message: "Ready!" }
+                });
                 const firstPlayer = this.engine.game.flipCoin() ? this.state.players[0] : this.state.players[1];
                 this.engine.send(firstPlayer, "will go first.");
                 this.engine.send();

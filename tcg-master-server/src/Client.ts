@@ -6,7 +6,8 @@ import { Player } from "./game/state/Player.js";
 import { IToken } from "./IToken.js";
 
 export enum ClientEventType {
-     CardMove = "card_move"
+     Banner = "banner"
+    ,CardMove = "card_move"
     ,Attack = "attack"
     ,Damage = "damage"
     ,CoinFlip = "coin"

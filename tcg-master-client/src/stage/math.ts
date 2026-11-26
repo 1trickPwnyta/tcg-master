@@ -13,6 +13,10 @@ export class Vector {
         return new Vector(this.x + x, this.y + y);
     }
 
+    public half(): Vector {
+        return new Vector(this.x / 2, this.y / 2);
+    }
+
     public invert(): Vector {
         return new Vector(STAGE_SIZE.x - this.x, STAGE_SIZE.y - this.y);
     }
