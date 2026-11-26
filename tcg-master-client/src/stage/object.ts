@@ -10,13 +10,17 @@ export class StageObject {
     public neverFlip: boolean = false;
 
     public get actualPosition(): Vector {
-        return this.perspective === Perspective.Favoring ? this.position : this.position.invert();
+        return this.perspectivePosition(this.position);
     }
 
     public constructor(stage: Stage, className: string) {
         this.stage= stage;
         this.element = $("<div>", { class: `object ${className}` });
         this.stage.element.append(this.element);
+    }
+
+    public perspectivePosition(position: Vector): Vector {
+        return this.perspective === Perspective.Favoring ? position : position.invert();
     }
 
     public draw() {

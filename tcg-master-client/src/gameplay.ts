@@ -154,7 +154,7 @@ export class Gameplay implements IEventConsumer {
                 this.lastLogEntry = entry.id;
             }
         }
-        setTimeout(() => this.update(), 1000);
+        this.update();
     }
 
     private processInfo(tokens: { name: string, type?: string }[]) {

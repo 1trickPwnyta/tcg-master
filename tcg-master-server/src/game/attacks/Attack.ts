@@ -12,6 +12,7 @@ import { AttackContext, AttackResult } from "./AttackContext.js";
 import { Interrupt } from "../state/interrupts/Interrupt.js";
 import { IToken } from "../../IToken.js";
 import { Def } from "../../defs/Def.js";
+import { ClientEventType } from "../../Client.js";
 
 const __dirname = import.meta.dirname;
 
@@ -132,6 +133,7 @@ export class Attack implements ITargetable {
 
         let result;
         if (!context.failed) {
+            engine.sendEvent({ type: ClientEventType.Attack, args: { attacker: pokemon.id } });
             result = context.resolve();
         } else {
             engine.send(...pokemon.fullTokens, "'s attack failed.");

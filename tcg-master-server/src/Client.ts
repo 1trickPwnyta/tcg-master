@@ -7,6 +7,7 @@ import { IToken } from "./IToken.js";
 
 export enum ClientEventType {
      CardMove = "card_move"
+    ,Attack = "attack"
     ,Damage = "damage"
 };
 

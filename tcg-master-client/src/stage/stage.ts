@@ -5,6 +5,7 @@ import { Card, PokemonCard } from "./cards";
 import { EventHandler } from "./events/EventHandler";
 import { EventHandler_CardMove } from "./events/EventHandler_CardMove";
 import { EventHandler_Damage } from "./events/EventHandler_Damage";
+import { EventHandler_Attack } from "./events/EventHandler_Attack";
 
 export const STAGE_SIZE = new Vector(600, 600);
 export const CARD_SIZE = new Vector(72, 99);
@@ -36,6 +37,7 @@ export class Stage {
     public constructor() {
         this.handlers = new Map<string, EventHandler>();
         this.handlers.set("card_move", new EventHandler_CardMove(this));
+        this.handlers.set("attack", new EventHandler_Attack(this));
         this.handlers.set("damage", new EventHandler_Damage(this));
     }
 

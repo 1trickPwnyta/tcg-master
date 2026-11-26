@@ -42,7 +42,8 @@
     font-size: 3em;
     color: white;
     font-weight: bold;
-    text-shadow: 0 0 4px black;
+    text-shadow: 0 0 15px black;
+    background: radial-gradient(circle closest-side, black, transparent);
 }
 
 @keyframes spritesheet {
