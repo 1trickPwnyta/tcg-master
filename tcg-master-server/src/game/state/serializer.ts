@@ -2,6 +2,9 @@ import { GameEngine } from "../engine/GameEngine.js";
 
 const SERIALIZER_KEY = Symbol("state_serialization");
 const CLIENT_SERIALIZER_KEY = Symbol("client_state_serialization");
+const CLIENT_SERIALIZER_PROXY_KEY = Symbol("client_state_proxy");
+
+(Symbol as any).metadata ??= Symbol("Symbol.metadata");
 
 export const ClassRegistry = new Map<string, any>();
 
@@ -91,7 +94,7 @@ export function SerializationHydrate(state: any, engine?: GameEngine): any {
 };
 
 export function ClientSerialize() {
-    return (_value: any, context: ClassFieldDecoratorContext) => {
+    return (_: any, context: ClassFieldDecoratorContext) => {
         const key = context.name as string;
         if (!context.metadata![CLIENT_SERIALIZER_KEY]) {
             context.metadata![CLIENT_SERIALIZER_KEY] = [];
@@ -103,22 +106,40 @@ export function ClientSerialize() {
     };
 };
 
-export function ClientSerializationReplace(_key: string, value: any) {
-    if (value === null || typeof value !== "object") {
-        return value;
+export function ClientSerializeProxy() {
+    return (_: any, context: ClassMethodDecoratorContext) => {
+        context.metadata![CLIENT_SERIALIZER_PROXY_KEY] = context.name;
     }
+}
 
-    const fields = value.constructor?.[CLIENT_SERIALIZER_KEY];
-
-    if (fields) {
-        const obj: Record<string, any> = { __type: value.constructor.name };
-        for (const field of fields) {
-            obj[field] = value[field];
+export function ClientSerializationReplacer(player_id: number) {
+    return function ClientSerializationReplace(_: string, value: any) {
+        if (value === null || typeof value !== "object") {
+            return value;
         }
-        return obj;
-    } else if (value.constructor.name === "Object" || Array.isArray(value)) {
-        return value;
-    } else {
-        return null;
-    }
-};
+
+        const proxyName = value.constructor?.[Symbol.metadata]?.[CLIENT_SERIALIZER_PROXY_KEY];
+        if (proxyName) {
+            const proxyMethod = value[proxyName];
+            if (typeof proxyMethod === "function") {
+                const proxy = proxyMethod.call(value, player_id);
+                if (proxy !== undefined) {
+                    return proxy;
+                }
+            }
+        }
+
+        const fields = value.constructor?.[CLIENT_SERIALIZER_KEY];
+        if (fields) {
+            const obj: Record<string, any> = { __type: value.constructor.name };
+            for (const field of fields) {
+                obj[field] = value[field];
+            }
+            return obj;
+        } else if (value.constructor.name === "Object" || Array.isArray(value)) {
+            return value;
+        } else {
+            return null;
+        }
+    };
+}

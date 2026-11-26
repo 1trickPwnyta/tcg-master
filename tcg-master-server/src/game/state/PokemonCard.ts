@@ -12,7 +12,7 @@ import { Choice } from "./interrupts/Choice.js";
 import { InterruptResolution } from "./interrupts/InterruptResolution.js";
 import { Location } from "./Location.js";
 import { Player } from "./Player.js";
-import { ClientSerialize, Serializable, Serialize } from "./serializer.js";
+import { ClientSerialize, ClientSerializeProxy, Serializable, Serialize } from "./serializer.js";
 import { IToken } from "../../IToken.js";
 import { InterruptSync } from "./interrupts/Interrupt.js";
 import { ClientEventType } from "../../Client.js";
@@ -184,6 +184,15 @@ export class PokemonCard extends Card {
         }
 
         return null;
+    }
+
+    @ClientSerializeProxy()
+    public proxy(player_id: number): any {
+        if (!this.engine.game.started && player_id !== this.owner_id) {
+            return { id: this.id, name: "Face-down card", graphicPath: "back.png", damage: 0, attachments: { cards: [] } };
+        } else {
+            return undefined;
+        }
     }
 
     public dealDamage(context: DamageContext): { knockedOut: boolean, finalDamage: number } {

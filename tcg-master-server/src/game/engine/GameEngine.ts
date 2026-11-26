@@ -132,6 +132,12 @@ export class GameEngine {
         }
     };
 
+    public sendSync() {
+        for (const client of this.clients) {
+            client.sync();
+        }
+    }
+
     public showcase(card: Card) {
         for (const client of this.clients) {
             client.showcase(card.def);

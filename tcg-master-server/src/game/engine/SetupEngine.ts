@@ -89,6 +89,8 @@ export class SetupEngine extends SubEngine {
                         player.prizes.cards.push(player.deck.cards.pop()!);
                     }
                 }
+                this.state.started = true;
+                this.engine.sendSync();
                 const firstPlayer = this.engine.game.flipCoin() ? this.state.players[0] : this.state.players[1];
                 this.engine.send(firstPlayer, "will go first.");
                 this.engine.send();

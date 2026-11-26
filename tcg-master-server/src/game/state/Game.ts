@@ -10,6 +10,9 @@ import { Turn } from "./Turn.js";
 @Serializable()
 export class Game extends State {
     @Serialize()
+    public started: boolean = false;
+
+    @Serialize()
     public readonly players: Player[] = [];
 
     @Serialize()

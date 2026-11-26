@@ -5,7 +5,7 @@ import { GameEngine } from "../engine/GameEngine.js";
 import { ITargetable } from "./interrupts/Choice.js";
 import { Location } from "./Location.js";
 import { Player } from "./Player.js";
-import { ClientSerialize, Serializable, Serialize } from "./serializer.js";
+import { ClientSerialize, ClientSerializeProxy, Serializable, Serialize } from "./serializer.js";
 import { State } from "./State.js";
 
 @Serializable()

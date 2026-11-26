@@ -53,8 +53,8 @@ export class Command_check extends Command {
             case "xhand": return [ opponent.hand.count, "card(s)" ];
             case "xdiscard": return Client.getCardList(opponent.discard.cards);
             case "xprizes": return [ opponent.prizes.count, "card(s)" ];
-            case "xactive": return state.turn ? (opponent.activePokemon ? this.getStatus(opponent.activePokemon) : [ "(none)" ]) : [ "(hidden)" ];
-            case "xbench": return state.turn ? this.getBenchList(opponent.bench) : [ "(hidden)" ];
+            case "xactive": return state.started ? (opponent.activePokemon ? this.getStatus(opponent.activePokemon) : [ "(none)" ]) : [ "(hidden)" ];
+            case "xbench": return state.started ? this.getBenchList(opponent.bench) : [ "(hidden)" ];
         }
         
         const def = DefDatabase.get<CardDef>(context.text);

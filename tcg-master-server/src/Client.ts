@@ -26,6 +26,8 @@ export abstract class Client {
 
     public abstract sendInfo(...parts: any[]): void;
 
+    public abstract sync(): void;
+
     public abstract showcase(def: CardDef): void;
 
     public abstract view(def: CardDef): void;

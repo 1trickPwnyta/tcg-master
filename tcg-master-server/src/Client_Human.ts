@@ -5,7 +5,7 @@ import { Command, CommandNotFoundError } from "./commands/Command.js";
 import { Player } from "./game/state/Player.js";
 import { InterruptSync } from "./game/state/interrupts/Interrupt.js";
 import { CardDef } from "./defs/CardDef.js";
-import { ClientSerializationReplace } from "./game/state/serializer.js";
+import { ClientSerializationReplacer } from "./game/state/serializer.js";
 
 export class Client_Human extends Client {
     public readonly socket: Socket;
@@ -56,10 +56,10 @@ export class Client_Human extends Client {
         });
     }
 
-    private sync() {
+    public override sync() {
         if (this.player) {
             const view = this.player.view;
-            const payload = JSON.stringify(view, ClientSerializationReplace);
+            const payload = JSON.stringify(view, ClientSerializationReplacer(this.player_id!));
             this.socket.emit("SYNC", payload);
         }
     }
@@ -72,7 +72,7 @@ export class Client_Human extends Client {
     }
 
     public override sendEvent(event: ClientEvent) {
-        this.socket.emit("EVENT", JSON.stringify(event, ClientSerializationReplace));
+        this.socket.emit("EVENT", JSON.stringify(event, ClientSerializationReplacer(this.player_id!)));
     }
 
     public override sendInfo(...parts: any[]) {

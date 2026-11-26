@@ -27,6 +27,8 @@ export class Client_AI extends Client {
 
     public override sendInfo(_: any[]) { }
 
+    public override sync() { }
+
     public override showcase(_: CardDef) { }
 
     public override view(_: CardDef) { }
