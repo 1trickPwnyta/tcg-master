@@ -21,7 +21,7 @@ export class EventHandler_Damage extends EventHandler {
             number.neverFlip = true;
             number.draw();
             number.element.animate({
-                top: `${number.actualPosition.y - CARD_SIZE.y / 3}px`
+                top: `${number.actualPosition.y - CARD_SIZE.y / 5}px`
             }, 2000, "easeOutCubic");
             setTimeout(() => {
                 card.damage += args.amount;

@@ -123,21 +123,27 @@ export class Game extends State {
         return this.messages.map((m, i) => ({ id: i, parts: m }));
     }
 
-    public flipCoin(player?: Player): boolean {
+    public flipCoin(player?: Player, amount: number = 1): number {
         const heads = { name: "heads", type: "heads" };
         const tails = { name: "tails", type: "tails" };
-        const result = Math.random() < 0.5;
-        let message;
-        if (player) {
-            message = [ player, "flipped a coin... It was", result ? heads : tails, "!" ];
-        } else {
-            message = [ "A coin was flipped... It was", result ? heads : tails, "!" ];
+
+        let results = [];
+        for (let i = 0; i < amount; i++) {
+            const result = Math.random() < 0.5;
+            results.push(result);
+            if (player) {
+                this.engine.send(player, "flipped a coin... It was", result ? heads : tails, "!");
+            } else {
+                this.engine.send("A coin was flipped... It was", result ? heads : tails, "!");
+            }
         }
+
         this.engine.sendEvent({
             type: ClientEventType.CoinFlip,
-            args: { result: result }
-        }, ...message);
-        return result;
+            args: { results: results }
+        });
+
+        return results.filter(r => r).length;
     }
 
     public update() {

@@ -10,7 +10,7 @@ export class AttackComp_AttackerStatus extends AttackComp {
             return;
         }
 
-        if (this.args.trigger === "always" || context.engine.game.flipCoin(context.attacker.owner) === (this.args.trigger === "heads" ? true : false)) {
+        if (this.args.trigger === "always" || context.engine.game.flipCoin(context.attacker.owner) === (this.args.trigger === "heads" ? 1 : 0)) {
             context.addAttackerStatus(DefDatabase.get<StatusDef>(this.args.status), this.args.args);
         }
     }
