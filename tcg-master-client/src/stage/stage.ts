@@ -195,6 +195,13 @@ export class Stage {
                 const shell = $("<div>");
                 shell.css({ left: `${2 + i * handSeparation}%` })
                 shell.on("mouseover", () => Gameplay.instance.showcase(hand[i].graphicPath));
+                shell.on("click", () => {
+                    const playCardChoice = Gameplay.instance.choices?.find(c => c.type === "play_card");
+                    if (playCardChoice) {
+                        Gameplay.instance.send(`select ${playCardChoice.option}`);
+                        Gameplay.instance.send(`select ${i + 1}`);
+                    }
+                });
                 const card = $("<div>", { class: "card" });
                 card.css({ "background-image": `url("/card-images/${hand[i].graphicPath}")` });
                 shell.append(card);

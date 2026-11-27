@@ -103,9 +103,14 @@ export class Client_Human extends Client {
     }
 
     public override prompt(interrupt: InterruptSync) {
-        const userChoices = interrupt.choices!.map((c, i) => ({ option: (i + 1).toString(), parts: Client.tokenize(...c.parts) }));
+        const userChoices = interrupt.choices!.map((c, i) => ({
+            option: (i + 1).toString(),
+            target: c.id as string | number | null,
+            type: c.targetType as string | undefined,
+            parts: Client.tokenize(...c.parts)
+        }));
         if (!interrupt.force) {
-            userChoices.push({ option: "`", parts: [ { name: "(cancel)" } ] });
+            userChoices.push({ option: "`", target: null, type: "cancel", parts: [ { name: "(cancel)" } ] });
         }
         
         this.socket.emit("ASK", {

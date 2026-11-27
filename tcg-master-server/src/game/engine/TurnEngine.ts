@@ -2,7 +2,7 @@ import { InterruptResolution } from "../state/interrupts/InterruptResolution.js"
 import { Interrupt, InterruptAsync, InterruptSync } from "../state/interrupts/Interrupt.js";
 import { Turn } from "../state/Turn.js";
 import { SubEngine } from "./SubEngine.js";
-import { Choice } from "../state/interrupts/Choice.js";
+import { Choice, TargetType } from "../state/interrupts/Choice.js";
 import { EnergyCard } from "../state/EnergyCard.js";
 import { PokemonCardWrapper } from "../state/PokemonCardWrapper.js";
 import { MenuOption } from "../state/interrupts/MenuOption.js";
@@ -17,7 +17,7 @@ export class TurnEngine extends SubEngine {
         const player = this.engine.game.getPlayer(this.turn.player);
 
         const choices = [
-            Choice.fromText(MenuOption.PlayCard).withResolution(InterruptResolution.PlayCard),
+            Choice.fromText(MenuOption.PlayCard, undefined, TargetType.PlayCard).withResolution(InterruptResolution.PlayCard),
             Choice.fromText(MenuOption.Attack).withResolution(InterruptResolution.Attack),
             Choice.fromText(MenuOption.Retreat).withResolution(InterruptResolution.Retreat).withAiScoreOffset(-50)
         ];

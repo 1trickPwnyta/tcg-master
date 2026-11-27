@@ -8,6 +8,13 @@ import { Storage } from "./storage";
 import { Stage, type StageEvent } from "./stage/stage";
 import type { State } from "./stage/state";
 
+export type Choice = {
+    option: string;
+    target: string | number | null;
+    type?: string;
+    parts: any[];
+};
+
 export class Gameplay implements IEventConsumer {
     private static _instance?: Gameplay;
 
@@ -52,9 +59,15 @@ export class Gameplay implements IEventConsumer {
     private syncInterval: any;
     private stage: Stage;
     private dirty: boolean = false;
+    private _choices: Choice[] | null = null;
 
     public get busy(): boolean {
         return this._busy;
+    }
+
+    public get choices(): Choice[] | null {
+        if (this._choices) return [ ...this._choices ];
+        else return null;
     }
 
     private constructor(socket: Socket) {
@@ -171,12 +184,14 @@ export class Gameplay implements IEventConsumer {
         this.nextLine();
     }
 
-    private processPrompt(prompt: { text: any[], choices: { option: string, parts: any[] }[] }) {
+    private processPrompt(prompt: { text: any[], choices: Choice[] }) {
+        this._choices = prompt.choices;
         $("#prompt").html(this.detokenize(prompt.text));
         $("#choices").html(prompt.choices.map(c => `[${c.option}] ` + this.detokenize(c.parts)).join("<br />"));
     }
 
     private wait() {
+        this._choices = null;
         $("#prompt").text("Please stand by...");
         $("#choices").html("");
     }

@@ -3,7 +3,12 @@ import { Serializable, Serialize } from "../serializer.js";
 
 export interface ITargetable {
     id: number | string;
+    targetType?: TargetType;
     targetName: string | any[];
+};
+
+export enum TargetType {
+    PlayCard = "play_card"
 };
 
 @Serializable()
@@ -12,8 +17,8 @@ export class Choice {
         return new Choice({ id: id ?? int, targetName: [ { name: int.toString() } ] });
     }
 
-    public static fromText(text: string, id?: number | string): Choice {
-        return new Choice({ id: id ?? text, targetName: [ { name: text } ] });
+    public static fromText(text: string, id?: number | string, type?: TargetType): Choice {
+        return new Choice({ id: id ?? text, targetType: type, targetName: [ { name: text } ] });
     }
 
     public static get Yes(): Choice {
@@ -31,6 +36,9 @@ export class Choice {
     public readonly id: number | string;
 
     @Serialize()
+    public readonly targetType?: string;
+
+    @Serialize()
     public resolution?: InterruptResolution;
 
     @Serialize()
@@ -45,6 +53,7 @@ export class Choice {
     public constructor(target: ITargetable) {
         this.parts = typeof target.targetName === "string" ? [ target.targetName ] : target.targetName;
         this.id = target.id;
+        this.targetType = target.targetType;
     }
 
     public withResolution(resolution: InterruptResolution, ...args: number[]) {
