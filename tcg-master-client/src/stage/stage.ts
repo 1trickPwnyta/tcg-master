@@ -1,6 +1,6 @@
 import $ from "jquery";
 import { Vector } from "./math";
-import type { Player, State } from "./state";
+import type { CardState, Player, State } from "./state";
 import { Card, PokemonCard } from "./cards";
 import { EventHandler } from "./events/EventHandler";
 import { EventHandler_CardMove } from "./events/EventHandler_CardMove";
@@ -9,6 +9,7 @@ import { EventHandler_Attack } from "./events/EventHandler_Attack";
 import { EventHandler_CoinFlip } from "./events/EventHandler_CoinFlip";
 import { EventHandler_Banner } from "./events/EventHandler_Banner";
 import { StageObject } from "./object";
+import { Gameplay } from "../gameplay";
 
 export const STAGE_SIZE = new Vector(600, 600);
 export const CARD_SIZE = new Vector(72, 99);
@@ -40,6 +41,10 @@ export class Stage {
 
     public get element(): JQuery<HTMLElement> {
         return $("#stage");
+    }
+
+    public get hand(): JQuery<HTMLElement> {
+        return $("#hand");
     }
 
     public constructor() {
@@ -106,6 +111,7 @@ export class Stage {
             object.remove();
         }
         this.cards = [];
+        this.hand.html("");
         
         if (this.state) {
             this.drawPlayer(Perspective.Favoring, this.state.self);
@@ -177,6 +183,22 @@ export class Stage {
                 prize.position = PRIZE_POSITION.translate(prizePositions[i].x, prizePositions[i].y);
                 prize.perspective = perspective;
                 prize.draw();
+            }
+        }
+
+        if (Array.isArray(player.hand)) {
+            const hand = player.hand as CardState[];
+            const rect = this.hand[0].getBoundingClientRect();
+            const cardWidth = rect.height * 0.8 / 1.5 / rect.width;
+            const handSeparation = player.hand.length > 1 ? Math.min((96 - cardWidth * 100) / (player.hand.length - 1), 13) : 0;
+            for (let i = 0; i < player.hand.length; i++) {
+                const shell = $("<div>");
+                shell.css({ left: `${2 + i * handSeparation}%` })
+                shell.on("mouseover", () => Gameplay.instance.showcase(hand[i].graphicPath));
+                const card = $("<div>", { class: "card" });
+                card.css({ "background-image": `url("/card-images/${hand[i].graphicPath}")` });
+                shell.append(card);
+                this.hand.append(shell);
             }
         }
     }

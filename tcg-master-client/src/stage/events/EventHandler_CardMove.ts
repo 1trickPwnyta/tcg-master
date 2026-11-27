@@ -89,6 +89,8 @@ export class EventHandler_CardMove extends EventHandler {
                         player.bench.splice(player.bench.findIndex((c: CardState) => c.id === args.mover.id), 1);
                     } else if (args.from === "discard") {
                         player.discard.pop();
+                    } else if (args.from === "hand" && Array.isArray(player.hand)) {
+                        player.hand.splice(player.hand.findIndex((c: CardState) => c.id === args.mover.id), 1);
                     }
 
                     if (attachedToCard) {
@@ -99,6 +101,8 @@ export class EventHandler_CardMove extends EventHandler {
                         player.bench.push(args.mover as PokemonCardState);
                     } else if (args.to === "discard") {
                         player.discard.push(args.mover);
+                    } else if (args.to === "hand" && Array.isArray(player.hand)) {
+                        player.hand.push(args.mover);
                     }
 
                     stage.draw();

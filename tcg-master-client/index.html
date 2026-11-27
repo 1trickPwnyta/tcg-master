@@ -44,12 +44,17 @@
             <div id="gameplay" class="app">
                 <div class="flex-col">
                     <div id="stage"></div>
+                    <div id="hand"></div>
+                    <div id="commands">
+                        <div id="commands-you" class="commands-panel">You<div></div></div>
+                        <div id="commands-opponent" class="commands-panel">Opponent<div></div></div>
+                        <div id="commands-debug" class="commands-panel">Debug<div></div></div>
+                    </div>
+                </div>
+                <div class="flex-col">
+                    <div id="showcase"></div>
+                    <div id="console"></div>
                     <div id="controls">
-                        <div id="commands">
-                            <div id="commands-you" class="commands-panel">You<div></div></div>
-                            <div id="commands-opponent" class="commands-panel">Opponent<div></div></div>
-                            <div id="commands-debug" class="commands-panel">Debug<div></div></div>
-                        </div>
                         <div id="prompt"></div>
                         <div id="choices"></div>
                         <form id="input-form" onsubmit="formSubmit(event)">
@@ -57,10 +62,6 @@
                             <input type="submit" value="Submit" />
                         </form>
                     </div>
-                </div>
-                <div class="flex-col">
-                    <div id="showcase"></div>
-                    <div id="console"></div>
                 </div>
             </div>
         </div>

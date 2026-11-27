@@ -51,6 +51,7 @@ export class Gameplay implements IEventConsumer {
     private lastLogEntry: number = -1;
     private syncInterval: any;
     private stage: Stage;
+    private dirty: boolean = false;
 
     public get busy(): boolean {
         return this._busy;
@@ -63,7 +64,11 @@ export class Gameplay implements IEventConsumer {
     }
 
     private start() {
-        this.syncInterval = setInterval(() => this.socket.emit("SYNC"), 5000);
+        this.syncInterval = setInterval(() => {
+            if (this.dirty) {
+                this.socket.emit("SYNC");
+            }
+        }, 5000);
         this.update();
     }
 
@@ -76,6 +81,8 @@ export class Gameplay implements IEventConsumer {
     }
 
     public consumeEvent(event: GameEvent) {
+        this.dirty = true;
+
         if (this.busy && !event.urgent) {
             return false;
         }
@@ -123,6 +130,7 @@ export class Gameplay implements IEventConsumer {
 
     private sync(state: State) {
         this.stage.update(state);
+        this.dirty = false;
     }
 
     private detokenize(tokens: { name: string, type?: string }[]): string {
