@@ -17,6 +17,7 @@ export const BENCH_POSITION = new Vector(STAGE_SIZE.x / 2, STAGE_SIZE.y * 9 / 10
 export const BENCH_OFFSET = STAGE_SIZE.x / 7;
 export const DECK_POSITION = new Vector(STAGE_SIZE.x * 31 / 40, STAGE_SIZE.y * 7 / 11);
 export const DISCARD_POSITION = new Vector(STAGE_SIZE.x * 11 / 12, STAGE_SIZE.y * 31 / 44);
+export const PRIZE_POSITION = new Vector(STAGE_SIZE.x / 6, STAGE_SIZE.y * 15 / 22);
 
 export enum Perspective {
     Favoring,
@@ -129,7 +130,7 @@ export class Stage {
         }
 
         if (player.deck) {
-            const deck = new StageObject(this, "deck");
+            const deck = new StageObject(this, "facedown");
             deck.element.css({
                 width: `${CARD_SIZE.x}px`,
                 height: `${CARD_SIZE.y}px`,
@@ -138,6 +139,13 @@ export class Stage {
             deck.position = DECK_POSITION;
             deck.perspective = perspective;
             deck.draw();
+
+            const deckCount = new StageObject(this, "card-count");
+            deckCount.element.text(`x${player.deck}`);
+            deckCount.position = DECK_POSITION.translate(CARD_SIZE.x * 3 / 8, CARD_SIZE.y * 3 / 8);
+            deckCount.perspective = perspective;
+            deckCount.neverFlip = true;
+            deckCount.draw();
         }
 
         if (player.discard.length) {
@@ -148,6 +156,41 @@ export class Stage {
             card.position = DISCARD_POSITION;
             card.perspective = perspective;
             card.draw();
+
+            const discardCount = new StageObject(this, "card-count");
+            discardCount.element.text(`x${player.discard.length}`);
+            discardCount.position = DISCARD_POSITION.translate(CARD_SIZE.x * 3 / 8, CARD_SIZE.y * 3 / 8);
+            discardCount.perspective = perspective;
+            discardCount.neverFlip = true;
+            discardCount.draw();
         }
+
+        if (player.prizes) {
+            const prizePositions = this.getPrizePositions(player.prizes);
+            for (let i = 0; i < prizePositions.length; i++) {
+                const prize = new StageObject(this, "facedown");
+                prize.element.css({
+                    width: `${CARD_SIZE.x}px`,
+                    height: `${CARD_SIZE.y}px`
+                });
+                prize.position = PRIZE_POSITION.translate(prizePositions[i].x, prizePositions[i].y);
+                prize.perspective = perspective;
+                prize.draw();
+            }
+        }
+    }
+
+    private getPrizePositions(amount: number): Vector[] {
+        if (amount <= 0) return [];
+
+        const angleStep = 2 * Math.PI / amount;
+        const points = [];
+
+        for (let i = 0; i < amount; i++) {
+            const angle = i * angleStep - Math.PI / 2;
+            points.push(new Vector(25 * Math.cos(angle), 25 * Math.sin(angle)));
+        }
+
+        return points;
     }
 };

@@ -30,11 +30,22 @@
     background-repeat: no-repeat;
 }
 
-#stage .deck {
+#stage .facedown {
     background-image: url("/card-images/back.png");
     background-size: contain;
     background-position: center;
     background-repeat: no-repeat;
+}
+
+#stage .card-count {
+    width: 24px;
+    height: 16px;
+    background-color: #00000099;
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 0.8em;
 }
 
 #stage .damage-counters {
@@ -42,7 +53,7 @@
     height: 24px;
     background-color: #471b1b99;
     color: white;
-    border-radius: 100%;
+    border-radius: 50%;
     display: flex;
     justify-content: center;
     align-items: center;
