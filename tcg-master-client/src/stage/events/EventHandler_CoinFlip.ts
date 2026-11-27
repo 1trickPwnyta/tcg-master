@@ -4,7 +4,7 @@ import { STAGE_SIZE } from "../stage";
 import { EventHandler } from "./EventHandler";
 
 export class EventHandler_CoinFlip extends EventHandler {
-    public onEvent(args: any, callback: () => void) {
+    public onEvent(args: { results: boolean[] }, callback: () => void) {
         const positions = this.calculatePositions(args.results.length, 50 * Math.min(args.results.length, 10));
         for (let i = 0; i < positions.length; i++) {
             this.flip(STAGE_SIZE.half().translate(positions[i].x, positions[i].y), args.results[i]);
@@ -29,7 +29,7 @@ export class EventHandler_CoinFlip extends EventHandler {
             flipping = false;
             coin.element.removeClass("coin-flip");
             coin.element.css("background-image", `url("/coin-images/${result ? "front" : "back"}.png")`);
-            setTimeout(() => coin.element.fadeOut(1000), 1000);
+            setTimeout(() => coin.element.fadeOut(1000, function() { coin.remove(); }), 1000);
         }, 700);
     }
 

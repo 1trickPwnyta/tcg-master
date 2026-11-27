@@ -13,7 +13,7 @@ export class TrainerWorker_PokemonBreeder extends TrainerWorker {
 
     private getBasicChoices(context: TrainerContext, evolution: PokemonCard): Choice[] {
         return this.getValidChoices(context, context.player.pokemonInPlay
-            .filter(p => p.evolutionEligible && p.def.evolution.evolvesEver(evolution.name)).map(p => new Choice(p)));
+            .filter(p => p.evolutionEligible && p.def.evolution?.evolvesEver(evolution.name)).map(p => new Choice(p)));
     }
 
     public override validate(context: TrainerContext): AcceptanceReport {

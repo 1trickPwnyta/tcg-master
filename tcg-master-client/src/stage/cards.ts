@@ -1,4 +1,6 @@
+import $ from "jquery";
 import { Gameplay } from "../gameplay";
+import { Vector } from "./math";
 import { StageObject } from "./object";
 import { CARD_SIZE, Stage } from "./stage";
 import type { CardState, PokemonCardState } from "./state";
@@ -20,11 +22,17 @@ export class Card extends StageObject {
         this._state = state;
         this.element.css({
             width: `${CARD_SIZE.x}px`,
+            height: `${CARD_SIZE.y}px`
+        })
+        const innerElement = $("<div>");
+        innerElement.css({
+            width: `${CARD_SIZE.x}px`,
             height: `${CARD_SIZE.y}px`,
             backgroundImage: `url("/card-images/${state.graphicPath}")`
         });
-        this.element.on("mouseover", () => Gameplay.instance.showcase(state.graphicPath));
-        this.element.css({ zIndex: CARD_ZINDEX });
+        innerElement.on("mouseover", () => Gameplay.instance.showcase(state.graphicPath));
+        innerElement.css({ zIndex: CARD_ZINDEX });
+        this.element.append(innerElement);
         this.stage.addCard(this);
     }
 
@@ -50,15 +58,16 @@ export class PokemonCard extends Card {
         this.damageCounters.neverFlip = true;
         this.damageCounters.element.css({ visibility: "hidden" });
         this.attachments = state.attachments.cards.map(c => new Card(stage, c));
-    }
-
-    public override draw() {
         for (let i = this.attachments.length - 1; i >= 0; i--) {
-            this.attachments[i].position = this.position.translate(0, -CARD_OFFSET * (i + 1));
+            this.element.append(this.attachments[i].element);
+            this.attachments[i].position = new Vector(CARD_SIZE.x / 2, CARD_SIZE.y / 2 - CARD_OFFSET * (i + 1));
             this.attachments[i].perspective = this.perspective;
             this.attachments[i].element.css({ zIndex: CARD_ZINDEX - 1 - i });
             this.attachments[i].draw();
         }
+    }
+
+    public override draw() {
         super.draw();
         if (this.damage) {
             this.damageCounters.position = this.position.translate(CARD_SIZE.x / 2, -(CARD_SIZE.y / 4));

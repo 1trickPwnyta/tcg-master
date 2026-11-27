@@ -20,6 +20,11 @@ export class EventHandler_CardMove extends EventHandler {
                 default: console.error(`No handler for location ${args.to}.`); break;
             }
         }
+
+        let attachedFromCard: PokemonCard | undefined;
+        if (typeof args.from === "number") {
+            attachedFromCard = this.stage.getCard(args.from) as PokemonCard | undefined;
+        }
         
         if (targetPosition) {
             if (!this.stage.isMe(args.owner)) {
@@ -44,16 +49,23 @@ export class EventHandler_CardMove extends EventHandler {
                 card.remove();
                 const player = stage.getPlayer(args.owner);
                 if (player) {
+                    if (attachedFromCard) {
+                        attachedFromCard.state.attachments.cards.splice(attachedFromCard.state.attachments.cards.findIndex(c => c.id === args.mover.id), 1);
+                    } else if (args.from === "active") {
+                        player.active = null;
+                    } else if (args.from === "bench") {
+                        player.bench.splice(player.bench.findIndex((c: CardState) => c.id === args.mover.id), 1);
+                    }
+
                     if (attachedToCard) {
                         attachedToCard.state.attachments.cards.push(args.mover);
-                        stage.draw();
                     } else if (args.to === "active") {
                         player.active = args.mover as PokemonCardState;
-                        stage.draw();
                     } else if (args.to === "bench") {
                         player.bench.push(args.mover as PokemonCardState);
-                        stage.draw();
                     }
+
+                    stage.draw();
                 }
                 callback();
             });

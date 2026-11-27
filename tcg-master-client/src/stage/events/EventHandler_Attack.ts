@@ -3,7 +3,7 @@ import { CARD_SIZE } from "../stage";
 import { EventHandler } from "./EventHandler";
 
 export class EventHandler_Attack extends EventHandler {
-    public onEvent(args: any, callback: () => void) {
+    public onEvent(args: {  attacker: number }, callback: () => void) {
         const attacker = this.stage.getCard(args.attacker);
         console.log(attacker);
         if (attacker) {
