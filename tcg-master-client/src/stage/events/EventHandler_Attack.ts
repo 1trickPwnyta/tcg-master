@@ -5,7 +5,6 @@ import { EventHandler } from "./EventHandler";
 export class EventHandler_Attack extends EventHandler {
     public onEvent(args: {  attacker: number }, callback: () => void) {
         const attacker = this.stage.getCard(args.attacker);
-        console.log(attacker);
         if (attacker) {
             const position = attacker.actualPosition;
             attacker.element.animate({

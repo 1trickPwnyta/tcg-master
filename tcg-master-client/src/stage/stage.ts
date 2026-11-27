@@ -18,6 +18,7 @@ export const BENCH_OFFSET = STAGE_SIZE.x / 7;
 export const DECK_POSITION = new Vector(STAGE_SIZE.x * 31 / 40, STAGE_SIZE.y * 7 / 11);
 export const DISCARD_POSITION = new Vector(STAGE_SIZE.x * 11 / 12, STAGE_SIZE.y * 31 / 44);
 export const PRIZE_POSITION = new Vector(STAGE_SIZE.x / 6, STAGE_SIZE.y * 15 / 22);
+export const HAND_LOCATION = new Vector(STAGE_SIZE.x / 2, STAGE_SIZE.y + CARD_SIZE.y / 2);
 
 export enum Perspective {
     Favoring,

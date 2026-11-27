@@ -3,5 +3,6 @@ export interface Turn {
     player: number;
     energyPlayed: boolean;
     retreats: number;
+    cancels: number;
     phase: "preattack" | "attack" | "postattack";
 };

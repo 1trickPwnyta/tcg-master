@@ -2,7 +2,7 @@ import { Client_AI } from "../../ai/Client_AI.js";
 import { Game as Game } from "../state/Game.js";
 import { Interrupt, InterruptAsync, InterruptSync } from "../state/interrupts/Interrupt.js";
 import { Player } from "../state/Player.js";
-import { Client, ClientEvent } from "../../Client.js";
+import { Client, ClientEvent, ClientEventType } from "../../Client.js";
 import { SetupEngine } from "./SetupEngine.js";
 import { TurnEngine } from "./TurnEngine.js";
 import { InterruptEngine } from "./InterruptEngine.js";
@@ -83,6 +83,14 @@ export class GameEngine {
         this.game.interrupt = null;
         const winner = this.game.getPlayer(winner_id);
         this.send(winner, "has no more prizes left.", winner, "wins!");
+        this.sendEventTo(winner, {
+            type: ClientEventType.Banner,
+            args: { message: "You win.", permanent: true }
+        });
+        this.sendEventTo(winner.opponent, {
+            type: ClientEventType.Banner,
+            args: { message: "You lose.", permanent: true }
+        });
         this.game.winner_id = winner_id;
         for (const client of this.clients) {
             client.notify_gameOver(winner);

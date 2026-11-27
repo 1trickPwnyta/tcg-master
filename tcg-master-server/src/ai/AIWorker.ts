@@ -20,7 +20,7 @@ const { DefDatabase } = await import("../defs/DefDatabase.js");
 await DefDatabase.init();
 await import("../loader.js");
 
-const MAX_DEPTH: number = 8;
+const MAX_DEPTH: number = 4;
 const DEBUG: boolean = false;
 
 const enum TTFlag { Exact, LowerBound, UpperBound }
@@ -68,7 +68,7 @@ function expectiminimax(game: Game, for_player: number, depth: number, alpha: nu
     const myTurn = myInterrupt !== null;
     const interrupt = myInterrupt ?? theirInterrupt!;
     const choices: (Choice | null)[] = AIPruner.prune([ ...interrupt.choices ].sort((a, b) => b.hint_priority - a.hint_priority));
-    if (!interrupt.force) {
+    if (!interrupt.force && (game.turn?.cancels ?? 0 < 3)) {
         choices.push(null);
     }
 

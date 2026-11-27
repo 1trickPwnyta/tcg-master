@@ -161,7 +161,7 @@ export class Player extends State {
     }
 
     public takePrize() {
-        const card = this.prizes.cards.pop()!;
+        const card = this.prizes.cards[0];
         this.hand.add(card);
         this.engine.sendTo(this.opponent, this, "took a prize.");
         this.engine.sendTo(this, "You took", card, "as a prize.");

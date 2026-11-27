@@ -196,16 +196,6 @@ export class PokemonCard extends Card {
     }
 
     public dealDamage(context: DamageContext): { knockedOut: boolean, finalDamage: number } {
-        if (context.type) {
-            if (this.weakness === context.type) {
-                context.amount *= 2;
-            }
-            if (this.resistance === context.type) {
-                context.amount -= 30;
-                context.amount = Math.max(0, context.amount);
-            }
-        }
-
         for (const status of this.modifiers) {
             context.amount = status.modifier.modifyDamageTaken({
                 engine: this.engine,

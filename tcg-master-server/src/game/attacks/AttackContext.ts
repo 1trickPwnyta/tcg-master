@@ -111,6 +111,13 @@ export class AttackContext {
             source: "attack",
             type: this.attacker.def.type
         };
+        if (this.defender.weakness === this.attacker.def.type) {
+            damageContext.amount *= 2;
+        }
+        if (this.defender.resistance === this.attacker.def.type) {
+            damageContext.amount -= 30;
+            damageContext.amount = Math.max(0, damageContext.amount);
+        }
         let affected = true;
         for (const modifier of this.attacker.modifiers) {
             damageContext.amount = modifier.modifier.modifyDamageDealt({

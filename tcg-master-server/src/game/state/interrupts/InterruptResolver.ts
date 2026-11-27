@@ -35,6 +35,9 @@ export class InterruptResolver {
         const key = interrupt.cancelResolution!;
         const worker = workers.get(key);
         if (worker) {
+            if (engine.game.turn) {
+                engine.game.turn.cancels++;
+            }
             worker.execute({ engine: engine }, player_id, ...(interrupt.args ?? []));
         } else {
             throw new Error(`No worker for ${key}.`);

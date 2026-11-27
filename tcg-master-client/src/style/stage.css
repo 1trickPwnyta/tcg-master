@@ -126,11 +126,11 @@
 
 @keyframes coin-height {
     0% {
-        transform: translate(0px, 60px) scale(4, 4);
+        transform: translate(0px, 60px) scale(3, 3);
         opacity: 0;
     }
     50% {
-        transform: translate(0px, -120px) scale(6, 6);
+        transform: translate(0px, -120px) scale(4.5, 4.5);
         opacity: 1;
     }
     100% {

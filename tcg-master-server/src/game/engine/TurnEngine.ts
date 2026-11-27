@@ -40,6 +40,7 @@ export class TurnEngine extends SubEngine {
             player: player.id,
             energyPlayed: false,
             retreats: 0,
+            cancels: 0,
             phase: "preattack"
         };
         this.state.betweenTurns = false;
