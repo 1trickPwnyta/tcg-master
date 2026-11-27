@@ -26,14 +26,17 @@ export class TrainerWorker_EnergyRetrieval extends TrainerWorker {
     }
 
     public override acquireTargets(context: TrainerContext): Interrupt | null {
-        const choices = this.getTargetChoices(context);
         for (let i = 0; i < this.amount; i++) {
-            if (choices.length) {
-                return this.generateInterrupt(context)
-                    .withPrompt("Select a basic energy card from your discard pile.")
-                    .withChoices(choices);
-            } else {
-                context.addNullTarget();
+            const energy = context.nextTarget();
+            if (energy === undefined) {
+                const choices = this.getTargetChoices(context);
+                if (choices.length) {
+                    return this.generateInterrupt(context)
+                        .withPrompt("Select a basic energy card from your discard pile.")
+                        .withChoices(choices);
+                } else {
+                    context.addNullTarget();
+                }
             }
         }
 

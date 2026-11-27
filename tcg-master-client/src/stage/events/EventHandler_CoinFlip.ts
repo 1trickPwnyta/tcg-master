@@ -25,8 +25,15 @@ export class EventHandler_CoinFlip extends EventHandler {
             coin.element.css("background-image", `url("/coin-images/${front ? "front" : "back"}.png")`);
         });
         coin.draw();
+
+        const shadow = new StageObject(this.stage, "coin-shadow");
+        shadow.position = coin.position;
+        shadow.element.css("z-index", 999);
+        shadow.draw();
+
         setTimeout(() => {
             flipping = false;
+            shadow.remove();
             coin.element.removeClass("coin-flip");
             coin.element.css("background-image", `url("/coin-images/${result ? "front" : "back"}.png")`);
             setTimeout(() => coin.element.fadeOut(1000, function() { coin.remove(); }), 1000);

@@ -81,6 +81,14 @@
     animation: coin-flip 0.1s linear infinite, coin-height 0.7s;
 }
 
+#stage .coin-shadow {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    animation: coin-shadow 0.7s;
+    background-color: black;
+}
+
 @keyframes spritesheet {
     0% {
         background-position: 0 0;
@@ -111,10 +119,26 @@
         opacity: 0;
     }
     50% {
-        transform: translate(0px, -60px) scale(6, 6);
+        transform: translate(0px, -120px) scale(6, 6);
         opacity: 1;
     }
     100% {
         transform: translate(0px, 0px) scale(1, 1);
+    }
+}
+
+@keyframes coin-shadow {
+    0% {
+        transform: translate(0px, 60px);
+        opacity: 0;
+        box-shadow: 0 0 8px 12px black;
+    }
+    50% {
+        opacity: 1;
+        box-shadow: 0 0 12px 24px black;
+    }
+    100% {
+        transform: translate(0px, 0px);
+        box-shadow: 0 0 0px 0px black;
     }
 }
